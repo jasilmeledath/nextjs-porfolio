@@ -92,7 +92,7 @@ class BlogController {
         }
       }, 'Blogs retrieved successfully');
 
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -144,7 +144,7 @@ class BlogController {
         }
       }, 'Published blogs retrieved successfully');
 
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -169,7 +169,7 @@ class BlogController {
       }
 
       const response = ApiResponse.success(blog, 'Blog retrieved successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -207,7 +207,7 @@ class BlogController {
         relatedBlogs
       }, 'Blog retrieved successfully');
 
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -231,8 +231,8 @@ class BlogController {
 
       await blog.populate('author', 'firstName lastName email');
 
-      const response = ApiResponse.success(blog, 'Blog created successfully');
-      res.status(HTTP_STATUS.CREATED).json(response);
+      const response = ApiResponse.created(blog, 'Blog created successfully');
+      res.status(response.statusCode).json(response);
     } catch (error) {
       if (error.name === 'ValidationError') {
         next(new ValidationError(error.message));
@@ -273,7 +273,7 @@ class BlogController {
       await blog.populate('author', 'firstName lastName email');
 
       const response = ApiResponse.success(blog, 'Blog updated successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       if (error.name === 'ValidationError') {
         next(new ValidationError(error.message));
@@ -309,7 +309,7 @@ class BlogController {
       await Blog.findByIdAndDelete(id);
 
       const response = ApiResponse.success(null, 'Blog deleted successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -350,7 +350,7 @@ class BlogController {
       await blog.populate('author', 'firstName lastName email');
 
       const response = ApiResponse.success(blog, `Blog ${status} successfully`);
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -386,7 +386,7 @@ class BlogController {
       };
 
       const response = ApiResponse.success(stats, 'Blog statistics retrieved successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -405,7 +405,7 @@ class BlogController {
       const blogs = await Blog.getPopular(parseInt(limit));
 
       const response = ApiResponse.success(blogs, 'Popular blogs retrieved successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -424,7 +424,7 @@ class BlogController {
       const blogs = await Blog.getRecent(parseInt(limit));
 
       const response = ApiResponse.success(blogs, 'Recent blogs retrieved successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -457,8 +457,8 @@ class BlogController {
       blog.comments.push(comment);
       await blog.save();
 
-      const response = ApiResponse.success(null, 'Comment added successfully. It will be visible after moderation.');
-      res.status(HTTP_STATUS.CREATED).json(response);
+      const response = ApiResponse.created(null, 'Comment added successfully. It will be visible after moderation.');
+      res.status(response.statusCode).json(response);
     } catch (error) {
       if (error.name === 'ValidationError') {
         next(new ValidationError(error.message));
@@ -499,7 +499,7 @@ class BlogController {
       await blog.save();
 
       const response = ApiResponse.success(null, `Comment ${status} successfully`);
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -516,7 +516,7 @@ class BlogController {
       const categories = await Blog.distinct('categories', { status: 'published' });
       
       const response = ApiResponse.success(categories, 'Categories retrieved successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }
@@ -533,7 +533,7 @@ class BlogController {
       const tags = await Blog.distinct('tags', { status: 'published' });
       
       const response = ApiResponse.success(tags, 'Tags retrieved successfully');
-      res.status(HTTP_STATUS.OK).json(response);
+      res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
     }

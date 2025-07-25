@@ -24,6 +24,23 @@ class ApiResponse {
   }
 
   /**
+   * Create a created response
+   * @param {*} data - The response data
+   * @param {string} message - Success message
+   * @returns {Object} Formatted created response
+   */
+  static created(data = null, message = 'Resource created successfully') {
+    return {
+      success: true,
+      status: API_RESPONSE_STATUS.SUCCESS,
+      message,
+      data,
+      statusCode: 201,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
    * Create an error response
    * @param {string} message - Error message
    * @param {number} statusCode - HTTP status code (default: 500)
