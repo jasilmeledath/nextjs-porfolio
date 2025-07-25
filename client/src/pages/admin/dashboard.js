@@ -30,6 +30,7 @@ import {
   FiShield
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import ResponsiveDebugger from '../../components/ui/ResponsiveDebugger';
 
 /**
  * Admin Dashboard Main Page Component
@@ -99,6 +100,12 @@ export default function AdminDashboardPage() {
   const navigateToSection = (section) => {
     setActiveSection(section);
     setSidebarOpen(false); // Close sidebar on mobile
+    
+    // Navigate to specific blog page if needed
+    if (section === 'blog') {
+      router.push('/admin/blog');
+      return;
+    }
   };
 
   // Navigation items
@@ -238,7 +245,7 @@ export default function AdminDashboardPage() {
         )}
 
         {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-black/95 backdrop-blur-xl border-r border-green-500/20 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-black/95 backdrop-blur-xl border-r border-green-500/20 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0`}>
           <div 
             id="admin-dashboard-sidebar-navigation-menu"
             className="flex flex-col h-full"
@@ -343,7 +350,7 @@ export default function AdminDashboardPage() {
           {/* Top Header */}
           <header 
             id="admin-dashboard-header-navigation-bar"
-            className="bg-black/95 backdrop-blur-xl border-b border-green-500/30 shadow-lg shadow-green-500/10"
+            className="sticky top-0 z-30 bg-black/95 backdrop-blur-xl border-b border-green-500/30 shadow-lg shadow-green-500/10"
           >
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
               <div className="flex items-center">
@@ -381,14 +388,14 @@ export default function AdminDashboardPage() {
           </header>
 
           {/* Dashboard Content */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 relative">
+          <main className="p-4 sm:p-6 lg:p-8">
             {activeSection === 'dashboard' && (
               <motion.div
                 id="admin-dashboard-overview-main-container"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
-                className="space-y-6 lg:space-y-8"
+                className="max-w-7xl mx-auto space-y-6 lg:space-y-8"
               >
                 {/* Statistics Cards */}
                 <motion.div 
@@ -419,33 +426,36 @@ export default function AdminDashboardPage() {
                         whileHover={{ scale: 1.02, y: -2 }}
                         transition={{ type: "spring", stiffness: 300 }}
                         id={`admin-stats-${card.id.replace('-', '-')}-card`}
-                        className={`bg-gradient-to-br ${colorClasses[card.color]} backdrop-blur-xl rounded-xl border shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6 relative overflow-hidden group`}
+                        className={`bg-gradient-to-br ${colorClasses[card.color]} backdrop-blur-xl rounded-xl border shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6 relative overflow-hidden group h-full`}
                       >
                         {/* Animated border */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                         
-                        <div className="relative flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-green-600 font-mono text-xs uppercase tracking-wider mb-2">
-                              {card.title}
-                            </p>
-                            <p className={`text-2xl sm:text-3xl font-mono font-bold ${iconColorClasses[card.color]} mb-1 truncate`}>
-                              {card.value}
-                            </p>
-                            <div className="flex items-center space-x-2">
-                              <span className={`text-sm font-mono ${
-                                card.changeType === 'positive' ? 'text-green-400' : 
-                                card.changeType === 'negative' ? 'text-red-400' : 'text-yellow-400'
-                              }`}>
-                                {card.change}
-                              </span>
-                              <span className="text-green-700 font-mono text-xs hidden sm:inline">
-                                vs last period
-                              </span>
+                        <div className="relative flex flex-col h-full">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-green-600 font-mono text-xs uppercase tracking-wider mb-2">
+                                {card.title}
+                              </p>
+                              <p className={`text-2xl sm:text-3xl font-mono font-bold ${iconColorClasses[card.color]} mb-2 truncate`}>
+                                {card.value}
+                              </p>
+                            </div>
+                            <div className={`p-2 sm:p-3 rounded-lg bg-black/40 ${iconColorClasses[card.color]} flex-shrink-0 ml-3`}>
+                              {Icon && <Icon className="w-5 h-5 sm:w-6 sm:h-6" />}
                             </div>
                           </div>
-                          <div className={`p-2 sm:p-3 rounded-lg bg-black/40 ${iconColorClasses[card.color]} flex-shrink-0 ml-2`}>
-                            {Icon && <Icon className="w-5 h-5 sm:w-6 sm:h-6" />}
+                          
+                          <div className="flex items-center space-x-2 mt-auto">
+                            <span className={`text-sm font-mono ${
+                              card.changeType === 'positive' ? 'text-green-400' : 
+                              card.changeType === 'negative' ? 'text-red-400' : 'text-yellow-400'
+                            }`}>
+                              {card.change}
+                            </span>
+                            <span className="text-green-700 font-mono text-xs hidden sm:inline">
+                              vs last period
+                            </span>
                           </div>
                         </div>
                       </motion.div>
@@ -458,7 +468,7 @@ export default function AdminDashboardPage() {
                   {/* Recent Activity Feed */}
                   <div 
                     id="admin-stats-recent-activity-card"
-                    className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 shadow-lg p-4 sm:p-6"
+                    className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 shadow-lg p-4 sm:p-6 h-fit"
                   >
                     <div className="flex items-center justify-between mb-4 sm:mb-6 pb-4 border-b border-green-500/20">
                       <h3 className="text-base sm:text-lg font-mono font-bold text-green-400 tracking-wide">
@@ -469,7 +479,7 @@ export default function AdminDashboardPage() {
                         <span>LIVE</span>
                       </div>
                     </div>
-                    <div className="space-y-3 sm:space-y-4 max-h-80 overflow-y-auto custom-scrollbar">
+                    <div className="space-y-3 sm:space-y-4 max-h-80 lg:max-h-96 overflow-y-auto custom-scrollbar">
                       {recentActivities.map((activity) => {
                         const Icon = activity.icon;
                         const typeColors = {
@@ -506,7 +516,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 shadow-lg p-4 sm:p-6">
+                  <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 shadow-lg p-4 sm:p-6 h-fit">
                     <div className="flex items-center justify-between mb-4 sm:mb-6 pb-4 border-b border-green-500/20">
                       <h3 className="text-base sm:text-lg font-mono font-bold text-green-400 tracking-wide">
                         QUICK_ACCESS
@@ -515,7 +525,7 @@ export default function AdminDashboardPage() {
                         [4] MODULES
                       </div>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3">{/* Quick Action Buttons will continue here */}
                       <button
                         onClick={() => navigateToSection('blog')}
                         className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 text-left text-sm font-mono font-medium text-green-300 hover:text-green-200 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-all duration-300 border border-green-500/20 hover:border-green-500/40 group"
@@ -567,25 +577,30 @@ export default function AdminDashboardPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 shadow-lg p-6 sm:p-8 text-center"
+                className="max-w-4xl mx-auto"
               >
-                <div className="flex flex-col sm:flex-row items-center justify-center mb-6">
-                  <FiShield className="w-10 h-10 sm:w-12 sm:h-12 text-green-400 mb-4 sm:mb-0 sm:mr-4" />
-                  <h2 className="text-xl sm:text-2xl font-mono font-bold text-green-400 capitalize tracking-wider">
-                    {activeSection.toUpperCase()}_MODULE
-                  </h2>
-                </div>
-                <p className="text-green-600 font-mono text-sm sm:text-base">
-                  Module interface under development...
-                </p>
-                <div className="mt-6 flex items-center justify-center space-x-2 text-green-700 font-mono text-sm">
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                  <span>Status: PENDING_IMPLEMENTATION</span>
+                <div className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 shadow-lg p-6 sm:p-8 text-center">
+                  <div className="flex flex-col sm:flex-row items-center justify-center mb-6">
+                    <FiShield className="w-10 h-10 sm:w-12 sm:h-12 text-green-400 mb-4 sm:mb-0 sm:mr-4" />
+                    <h2 className="text-xl sm:text-2xl font-mono font-bold text-green-400 capitalize tracking-wider">
+                      {activeSection.toUpperCase()}_MODULE
+                    </h2>
+                  </div>
+                  <p className="text-green-600 font-mono text-sm sm:text-base mb-6">
+                    Module interface under development...
+                  </p>
+                  <div className="flex items-center justify-center space-x-2 text-green-700 font-mono text-sm">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <span>Status: PENDING_IMPLEMENTATION</span>
+                  </div>
                 </div>
               </motion.div>
             )}
           </main>
         </div>
+
+        {/* Responsive Debugger - Development Only */}
+        <ResponsiveDebugger />
       </div>
 
       {/* Custom Scrollbar Styles */}

@@ -24,8 +24,8 @@ const notFoundHandler = require('./middleware/not-found-handler');
 
 // Import routes
 const authRoutes = require('./routes/auth-routes');
+const blogRoutes = require('./routes/blog-routes');
 // const portfolioRoutes = require('./routes/portfolio-routes');
-// const blogRoutes = require('./routes/blog-routes');
 // const adminRoutes = require('./routes/admin-routes');
 
 /**
@@ -144,8 +144,8 @@ const createApp = () => {
 
     // Mount routes
     app.use('/api/v1/auth', authRoutes);
+    app.use('/api/v1/blogs', blogRoutes);
     // app.use('/api/v1/portfolio', portfolioRoutes);
-    // app.use('/api/v1/blog', blogRoutes);
     // app.use('/api/v1/admin', adminRoutes);
 
     // Static file serving for uploads

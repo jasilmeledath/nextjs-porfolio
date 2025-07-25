@@ -19,11 +19,12 @@ import {
   FiTag,
   FiArrowRight,
   FiChevronDown,
-  FiX
+  FiX,
+  FiEye,
+  FiMessageSquare
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
-import { BLOG_IDS } from '../../constants/component-ids';
-import { ArrowLeft, ArrowRight, Search, Filter, User, Calendar, Clock } from 'lucide-react';
+import BlogService from '../../services/blog-service';
 import ResponsiveDebugger from '../../components/ui/ResponsiveDebugger';
 
 /**
@@ -35,19 +36,82 @@ export default function BlogPage() {
   const { toggleTheme, isDark } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [popularBlogs, setPopularBlogs] = useState([]);
 
-  // Sample blog posts data
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Building Scalable React Applications with Next.js",
-      excerpt: "Learn how to build production-ready React applications with Next.js, including server-side rendering, static generation, and performance optimization techniques.",
-      content: "Full article content here...",
-      slug: "building-scalable-react-nextjs",
-      category: "React",
-      tags: ["React", "Next.js", "Performance", "SSR"],
-      author: "Professional Developer",
-      publishDate: "2025-01-20",
+  // Load blogs from API
+  useEffect(() => {
+    loadBlogs();
+    loadCategories();
+    loadPopularBlogs();
+  }, [currentPage, selectedCategory, searchQuery]);
+
+  /**
+   * Load published blogs
+   */
+  const loadBlogs = async () => {
+    try {
+      setLoading(true);
+      const params = {
+        page: currentPage,
+        limit: 9,
+        ...(selectedCategory !== 'all' && { category: selectedCategory }),
+        ...(searchQuery && { search: searchQuery })
+      };
+
+      const response = await BlogService.getPublishedBlogs(params);
+      setBlogs(response.data.blogs);
+      setTotalPages(response.data.pagination.totalPages);
+    } catch (error) {
+      console.error('[Blog] Error loading blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Load categories
+   */
+  const loadCategories = async () => {
+    try {
+      const response = await BlogService.getCategories();
+      setCategories(response.data);
+    } catch (error) {
+      console.error('[Blog] Error loading categories:', error);
+    }
+  };
+
+  /**
+   * Load popular blogs
+   */
+  const loadPopularBlogs = async () => {
+    try {
+      const response = await BlogService.getPopularBlogs(3);
+      setPopularBlogs(response.data);
+    } catch (error) {
+      console.error('[Blog] Error loading popular blogs:', error);
+    }
+  };
+
+  /**
+   * Handle search
+   */
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  /**
+   * Handle category filter
+   */
+  const handleCategoryFilter = (category) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
       readTime: "8 min read",
       featured: true,
       image: "/api/placeholder/800/400"

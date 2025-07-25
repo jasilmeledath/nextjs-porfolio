@@ -1,9 +1,9 @@
 /**
- * @fileoverview Admin Authentication Login Page
+ * @fileoverview Admin Authentication Login Page - Cyber Themed
  * @author Professional Developer <dev@portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { useState, useEffect } from 'react';
@@ -85,13 +85,13 @@ export default function AdminLoginPage() {
     try {
       // Basic validation
       if (!formData.email || !formData.password) {
-        throw new Error('Please fill in all fields');
+        throw new Error('All security fields are required');
       }
 
       // Email format validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
-        throw new Error('Please enter a valid email address');
+        throw new Error('Invalid user identifier format');
       }
 
       // Attempt login
@@ -100,25 +100,21 @@ export default function AdminLoginPage() {
       // Success - redirect handled by useEffect
       
     } catch (err) {
-      console.error('[AdminLogin] Login error:', err);
-      setError(err.message || 'Login failed. Please try again.');
+      console.error('[AdminLogin] Authentication error:', err);
+      setError(err.message || 'Authentication failed. Access denied.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  /**
-   * Toggle password visibility
-   */
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   // Show loading spinner while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-12 h-12 border-2 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-green-400 font-mono text-sm">INITIALIZING_SYSTEM...</p>
+        </div>
       </div>
     );
   }
@@ -131,190 +127,231 @@ export default function AdminLoginPage() {
   return (
     <>
       <Head>
-        <title>Admin Login - Portfolio Dashboard</title>
-        <meta name="description" content="Admin login page for portfolio management dashboard" />
+        <title>ADMIN_CORE - Access Terminal</title>
+        <meta name="description" content="Secure administrative access portal" />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <div 
-        id="admin-authentication-login-page-container"
-        className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 sm:px-6 lg:px-8"
-      >
+      <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+        {/* Cyber Grid Background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px'
+          }}></div>
+        </div>
+
+        {/* Animated Particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(15)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-green-400 rounded-full animate-pulse opacity-30"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 2}s`
+              }}
+            ></div>
+          ))}
+        </div>
+
+        {/* Main Login Container */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-md w-full space-y-8"
+          className="w-full max-w-md mx-4"
         >
           {/* Header Section */}
-          <motion.div variants={itemVariants} className="text-center">
-            <div 
-              id="admin-login-page-header-title"
-              className="flex justify-center items-center mb-6"
-            >
-              <div className="bg-blue-600 p-3 rounded-full">
-                <FiShield className="w-8 h-8 text-white" />
+          <motion.div variants={itemVariants} className="text-center mb-8">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 border-2 border-green-400 rounded-lg bg-green-400/10 flex items-center justify-center relative">
+                <span className="text-green-400 text-2xl font-mono font-bold">⚡</span>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Admin Dashboard
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Sign in to manage your portfolio
+            <h1 className="text-3xl font-mono font-bold text-green-400 tracking-wider mb-2">
+              ADMIN_CORE
+            </h1>
+            <p className="text-green-600 font-mono text-sm tracking-wide">
+              SECURE_ACCESS_TERMINAL
             </p>
+            <div className="flex items-center justify-center space-x-2 mt-4 text-green-700 font-mono text-xs">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span>System Status: OPERATIONAL</span>
+            </div>
           </motion.div>
 
           {/* Login Form */}
-          <motion.div 
+          <motion.div
             variants={itemVariants}
-            id="admin-login-form-wrapper-container"
-            className="bg-white dark:bg-gray-800 py-8 px-6 shadow-xl rounded-xl border border-gray-200 dark:border-gray-700"
+            className="bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-xl rounded-xl border border-green-500/30 shadow-2xl shadow-green-500/10 p-8"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Error Message */}
-              {error && (
-                <motion.div
-                  id="admin-login-error-message-display"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 flex items-center space-x-2"
-                >
-                  <FiAlertCircle className="w-4 h-4 text-red-500" />
-                  <span className="text-sm text-red-600 dark:text-red-400">
-                    {error}
-                  </span>
-                </motion.div>
-              )}
+            {/* System Info Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-green-500/20">
+              <div className="flex items-center space-x-3">
+                <FiShield className="w-5 h-5 text-green-400" />
+                <span className="text-green-400 font-mono text-sm font-medium">
+                  AUTHENTICATION_REQUIRED
+                </span>
+              </div>
+              <div className="text-green-600 font-mono text-xs">
+                v2.1.0
+              </div>
+            </div>
 
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-500/20 border border-red-500/40 rounded-lg flex items-center space-x-3"
+              >
+                <FiAlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                <div>
+                  <p className="text-red-400 font-mono text-sm font-medium">
+                    ACCESS_DENIED
+                  </p>
+                  <p className="text-red-500 font-mono text-xs mt-1">
+                    {error}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
-              <div>
-                <label 
-                  htmlFor="admin-login-email-input-field"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  Email Address
+              <motion.div variants={itemVariants}>
+                <label className="block text-green-400 font-mono text-sm font-medium mb-3">
+                  USER_IDENTIFIER
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiMail className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiMail className="w-5 h-5 text-green-600" />
                   </div>
                   <input
-                    id="admin-login-email-input-field"
-                    name="email"
                     type="email"
-                    autoComplete="email"
-                    required
+                    name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-lg relative block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    placeholder="admin@portfolio.com"
+                    className="w-full pl-12 pr-4 py-3 bg-black/40 border border-green-500/30 rounded-lg text-green-300 font-mono placeholder-green-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-300"
+                    placeholder="admin@system.core"
+                    required
+                    disabled={isSubmitting}
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Password Field */}
-              <div>
-                <label 
-                  htmlFor="admin-login-password-input-field"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
-                  Password
+              <motion.div variants={itemVariants}>
+                <label className="block text-green-400 font-mono text-sm font-medium mb-3">
+                  ACCESS_KEY
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiLock className="h-5 w-5 text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiLock className="w-5 h-5 text-green-600" />
                   </div>
                   <input
-                    id="admin-login-password-input-field"
-                    name="password"
                     type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
+                    name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="appearance-none rounded-lg relative block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-                    placeholder="Enter your password"
+                    className="w-full pl-12 pr-12 py-3 bg-black/40 border border-green-500/30 rounded-lg text-green-300 font-mono placeholder-green-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-300"
+                    placeholder="••••••••••••"
+                    required
+                    disabled={isSubmitting}
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={togglePasswordVisibility}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-green-600 hover:text-green-400 transition-colors"
+                    disabled={isSubmitting}
                   >
-                    {showPassword ? (
-                      <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
-                    ) : (
-                      <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
-                    )}
+                    {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                   </button>
                 </div>
-              </div>
+              </motion.div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
+              {/* Remember Me */}
+              <motion.div variants={itemVariants} className="flex items-center justify-between">
+                <label className="flex items-center space-x-3 cursor-pointer group">
                   <input
-                    id="remember-me"
-                    name="remember-me"
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="w-4 h-4 bg-black/40 border border-green-500/30 rounded focus:ring-2 focus:ring-green-500/50 text-green-500"
+                    disabled={isSubmitting}
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                    Remember me
-                  </label>
+                  <span className="text-green-600 font-mono text-sm group-hover:text-green-400 transition-colors">
+                    MAINTAIN_SESSION
+                  </span>
+                </label>
+                <div className="text-green-700 font-mono text-xs">
+                  SESSION_TIMEOUT: 7d
                 </div>
-
-                <div className="text-sm">
-                  <a
-                    id="admin-forgot-password-recovery-link"
-                    href="#"
-                    className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      // TODO: Implement forgot password functionality
-                      alert('Please contact the administrator for password recovery.');
-                    }}
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-              </div>
+              </motion.div>
 
               {/* Submit Button */}
-              <div>
+              <motion.div variants={itemVariants}>
                 <button
-                  id="admin-login-submit-authentication-button"
                   type="submit"
                   disabled={isSubmitting}
-                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-black font-mono font-bold rounded-lg transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg shadow-green-500/20"
                 >
                   {isSubmitting ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Signing in...
-                    </div>
+                    <>
+                      <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin mr-3"></div>
+                      <span>AUTHENTICATING...</span>
+                    </>
                   ) : (
-                    'Sign in to Dashboard'
+                    <>
+                      <FiShield className="w-5 h-5 mr-3" />
+                      <span>INITIATE_ACCESS</span>
+                    </>
                   )}
                 </button>
-              </div>
+              </motion.div>
             </form>
 
-            {/* Security Notice */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-                This is a secure admin area. All activities are logged and monitored.
-              </p>
-            </div>
+            {/* Footer Info */}
+            <motion.div variants={itemVariants} className="mt-8 pt-6 border-t border-green-500/20">
+              <div className="flex items-center justify-between text-green-700 font-mono text-xs">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>SECURE_CONNECTION</span>
+                </div>
+                <div>
+                  UPTIME: {new Date().toLocaleTimeString()}
+                </div>
+              </div>
+              <div className="text-center mt-4">
+                <p className="text-green-800 font-mono text-xs">
+                  © 2025 ADMIN_CORE v2.1.0 | All systems operational
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
 
-          {/* Footer */}
-          <motion.div variants={itemVariants} className="text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              © 2025 Portfolio Dashboard. All rights reserved.
-            </p>
+          {/* Warning Banner */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              <FiAlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+              <div>
+                <p className="text-yellow-400 font-mono text-sm font-medium">
+                  RESTRICTED_ACCESS
+                </p>
+                <p className="text-yellow-600 font-mono text-xs mt-1">
+                  Unauthorized access attempts are logged and monitored.
+                </p>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       </div>
