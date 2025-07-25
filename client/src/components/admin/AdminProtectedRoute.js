@@ -8,7 +8,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Higher-order component for protecting admin routes
@@ -87,4 +87,48 @@ export function AdminLayout({ children }) {
   );
 }
 
-export default withAdminAuth;
+/**
+ * Admin Protected Route Wrapper Component
+ * @function AdminProtectedRoute
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components to protect
+ * @returns {JSX.Element} Protected route wrapper
+ */
+export function AdminProtectedRoute({ children }) {
+  const { isAuthenticated, loading, user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!loading && !isAuthenticated) {
+      router.push('/admin/login');
+      return;
+    }
+
+    // Check if user has admin privileges
+    if (!loading && isAuthenticated && user && !user.isAdmin) {
+      router.push('/'); // Redirect to home if not admin
+      return;
+    }
+  }, [isAuthenticated, loading, user, router]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600 dark:text-gray-400">Verifying access...</span>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (redirect in progress)
+  if (!isAuthenticated || (user && !user.isAdmin)) {
+    return null;
+  }
+
+  // Render the protected children
+  return <>{children}</>;
+}
+
+export default AdminProtectedRoute;

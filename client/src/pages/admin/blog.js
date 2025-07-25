@@ -19,7 +19,7 @@ import {
   FiFilter,
   FiCalendar,
   FiTag,
-  FiBarChart3,
+  FiBarChart2,
   FiMoreVertical,
   FiSettings
 } from 'react-icons/fi';
@@ -433,7 +433,7 @@ function AdminBlogManagement() {
                                   {post.publishDate ? new Date(post.publishDate).toLocaleDateString() : 'Not published'}
                                 </span>
                                 <span className="flex items-center">
-                                  <FiBarChart3 className="w-4 h-4 mr-1" />
+                                  <FiBarChart2 className="w-4 h-4 mr-1" />
                                   {post.views} views
                                 </span>
                                 <span className="flex items-center">

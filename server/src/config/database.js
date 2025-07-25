@@ -14,27 +14,21 @@ const { DatabaseError } = require('../errors/custom-errors');
  * @constant {Object} DB_CONFIG
  */
 const DB_CONFIG = {
-    // Connection options
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    
     // Performance options
     maxPoolSize: 10, // Maintain up to 10 socket connections
     serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
     socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+    maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
     
-    // Monitoring options
-    monitorCommands: true,
+    // Retry options
+    retryWrites: true,
+    retryReads: true,
     
-    // Buffer options
-    bufferMaxEntries: 0, // Disable mongoose buffering
-    bufferCommands: false, // Disable mongoose buffering
+    // Heartbeat options
+    heartbeatFrequencyMS: 10000, // Send a heartbeat every 10 seconds
     
-    // Auto index management
-    autoIndex: process.env.NODE_ENV !== 'production',
-    
-    // Auto create collections
-    autoCreate: true
+    // Auto index management (disable in production for better performance)
+    autoIndex: process.env.NODE_ENV !== 'production'
 };
 
 /**

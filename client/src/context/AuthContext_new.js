@@ -49,25 +49,6 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // For development, create a mock admin user if no backend verification
-      if (process.env.NODE_ENV === 'development') {
-        // Mock admin user for development
-        const mockUser = {
-          id: 1,
-          email: 'admin@portfolio.com',
-          firstName: 'Admin',
-          lastName: 'User',
-          role: 'admin',
-          isAdmin: true,
-          permissions: ['portfolio:write', 'blog:write', 'blog:delete', 'comments:moderate', 'media:upload', 'analytics:view', 'settings:manage']
-        };
-        
-        setUser(mockUser);
-        setLoading(false);
-        setInitialized(true);
-        return;
-      }
-
       // Verify token with backend
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/verify`, {
         method: 'GET',
@@ -110,30 +91,6 @@ export function AuthProvider({ children }) {
   const login = async (email, password, rememberMe = false) => {
     try {
       setLoading(true);
-      
-      // For development, allow admin@portfolio.com with any password
-      if (process.env.NODE_ENV === 'development' && email === 'admin@portfolio.com') {
-        const mockUser = {
-          id: 1,
-          email: 'admin@portfolio.com',
-          firstName: 'Admin',
-          lastName: 'User',
-          role: 'admin',
-          isAdmin: true,
-          permissions: ['portfolio:write', 'blog:write', 'blog:delete', 'comments:moderate', 'media:upload', 'analytics:view', 'settings:manage']
-        };
-        
-        setUser(mockUser);
-        
-        // Set mock auth token
-        Cookies.set('auth_token', 'mock-admin-token', {
-          expires: rememberMe ? 30 : 7,
-          secure: false,
-          sameSite: 'strict'
-        });
-        
-        return { success: true, user: mockUser };
-      }
       
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: 'POST',
@@ -181,7 +138,7 @@ export function AuthProvider({ children }) {
     try {
       const token = Cookies.get('auth_token');
       
-      if (token && process.env.NODE_ENV !== 'development') {
+      if (token) {
         // Call logout endpoint to invalidate server-side session
         await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
