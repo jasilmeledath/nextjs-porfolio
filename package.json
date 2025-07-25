@@ -1,0 +1,45 @@
+{
+  "name": "professional-portfolio",
+  "version": "1.0.0",
+  "description": "Enterprise-level personal portfolio with terminal interface, blog system, and admin panel",
+  "main": "server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "server:start": "cd server && npm start",
+    "client:build": "cd client && npm run build",
+    "client:start": "cd client && npm start",
+    "test": "concurrently \"npm run server:test\" \"npm run client:test\"",
+    "server:test": "cd server && npm test",
+    "client:test": "cd client && npm test",
+    "build": "npm run client:build",
+    "start": "npm run server:start",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "lint": "concurrently \"npm run server:lint\" \"npm run client:lint\"",
+    "server:lint": "cd server && npm run lint",
+    "client:lint": "cd client && npm run lint"
+  },
+  "keywords": [
+    "portfolio",
+    "terminal",
+    "blog",
+    "nextjs",
+    "express",
+    "mongodb",
+    "professional"
+  ],
+  "author": "Professional Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/professional-portfolio.git"
+  }
+}
