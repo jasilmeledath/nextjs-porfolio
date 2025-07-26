@@ -503,6 +503,7 @@ class PortfolioController {
       }
 
       const userId = portfolioOwner._id;
+      const userIdString = userId.toString();
 
       // Get all portfolio data
       const [
@@ -512,11 +513,11 @@ class PortfolioController {
         projects,
         experience
       ] = await Promise.all([
-        PersonalInfo.findOne({ userId }),
-        SocialLink.find({ userId, isActive: true }).sort({ order: 1 }),
-        Skill.find({ userId, isActive: true }).sort({ proficiency: -1, name: 1 }),
-        Project.find({ userId, isActive: true }).sort({ priority: -1, createdAt: -1 }),
-        Experience.find({ userId }).sort({ startDate: -1 })
+        PersonalInfo.findOne({ userId: userIdString }), // Use string for PersonalInfo
+        SocialLink.find({ userId: userIdString, isActive: true }).sort({ order: 1 }),
+        Skill.find({ userId: userIdString, isActive: true }).sort({ proficiency: -1, name: 1 }),
+        Project.find({ userId: userIdString, isActive: true }).sort({ priority: -1, createdAt: -1 }),
+        Experience.find({ userId: userIdString }).sort({ startDate: -1 })
       ]);
 
       const portfolioData = {
@@ -551,7 +552,7 @@ class PortfolioController {
         throw new CustomError('Portfolio owner not found', HTTP_STATUS.NOT_FOUND);
       }
 
-      const personalInfo = await PersonalInfo.findOne({ userId: portfolioOwner._id });
+      const personalInfo = await PersonalInfo.findOne({ userId: portfolioOwner._id.toString() });
 
       res.status(HTTP_STATUS.SUCCESS).json(
         ApiResponse.success(personalInfo, 'Personal information retrieved successfully')

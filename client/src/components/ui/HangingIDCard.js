@@ -58,6 +58,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
   const [isSwinging, setIsSwinging] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [staticId, setStaticId] = useState('123456') // Static ID to prevent hydration issues
 
   // Refs
   const cardRef = useRef(null)
@@ -95,6 +96,12 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
     updateDimensions()
     window.addEventListener("resize", updateDimensions)
     return () => window.removeEventListener("resize", updateDimensions)
+  }, [])
+
+  // Set dynamic ID on client side to prevent hydration mismatch
+  useEffect(() => {
+    // Generate a dynamic ID only on client side
+    setStaticId(String(Date.now()).slice(-6))
   }, [])
 
   // Enhanced motion values with smoother constraints
@@ -390,7 +397,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
 
     const createIdleMotion = () => {
       if (!isDragging && !isSwinging && !physicsStateRef.current.isAnimating) {
-        const time = Date.now() * 0.001
+        const time = performance.now() * 0.001 // Use performance.now() for animation
         
         // Subtle breathing motion
         const breathingX = Math.sin(time * 0.5) * 0.8
@@ -428,14 +435,28 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
     }
   }, [])
 
-  // Generate QR pattern
+  // Generate QR pattern with seeded randomness to avoid hydration issues
   const qrPattern = useMemo(() => {
     const size = isMobile ? 10 : 12
     const pattern = []
+    
+    // Create a simple seeded random function based on email hash
+    const emailSeed = personalInfo?.email ? 
+      personalInfo.email.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0)
+        return a & a
+      }, 0) : 12345
+    
+    let seedValue = Math.abs(emailSeed)
+    const seededRandom = () => {
+      seedValue = (seedValue * 9301 + 49297) % 233280
+      return seedValue / 233280
+    }
+    
     for (let i = 0; i < size; i++) {
       const row = []
       for (let j = 0; j < size; j++) {
-        row.push(Math.random() > 0.5)
+        row.push(seededRandom() > 0.5)
       }
       pattern.push(row)
     }
@@ -775,7 +796,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                 </div>
               </div>
               <div className={`text-right ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-                <div className={`${textSizes.details} font-mono`}>ID: {String(Date.now()).slice(-6)}</div>
+                <div className={`${textSizes.details} font-mono`}>ID: {staticId}</div>
                 <div className={textSizes.details}>Est. 2025</div>
               </div>
             </div>
@@ -798,7 +819,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                 <div className="w-full h-full relative">
                   {personalInfo?.profileImage || personalInfo?.avatarUrl ? (
                     <img
-                      src={personalInfo.profileImage || personalInfo.avatarUrl || "/placeholder.svg"}
+                      src={personalInfo.avatar}
                       alt={`${personalInfo?.name || "Developer"} Professional Photo`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
