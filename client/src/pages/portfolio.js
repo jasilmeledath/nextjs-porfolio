@@ -32,12 +32,15 @@ import {
 } from "lucide-react"
 import { usePortfolioData } from "../hooks/usePortfolioData"
 import HangingIDCard from "../components/ui/HangingIDCard"
+import ProjectPreview from "../components/ui/ProjectPreview"
 
 export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("hero")
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isDark, setIsDark] = useState(true)
   const [isClient, setIsClient] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [isProjectPreviewOpen, setIsProjectPreviewOpen] = useState(false)
   const containerRef = useRef(null)
 
   // Load portfolio data from backend
@@ -247,9 +250,27 @@ export default function PortfolioPage() {
     [error, personalInfo.name]
   )
 
+  // Project preview handlers
+  const openProjectPreview = useCallback((project) => {
+    setSelectedProject(project)
+    setIsProjectPreviewOpen(true)
+    document.body.style.overflow = 'hidden' // Prevent background scroll
+  }, [])
+
+  const closeProjectPreview = useCallback(() => {
+    setIsProjectPreviewOpen(false)
+    setSelectedProject(null)
+    document.body.style.overflow = 'unset' // Restore scroll
+  }, [])
+
   // Client-side hydration fix
   useEffect(() => {
     setIsClient(true)
+    
+    // Cleanup function to reset body overflow when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
   }, [])
 
   // Loading state - only show if we're still loading and don't have data
@@ -740,7 +761,8 @@ export default function PortfolioPage() {
                     initial="rest"
                     whileHover="hover"
                     variants={cardHover}
-                    className={`backdrop-blur-xl rounded-2xl md:rounded-3xl overflow-hidden border shadow-2xl hover:shadow-cyan-500/25 transition-all duration-500 ${
+                    onClick={() => openProjectPreview(project)}
+                    className={`backdrop-blur-xl rounded-2xl md:rounded-3xl overflow-hidden border shadow-2xl hover:shadow-cyan-500/25 transition-all duration-500 cursor-pointer ${
                       isDark 
                         ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/20' 
                         : 'bg-gradient-to-br from-black/5 to-black/2 border-black/10'
@@ -819,29 +841,45 @@ export default function PortfolioPage() {
                       </div>
 
                       {/* Project Links */}
-                      <div className="flex items-center space-x-3 md:space-x-4">
-                        <motion.a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3 md:space-x-4">
+                          <motion.a
+                            href={project.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ scale: 1.05 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center text-cyan-400 hover:text-cyan-300 font-semibold text-xs md:text-sm transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                            <span className="hidden sm:inline">Live Demo</span>
+                            <span className="sm:hidden">Demo</span>
+                          </motion.a>
+                          <motion.a
+                            href={project.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ scale: 1.05 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center text-gray-400 hover:text-white font-semibold text-xs md:text-sm transition-colors"
+                          >
+                            <Github className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                            <span className="hidden sm:inline">Code</span>
+                            <span className="sm:hidden">Code</span>
+                          </motion.a>
+                        </div>
+                        
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            openProjectPreview(project)
+                          }}
                           whileHover={{ scale: 1.05 }}
-                          className="inline-flex items-center text-cyan-400 hover:text-cyan-300 font-semibold text-xs md:text-sm transition-colors"
+                          whileTap={{ scale: 0.95 }}
+                          className="px-3 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-lg text-xs md:text-sm transition-all duration-300"
                         >
-                          <ExternalLink className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          <span className="hidden sm:inline">Live Demo</span>
-                          <span className="sm:hidden">Demo</span>
-                        </motion.a>
-                        <motion.a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          whileHover={{ scale: 1.05 }}
-                          className="inline-flex items-center text-gray-400 hover:text-white font-semibold text-xs md:text-sm transition-colors"
-                        >
-                          <Github className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          <span className="hidden sm:inline">Code</span>
-                          <span className="sm:hidden">Code</span>
-                        </motion.a>
+                          Details
+                        </motion.button>
                       </div>
                     </div>
                   </motion.div>
@@ -985,6 +1023,14 @@ export default function PortfolioPage() {
             </motion.div>
           </div>
         </section>
+
+        {/* Project Preview Modal */}
+        <ProjectPreview
+          project={selectedProject}
+          isOpen={isProjectPreviewOpen}
+          onClose={closeProjectPreview}
+          isDark={isDark}
+        />
 
         {/* Footer */}
         <footer className={`py-6 md:py-8 px-4 md:px-6 border-t ${
