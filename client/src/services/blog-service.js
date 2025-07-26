@@ -151,7 +151,13 @@ class BlogService {
       headers: this.getAuthHeaders()
     });
     
-    return this.handleResponse(response);
+    const result = await this.handleResponse(response);
+    
+    if (result.status === 'success') {
+      toast.success('Blog post deleted successfully!');
+    }
+    
+    return result;
   }
 
   /**

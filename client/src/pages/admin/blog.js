@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { 
   FiPlus,
   FiSearch,
@@ -28,7 +29,8 @@ import {
   FiArrowLeft,
   FiMoreVertical,
   FiSettings,
-  FiRefreshCw
+  FiRefreshCw,
+  FiExternalLink
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import BlogService from '../../services/blog-service';
@@ -132,9 +134,48 @@ export default function AdminBlogPage() {
    * @param {string} blogId - Blog ID to delete
    */
   const handleDeleteBlog = async (blogId) => {
-    if (!confirm('Are you sure you want to delete this blog? This action cannot be undone.')) {
-      return;
-    }
+    // Create a custom toast confirmation
+    const result = await new Promise((resolve) => {
+      const toastId = toast((t) => (
+        <div className="flex flex-col space-y-3">
+          <div className="text-sm font-semibold text-red-400">
+            Delete Blog Post
+          </div>
+          <div className="text-xs text-gray-300">
+            Are you sure you want to delete this blog? This action cannot be undone.
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                resolve(true);
+              }}
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors"
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                resolve(false);
+              }}
+              className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ), {
+        duration: Infinity,
+        style: {
+          background: '#1a1a1a',
+          border: '1px solid #ef4444',
+          borderRadius: '8px',
+        }
+      });
+    });
+
+    if (!result) return;
 
     try {
       await BlogService.deleteBlog(blogId);
@@ -142,7 +183,7 @@ export default function AdminBlogPage() {
       loadBlogStats(); // Reload stats
     } catch (error) {
       console.error('[AdminBlog] Error deleting blog:', error);
-      alert('Failed to delete blog. Please try again.');
+      toast.error('Failed to delete blog. Please try again.');
     }
   };
 
@@ -447,13 +488,28 @@ export default function AdminBlogPage() {
                         </td>
                         <td className="p-4">
                           <div className="flex items-center justify-end space-x-2">
+                            {/* Preview Button */}
+                            {blog.status === 'published' && (
+                              <Link 
+                                href={`/blog/${blog.slug}`}
+                                target="_blank"
+                                className="p-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 rounded text-purple-400 hover:text-purple-300 transition-all duration-300"
+                                title="Preview Blog"
+                              >
+                                <FiExternalLink className="w-3 h-3" />
+                              </Link>
+                            )}
+                            
+                            {/* Edit Button */}
                             <Link 
                               href={`/admin/blog/edit/${blog._id}`}
                               className="p-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded text-blue-400 hover:text-blue-300 transition-all duration-300"
+                              title="Edit Blog"
                             >
                               <FiEdit3 className="w-3 h-3" />
                             </Link>
                             
+                            {/* Publish/Unpublish Button */}
                             <button
                               onClick={() => handleStatusToggle(blog._id, blog.status === 'published' ? 'draft' : 'published')}
                               className={`p-2 rounded border transition-all duration-300 ${
@@ -461,13 +517,16 @@ export default function AdminBlogPage() {
                                   ? 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 hover:text-yellow-300'
                                   : 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300'
                               }`}
+                              title={blog.status === 'published' ? 'Unpublish Blog' : 'Publish Blog'}
                             >
                               {blog.status === 'published' ? <FiEyeOff className="w-3 h-3" /> : <FiEye className="w-3 h-3" />}
                             </button>
                             
+                            {/* Delete Button */}
                             <button
                               onClick={() => handleDeleteBlog(blog._id)}
                               className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded text-red-400 hover:text-red-300 transition-all duration-300"
+                              title="Delete Blog"
                             >
                               <FiTrash2 className="w-3 h-3" />
                             </button>

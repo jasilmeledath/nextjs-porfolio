@@ -255,22 +255,36 @@ class BlogController {
       const { id } = req.params;
       const updateData = req.body;
 
+      // Validate ObjectId
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ValidationError('Invalid blog ID format');
+      }
+
       const blog = await Blog.findById(id);
 
       if (!blog) {
         throw new NotFoundError('Blog not found');
       }
 
-      // Check if user is the author or admin
+      // Check if user is the author or has admin permissions
       if (blog.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-        throw new CustomError('Unauthorized to update this blog', HTTP_STATUS.FORBIDDEN);
+        throw new AuthorizationError('Unauthorized to update this blog');
       }
 
-      // Update blog
-      Object.assign(blog, updateData);
+      // Remove sensitive fields that shouldn't be updated directly
+      const { author, createdAt, updatedAt, ...allowedUpdateData } = updateData;
+
+      // If updating status to published, ensure publishedAt is set
+      if (allowedUpdateData.status === 'published' && !blog.publishedAt) {
+        allowedUpdateData.publishedAt = new Date();
+      }
+
+      // Update blog with validation
+      Object.assign(blog, allowedUpdateData);
       await blog.save();
 
-      await blog.populate('author', 'firstName lastName email');
+      // Populate author information for response
+      await blog.populate('author', 'firstName lastName email profileImage');
 
       const response = ApiResponse.success(blog, 'Blog updated successfully');
       res.status(response.statusCode).json(response);
@@ -278,7 +292,9 @@ class BlogController {
       if (error.name === 'ValidationError') {
         next(new ValidationError(error.message));
       } else if (error.code === 11000) {
-        next(new ValidationError('Blog with this slug already exists'));
+        // Handle duplicate slug error
+        const field = Object.keys(error.keyPattern)[0];
+        next(new ConflictError(`Blog with this ${field} already exists`));
       } else {
         next(error);
       }
@@ -295,20 +311,36 @@ class BlogController {
     try {
       const { id } = req.params;
 
+      // Validate ObjectId
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new ValidationError('Invalid blog ID format');
+      }
+
       const blog = await Blog.findById(id);
 
       if (!blog) {
         throw new NotFoundError('Blog not found');
       }
 
-      // Check if user is the author or admin
+      // Check if user is the author or has admin permissions
       if (blog.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-        throw new CustomError('Unauthorized to delete this blog', HTTP_STATUS.FORBIDDEN);
+        throw new AuthorizationError('Unauthorized to delete this blog');
       }
 
+      // Store blog info for response (before deletion)
+      const blogInfo = {
+        id: blog._id,
+        title: blog.title,
+        slug: blog.slug
+      };
+
+      // Delete the blog
       await Blog.findByIdAndDelete(id);
 
-      const response = ApiResponse.success(null, 'Blog deleted successfully');
+      const response = ApiResponse.success(
+        { deletedBlog: blogInfo }, 
+        'Blog deleted successfully'
+      );
       res.status(response.statusCode).json(response);
     } catch (error) {
       next(error);
