@@ -109,4 +109,44 @@
   .text-gradient {
     @apply bg-clip-text text-transparent;
   }
+
+  /* Range slider styles */
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    cursor: pointer;
+    border: 2px solid rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.2);
+  }
+
+  .slider::-webkit-slider-track {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1f2937 0%, rgba(16, 185, 129, 0.3) 100%);
+  }
+
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    cursor: pointer;
+    border: 2px solid rgba(16, 185, 129, 0.5);
+    box-shadow: none;
+  }
+
+  .slider::-moz-range-track {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1f2937 0%, rgba(16, 185, 129, 0.3) 100%);
+    border: none;
+  }
 }
