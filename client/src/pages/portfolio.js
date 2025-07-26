@@ -356,9 +356,17 @@ export default function PortfolioPage() {
                   <motion.h2 className="text-3xl lg:text-4xl bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent font-bold mb-8">
                     {personalInfo.title}
                   </motion.h2>
-                  <p className={`text-xl leading-relaxed ${
+                  <div className={`text-lg leading-relaxed space-y-4 ${
                     isDark ? 'text-gray-300' : 'text-gray-600'
-                  }`}>{personalInfo.description}</p>
+                  }`}>
+                    {personalInfo.description?.split('\n\n').filter(paragraph => paragraph.trim()).map((paragraph, index) => (
+                      <p key={index} className="text-base leading-relaxed">
+                        {paragraph.trim()}
+                      </p>
+                    )) || (
+                      <p className="text-base leading-relaxed">{personalInfo.description}</p>
+                    )}
+                  </div>
                 </motion.div>
 
                 <motion.div variants={fadeInUp} className={`flex items-center space-x-3 ${
@@ -429,7 +437,20 @@ export default function PortfolioPage() {
                     className="relative w-96 h-96 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-2 shadow-2xl"
                   >
                     <div className="w-full h-full rounded-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
-                      <div className="text-8xl">👨‍💻</div>
+                      {personalInfo.profileImage || personalInfo.avatarUrl ? (
+                        <img 
+                          src={personalInfo.profileImage || personalInfo.avatarUrl || "/placeholder.svg"}
+                          alt={`${personalInfo.name} Avatar`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <div className="text-8xl" style={{ display: personalInfo.profileImage || personalInfo.avatarUrl ? 'none' : 'block' }}>
+                        👨‍💻
+                      </div>
                     </div>
                   </motion.div>
 
@@ -654,7 +675,11 @@ export default function PortfolioPage() {
                       </h3>
                       <p className={`mb-4 text-sm leading-relaxed ${
                         isDark ? 'text-gray-300' : 'text-gray-600'
-                      }`}>{project.description}</p>
+                      }`}>
+                        {project.description?.length > 150 
+                          ? `${project.description.substring(0, 150)}...` 
+                          : project.description}
+                      </p>
 
                       {/* Stats */}
                       <div className={`flex justify-between text-xs mb-4 ${
