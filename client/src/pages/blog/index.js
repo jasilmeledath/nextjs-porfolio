@@ -26,7 +26,6 @@ import {
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import BlogService from '../../services/blog-service';
-import ResponsiveDebugger from '../../components/ui/ResponsiveDebugger';
 
 /**
  * Blog Page Component
@@ -550,9 +549,6 @@ export default function BlogPage() {
           </div>
         </footer>
       </div>
-      
-      {/* Mobile Debug Tool */}
-      <ResponsiveDebugger />
     </>
   );
 }

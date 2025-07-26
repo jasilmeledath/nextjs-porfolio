@@ -27,7 +27,6 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import BlogService from '../../../services/blog-service';
-import ResponsiveDebugger from '../../../components/ui/ResponsiveDebugger';
 
 /**
  * Admin Blog Create Page Component
@@ -612,9 +611,6 @@ export default function AdminBlogCreatePage() {
             </div>
           </form>
         </div>
-
-        {/* Responsive Debugger - Development Only */}
-        <ResponsiveDebugger />
       </div>
     </>
   );

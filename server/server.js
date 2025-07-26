@@ -33,12 +33,15 @@ const startServer = async () => {
         console.log('🚀 Starting Portfolio Server...');
         console.log(`📊 Environment: ${SERVER_CONFIG.NODE_ENV}`);
         
-        // Connect to database (optional in development)
+        // Connect to database (required for saving data)
         try {
+            console.log('📊 Attempting to connect to MongoDB...');
             await connectToDatabase();
+            console.log('✅ MongoDB connection successful!');
         } catch (error) {
-            console.log('⚠️  Database connection failed, continuing without database for development');
-            console.log('   To enable database features, ensure MongoDB is running and connection string is correct');
+            console.error('❌ Database connection failed:', error);
+            console.error('❌ Cannot start server without database connection');
+            process.exit(1);
         }
         
         // Create Express app

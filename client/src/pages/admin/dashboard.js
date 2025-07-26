@@ -27,10 +27,11 @@ import {
   FiTrendingUp,
   FiClock,
   FiActivity,
-  FiShield
+  FiShield,
+  FiFolder
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
-import ResponsiveDebugger from '../../components/ui/ResponsiveDebugger';
+import ProjectForm from '../../components/admin/ProjectForm';
 
 /**
  * Admin Dashboard Main Page Component
@@ -101,9 +102,14 @@ export default function AdminDashboardPage() {
     setActiveSection(section);
     setSidebarOpen(false); // Close sidebar on mobile
     
-    // Navigate to specific blog page if needed
+    // Navigate to specific pages for modular sections
     if (section === 'blog') {
       router.push('/admin/blog');
+      return;
+    }
+    
+    if (section === 'portfolio') {
+      router.push('/admin/portfolio');
       return;
     }
   };
@@ -112,6 +118,7 @@ export default function AdminDashboardPage() {
   const navigationItems = [
     { id: 'dashboard', label: 'System Overview', icon: FiHome },
     { id: 'portfolio', label: 'Portfolio Mgmt', icon: FiUser },
+    { id: 'projects', label: 'Project Creator', icon: FiFolder },
     { id: 'blog', label: 'Content Hub', icon: FiFileText },
     { id: 'comments', label: 'Moderation', icon: FiMessageSquare },
     { id: 'media', label: 'Media Vault', icon: FiImage },
@@ -527,12 +534,12 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="space-y-3">{/* Quick Action Buttons will continue here */}
                       <button
-                        onClick={() => navigateToSection('blog')}
+                        onClick={() => navigateToSection('projects')}
                         className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 text-left text-sm font-mono font-medium text-green-300 hover:text-green-200 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-all duration-300 border border-green-500/20 hover:border-green-500/40 group"
                       >
                         <div className="flex items-center min-w-0">
-                          <FiEdit3 className="w-4 h-4 sm:w-5 sm:h-5 mr-3 group-hover:animate-pulse flex-shrink-0" />
-                          <span className="truncate">CREATE_POST</span>
+                          <FiFolder className="w-4 h-4 sm:w-5 sm:h-5 mr-3 group-hover:animate-pulse flex-shrink-0" />
+                          <span className="truncate">CREATE_PROJECT</span>
                         </div>
                         <span className="text-green-600 text-xs ml-2">&gt;</span>
                       </button>
@@ -542,7 +549,17 @@ export default function AdminDashboardPage() {
                       >
                         <div className="flex items-center min-w-0">
                           <FiUser className="w-4 h-4 sm:w-5 sm:h-5 mr-3 group-hover:animate-pulse flex-shrink-0" />
-                          <span className="truncate">UPDATE_PROFILE</span>
+                          <span className="truncate">PORTFOLIO_MODULE</span>
+                        </div>
+                        <span className="text-green-600 text-xs ml-2">&gt;</span>
+                      </button>
+                      <button
+                        onClick={() => navigateToSection('blog')}
+                        className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 text-left text-sm font-mono font-medium text-green-300 hover:text-green-200 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-all duration-300 border border-green-500/20 hover:border-green-500/40 group"
+                      >
+                        <div className="flex items-center min-w-0">
+                          <FiEdit3 className="w-4 h-4 sm:w-5 sm:h-5 mr-3 group-hover:animate-pulse flex-shrink-0" />
+                          <span className="truncate">CREATE_POST</span>
                         </div>
                         <span className="text-green-600 text-xs ml-2">&gt;</span>
                       </button>
@@ -556,16 +573,6 @@ export default function AdminDashboardPage() {
                         </div>
                         <span className="text-green-600 text-xs ml-2">&gt;</span>
                       </button>
-                      <button
-                        onClick={() => navigateToSection('analytics')}
-                        className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 text-left text-sm font-mono font-medium text-green-300 hover:text-green-200 bg-green-500/10 hover:bg-green-500/20 rounded-lg transition-all duration-300 border border-green-500/20 hover:border-green-500/40 group"
-                      >
-                        <div className="flex items-center min-w-0">
-                          <FiBarChart2 className="w-4 h-4 sm:w-5 sm:h-5 mr-3 group-hover:animate-pulse flex-shrink-0" />
-                          <span className="truncate">VIEW_ANALYTICS</span>
-                        </div>
-                        <span className="text-green-600 text-xs ml-2">&gt;</span>
-                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -573,7 +580,17 @@ export default function AdminDashboardPage() {
             )}
 
             {/* Other sections placeholder */}
-            {activeSection !== 'dashboard' && (
+            {activeSection === 'projects' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="max-w-6xl mx-auto"
+              >
+                <ProjectForm onSuccess={() => setActiveSection('dashboard')} />
+              </motion.div>
+            )}
+
+            {activeSection !== 'dashboard' && activeSection !== 'projects' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -598,9 +615,6 @@ export default function AdminDashboardPage() {
             )}
           </main>
         </div>
-
-        {/* Responsive Debugger - Development Only */}
-        <ResponsiveDebugger />
       </div>
 
       {/* Custom Scrollbar Styles */}

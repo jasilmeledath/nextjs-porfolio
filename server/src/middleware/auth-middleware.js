@@ -36,7 +36,29 @@ const authenticate = async (req, res, next) => {
     }
     
     try {
-      // Verify token
+      // Special handling for development mode with mock token
+      if (process.env.NODE_ENV === 'development' && token === 'mock-admin-token') {
+        console.log('[AuthMiddleware] Using mock admin token in development mode');
+        
+        // Create a mock admin user for development
+        // Use the real user ID from the database for the mock admin
+        req.user = {
+          id: '688380f9314e98a2c9b95aa7',
+          _id: '688380f9314e98a2c9b95aa7',
+          email: 'admin@portfolio.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin',
+          isActive: true,
+          isLocked: false,
+          hasPermission: () => true // Mock function that always returns true
+        };
+        req.token = token;
+        
+        return next();
+      }
+      
+      // Normal token verification for production
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
       
       // Find user by ID from token

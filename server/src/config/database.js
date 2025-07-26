@@ -47,12 +47,10 @@ let dbConnection = null;
  */
 const connectToDatabase = async (connectionString = process.env.MONGODB_URI) => {
     try {
+        // Use default connection string if not provided
         if (!connectionString) {
-            throw new DatabaseError(
-                'MongoDB connection string is required',
-                'CONNECTION_SETUP',
-                'DB_001'
-            );
+            console.log('⚠️ No MongoDB connection string provided, using default: mongodb://localhost:27017/portfolio-dev');
+            connectionString = 'mongodb://localhost:27017/portfolio-dev';
         }
 
         // If already connected, return existing connection
@@ -61,11 +59,19 @@ const connectToDatabase = async (connectionString = process.env.MONGODB_URI) => 
             return dbConnection;
         }
 
-        // Connect to MongoDB
-        console.log('📊 Connecting to MongoDB...');
+        // Connect to MongoDB with detailed logging
+        console.log(`📊 Connecting to MongoDB at: ${connectionString.split('@').pop()}`);
+        console.log('📊 Connection options:', JSON.stringify(DB_CONFIG, null, 2));
+        
         await mongoose.connect(connectionString, DB_CONFIG);
         
         dbConnection = mongoose.connection;
+        
+        console.log(`📊 Connected to MongoDB database: ${dbConnection.name}`);
+        console.log(`📊 MongoDB version: ${await mongoose.connection.db.admin().serverInfo().then(info => info.version)}`);
+        console.log('📊 Available collections:');
+        const collections = await mongoose.connection.db.listCollections().toArray();
+        collections.forEach(collection => console.log(`   - ${collection.name}`));
         
         // Connection event listeners
         dbConnection.on('connected', () => {

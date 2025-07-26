@@ -27,7 +27,6 @@ import {
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import BlogService from '../../services/blog-service';
-import ResponsiveDebugger from '../../components/ui/ResponsiveDebugger';
 
 /**
  * Blog Detail Page Component
@@ -542,9 +541,6 @@ export default function BlogDetailPage() {
             </motion.section>
           )}
         </div>
-
-        {/* Responsive Debugger - Development Only */}
-        <ResponsiveDebugger />
       </div>
     </>
   );

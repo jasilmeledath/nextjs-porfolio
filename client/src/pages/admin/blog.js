@@ -34,7 +34,6 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import BlogService from '../../services/blog-service';
-import ResponsiveDebugger from '../../components/ui/ResponsiveDebugger';
 
 /**
  * Admin Blog Management Page Component
@@ -664,9 +663,6 @@ export default function AdminBlogPage() {
             )}
           </motion.div>
         </div>
-
-        {/* Responsive Debugger - Development Only */}
-        <ResponsiveDebugger />
       </div>
     </>
   );

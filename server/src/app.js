@@ -25,7 +25,8 @@ const notFoundHandler = require('./middleware/not-found-handler');
 // Import routes
 const authRoutes = require('./routes/auth-routes');
 const blogRoutes = require('./routes/blog-routes');
-// const portfolioRoutes = require('./routes/portfolio-routes');
+const portfolioRoutes = require('./routes/portfolio-routes');
+const portfolioManagementRoutes = require('./routes/portfolio-management-routes');
 // const adminRoutes = require('./routes/admin-routes');
 
 /**
@@ -145,13 +146,20 @@ const createApp = () => {
     // Mount routes
     app.use('/api/v1/auth', authRoutes);
     app.use('/api/v1/blogs', blogRoutes);
-    // app.use('/api/v1/portfolio', portfolioRoutes);
+    app.use('/api/v1/portfolio', portfolioRoutes);
+    app.use('/api/v1/portfolio-management', portfolioManagementRoutes);
     // app.use('/api/v1/admin', adminRoutes);
 
     // Static file serving for uploads
     app.use('/uploads', express.static('uploads', {
         maxAge: '1d',
         etag: false
+    }));
+
+    // Static file serving for public assets
+    app.use('/public', express.static('public', {
+        maxAge: '7d',
+        etag: true
     }));
 
     // Catch-all route for API documentation or frontend serving
