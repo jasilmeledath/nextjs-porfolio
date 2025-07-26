@@ -307,28 +307,28 @@ export default function AdminBlogPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 lg:mb-8"
           >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-              <div className="flex items-center space-x-4 mb-4 sm:mb-0">
+            <div className="flex flex-col space-y-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
+              <div className="flex items-center space-x-3 sm:space-x-4">
                 <Link 
                   href="/admin/dashboard"
-                  className="p-2 rounded-lg bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300 transition-all duration-300"
+                  className="p-2 rounded-lg bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300 transition-all duration-300 flex-shrink-0"
                 >
-                  <FiArrowLeft className="w-5 h-5" />
+                  <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-mono font-bold text-green-400 tracking-wider">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-mono font-bold text-green-400 tracking-wider truncate">
                     CONTENT_HUB
                   </h1>
-                  <p className="text-green-600 font-mono text-sm mt-1">
+                  <p className="text-green-600 font-mono text-xs sm:text-sm mt-1">
                     Blog Management System
                   </p>
                 </div>
               </div>
               <Link 
                 href="/admin/blog/create"
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-500/40 hover:border-green-500/60 rounded-lg text-green-300 hover:text-green-200 font-mono font-medium transition-all duration-300 group"
+                className="flex items-center justify-center space-x-2 px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30 border border-green-500/40 hover:border-green-500/60 rounded-lg text-green-300 hover:text-green-200 font-mono font-medium transition-all duration-300 group text-sm sm:text-base"
               >
-                <FiPlus className="w-4 h-4 group-hover:animate-pulse" />
+                <FiPlus className="w-4 h-4 group-hover:animate-pulse flex-shrink-0" />
                 <span>CREATE_POST</span>
               </Link>
             </div>
@@ -378,25 +378,25 @@ export default function AdminBlogPage() {
             transition={{ delay: 0.2 }}
             className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 p-4 sm:p-6 mb-6"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+            <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 lg:space-x-4">
               {/* Search */}
-              <div className="relative flex-1 max-w-md">
+              <div className="relative flex-1 max-w-full lg:max-w-md">
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search posts..."
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono focus:outline-none focus:border-green-500/40 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono focus:outline-none focus:border-green-500/40 transition-colors text-sm"
                 />
               </div>
 
               {/* Filters */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <select
                   value={filterStatus}
                   onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="px-3 py-2 bg-black/40 border border-green-500/20 rounded-lg text-green-300 font-mono focus:outline-none focus:border-green-500/40 transition-colors"
+                  className="flex-1 sm:flex-none px-3 py-2.5 bg-black/40 border border-green-500/20 rounded-lg text-green-300 font-mono focus:outline-none focus:border-green-500/40 transition-colors text-sm"
                 >
                   <option value="all">All Status</option>
                   <option value="published">Published</option>
@@ -406,7 +406,8 @@ export default function AdminBlogPage() {
 
                 <button
                   onClick={() => loadBlogs()}
-                  className="p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded-lg text-green-400 hover:text-green-300 transition-all duration-300"
+                  className="p-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded-lg text-green-400 hover:text-green-300 transition-all duration-300"
+                  title="Refresh"
                 >
                   <FiRefreshCw className="w-4 h-4" />
                 </button>
@@ -432,131 +433,229 @@ export default function AdminBlogPage() {
                 <div className="text-green-600 font-mono text-sm">Create your first blog post</div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-black/40 border-b border-green-500/20">
-                    <tr>
-                      <th className="text-left p-4 text-green-400 font-mono text-sm font-medium">TITLE</th>
-                      <th className="text-left p-4 text-green-400 font-mono text-sm font-medium hidden sm:table-cell">STATUS</th>
-                      <th className="text-left p-4 text-green-400 font-mono text-sm font-medium hidden md:table-cell">VIEWS</th>
-                      <th className="text-left p-4 text-green-400 font-mono text-sm font-medium hidden lg:table-cell">DATE</th>
-                      <th className="text-right p-4 text-green-400 font-mono text-sm font-medium">ACTIONS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {blogs.map((blog) => (
-                      <motion.tr
-                        key={blog._id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="border-b border-green-500/10 hover:bg-green-500/5 transition-colors group"
-                      >
-                        <td className="p-4">
-                          <div className="flex items-start space-x-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-green-300 font-mono font-medium truncate group-hover:text-green-200 transition-colors">
+              <>
+                {/* Desktop Table View - Hidden on mobile */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-black/40 border-b border-green-500/20">
+                      <tr>
+                        <th className="text-left p-4 text-green-400 font-mono text-sm font-medium">TITLE</th>
+                        <th className="text-left p-4 text-green-400 font-mono text-sm font-medium">STATUS</th>
+                        <th className="text-left p-4 text-green-400 font-mono text-sm font-medium">VIEWS</th>
+                        <th className="text-left p-4 text-green-400 font-mono text-sm font-medium">DATE</th>
+                        <th className="text-right p-4 text-green-400 font-mono text-sm font-medium">ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {blogs.map((blog) => (
+                        <motion.tr
+                          key={blog._id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="border-b border-green-500/10 hover:bg-green-500/5 transition-colors group"
+                        >
+                          <td className="p-4 max-w-xs">
+                            <div className="flex flex-col">
+                              <h3 className="text-green-300 font-mono font-medium group-hover:text-green-200 transition-colors line-clamp-2 leading-tight">
                                 {blog.title}
                               </h3>
-                              <p className="text-green-600 font-mono text-xs mt-1 truncate">
+                              <p className="text-green-600 font-mono text-xs mt-1 line-clamp-2 leading-relaxed">
                                 {blog.excerpt}
                               </p>
-                              <div className="flex items-center space-x-2 mt-2 sm:hidden">
-                                <span className={`px-2 py-1 rounded text-xs font-mono border ${getStatusBadge(blog.status)}`}>
-                                  {blog.status.toUpperCase()}
-                                </span>
-                                <span className="text-green-600 font-mono text-xs">
-                                  {blog.views} views
-                                </span>
-                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="p-4 hidden sm:table-cell">
-                          <span className={`px-2 py-1 rounded text-xs font-mono border ${getStatusBadge(blog.status)}`}>
-                            {blog.status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="p-4 hidden md:table-cell">
-                          <span className="text-green-400 font-mono text-sm">
-                            {blog.views.toLocaleString()}
-                          </span>
-                        </td>
-                        <td className="p-4 hidden lg:table-cell">
-                          <span className="text-green-600 font-mono text-xs">
-                            {formatDate(blog.createdAt)}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center justify-end space-x-2">
-                            {/* Preview Button */}
-                            {blog.status === 'published' && (
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2 py-1 rounded text-xs font-mono border ${getStatusBadge(blog.status)}`}>
+                              {blog.status.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className="text-green-400 font-mono text-sm">
+                              {blog.views.toLocaleString()}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className="text-green-600 font-mono text-xs">
+                              {formatDate(blog.createdAt)}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center justify-end space-x-2">
+                              {/* Preview Button */}
+                              {blog.status === 'published' && (
+                                <Link 
+                                  href={`/blog/${blog.slug}`}
+                                  target="_blank"
+                                  className="p-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 rounded text-purple-400 hover:text-purple-300 transition-all duration-300"
+                                  title="Preview Blog"
+                                >
+                                  <FiExternalLink className="w-3 h-3" />
+                                </Link>
+                              )}
+                              
+                              {/* Edit Button */}
                               <Link 
-                                href={`/blog/${blog.slug}`}
-                                target="_blank"
-                                className="p-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 rounded text-purple-400 hover:text-purple-300 transition-all duration-300"
-                                title="Preview Blog"
+                                href={`/admin/blog/edit/${blog._id}`}
+                                className="p-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded text-blue-400 hover:text-blue-300 transition-all duration-300"
+                                title="Edit Blog"
                               >
-                                <FiExternalLink className="w-3 h-3" />
+                                <FiEdit3 className="w-3 h-3" />
                               </Link>
-                            )}
-                            
-                            {/* Edit Button */}
-                            <Link 
-                              href={`/admin/blog/edit/${blog._id}`}
-                              className="p-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded text-blue-400 hover:text-blue-300 transition-all duration-300"
-                              title="Edit Blog"
-                            >
-                              <FiEdit3 className="w-3 h-3" />
-                            </Link>
-                            
-                            {/* Publish/Unpublish Button */}
-                            <button
-                              onClick={() => handleStatusToggle(blog._id, blog.status === 'published' ? 'draft' : 'published')}
-                              className={`p-2 rounded border transition-all duration-300 ${
-                                blog.status === 'published' 
-                                  ? 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 hover:text-yellow-300'
-                                  : 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300'
-                              }`}
-                              title={blog.status === 'published' ? 'Unpublish Blog' : 'Publish Blog'}
-                            >
-                              {blog.status === 'published' ? <FiEyeOff className="w-3 h-3" /> : <FiEye className="w-3 h-3" />}
-                            </button>
-                            
-                            {/* Delete Button */}
-                            <button
-                              onClick={() => handleDeleteBlog(blog._id)}
-                              className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded text-red-400 hover:text-red-300 transition-all duration-300"
-                              title="Delete Blog"
-                            >
-                              <FiTrash2 className="w-3 h-3" />
-                            </button>
+                              
+                              {/* Publish/Unpublish Button */}
+                              <button
+                                onClick={() => handleStatusToggle(blog._id, blog.status === 'published' ? 'draft' : 'published')}
+                                className={`p-2 rounded border transition-all duration-300 ${
+                                  blog.status === 'published' 
+                                    ? 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 hover:text-yellow-300'
+                                    : 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300'
+                                }`}
+                                title={blog.status === 'published' ? 'Unpublish Blog' : 'Publish Blog'}
+                              >
+                                {blog.status === 'published' ? <FiEyeOff className="w-3 h-3" /> : <FiEye className="w-3 h-3" />}
+                              </button>
+                              
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleDeleteBlog(blog._id)}
+                                className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded text-red-400 hover:text-red-300 transition-all duration-300"
+                                title="Delete Blog"
+                              >
+                                <FiTrash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View - Visible on mobile and tablet */}
+                <div className="lg:hidden space-y-4 p-4">
+                  {blogs.map((blog) => (
+                    <motion.div
+                      key={blog._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-black/30 border border-green-500/20 rounded-lg p-4 hover:bg-green-500/5 transition-all duration-300"
+                    >
+                      {/* Blog Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0 mr-3">
+                          <h3 className="text-green-300 font-mono font-medium text-sm sm:text-base leading-tight mb-2">
+                            {blog.title}
+                          </h3>
+                          <p className="text-green-600 font-mono text-xs leading-relaxed line-clamp-3">
+                            {blog.excerpt}
+                          </p>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-mono border whitespace-nowrap ${getStatusBadge(blog.status)}`}>
+                          {blog.status.toUpperCase()}
+                        </span>
+                      </div>
+
+                      {/* Blog Meta */}
+                      <div className="flex items-center justify-between text-xs font-mono mb-4">
+                        <div className="flex items-center space-x-4 text-green-600">
+                          <div className="flex items-center space-x-1">
+                            <FiTrendingUp className="w-3 h-3" />
+                            <span>{blog.views} views</span>
                           </div>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          <div className="flex items-center space-x-1">
+                            <FiCalendar className="w-3 h-3" />
+                            <span>{formatDate(blog.createdAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-end space-x-2">
+                        {/* Preview Button */}
+                        {blog.status === 'published' && (
+                          <Link 
+                            href={`/blog/${blog.slug}`}
+                            target="_blank"
+                            className="flex items-center space-x-1 px-3 py-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 rounded text-purple-400 hover:text-purple-300 transition-all duration-300 text-xs font-mono"
+                          >
+                            <FiExternalLink className="w-3 h-3" />
+                            <span className="hidden sm:inline">Preview</span>
+                          </Link>
+                        )}
+                        
+                        {/* Edit Button */}
+                        <Link 
+                          href={`/admin/blog/edit/${blog._id}`}
+                          className="flex items-center space-x-1 px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded text-blue-400 hover:text-blue-300 transition-all duration-300 text-xs font-mono"
+                        >
+                          <FiEdit3 className="w-3 h-3" />
+                          <span className="hidden sm:inline">Edit</span>
+                        </Link>
+                        
+                        {/* Publish/Unpublish Button */}
+                        <button
+                          onClick={() => handleStatusToggle(blog._id, blog.status === 'published' ? 'draft' : 'published')}
+                          className={`flex items-center space-x-1 px-3 py-2 rounded border transition-all duration-300 text-xs font-mono ${
+                            blog.status === 'published' 
+                              ? 'bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 hover:text-yellow-300'
+                              : 'bg-green-500/10 hover:bg-green-500/20 border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300'
+                          }`}
+                        >
+                          {blog.status === 'published' ? <FiEyeOff className="w-3 h-3" /> : <FiEye className="w-3 h-3" />}
+                          <span className="hidden sm:inline">{blog.status === 'published' ? 'Hide' : 'Publish'}</span>
+                        </button>
+                        
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => handleDeleteBlog(blog._id)}
+                          className="flex items-center space-x-1 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded text-red-400 hover:text-red-300 transition-all duration-300 text-xs font-mono"
+                        >
+                          <FiTrash2 className="w-3 h-3" />
+                          <span className="hidden sm:inline">Delete</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </>
             )}
 
             {/* Pagination */}
             {!blogsLoading && blogs.length > 0 && totalPages > 1 && (
-              <div className="p-4 border-t border-green-500/20 flex items-center justify-between">
-                <div className="text-green-600 font-mono text-sm">
+              <div className="p-4 border-t border-green-500/20 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+                <div className="text-green-600 font-mono text-sm text-center sm:text-left">
                   Page {currentPage} of {totalPages}
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded text-green-400 hover:text-green-300 font-mono text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded text-green-400 hover:text-green-300 font-mono text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Prev
+                    Previous
                   </button>
+                  <div className="hidden sm:flex items-center space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-3 py-2 rounded font-mono text-sm transition-all duration-300 ${
+                            currentPage === pageNum
+                              ? 'bg-green-500/20 border border-green-500/40 text-green-300'
+                              : 'bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded text-green-400 hover:text-green-300 font-mono text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 rounded text-green-400 hover:text-green-300 font-mono text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
                   </button>
