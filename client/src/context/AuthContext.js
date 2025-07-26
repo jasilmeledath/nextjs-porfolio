@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
       // For development, set the admin token and then verify it normally
       if (process.env.NODE_ENV === 'development' && !token) {
         // Set the real admin token for development
-        const devToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI2ODM4MGY5MzE0ZTk4YTJjOWI5NWFhNyIsImVtYWlsIjoiamFzaWxtZWxlZGF0aEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJwb3J0Zm9saW86cmVhZCIsInBvcnRmb2xpbzp3cml0ZSIsImJsb2c6cmVhZCIsImJsb2c6d3JpdGUiLCJibG9nOmRlbGV0ZSIsImNvbW1lbnRzOm1vZGVyYXRlIiwibWVkaWE6dXBsb2FkIiwibWVkaWE6ZGVsZXRlIiwiYW5hbHl0aWNzOnZpZXciLCJzZXR0aW5nczptYW5hZ2UiLCJ1c2VyczptYW5hZ2UiXSwiaWF0IjoxNzUzNTM4Mjc2LCJleHAiOjE3NTQxNDMwNzYsImF1ZCI6InBvcnRmb2xpby1mcm9udGVuZCIsImlzcyI6InBvcnRmb2xpby1hcGkifQ.HzRib08rDPcDuFoXh4_NnboQuME3-LSoNWBpFtzfbHo';
+        const devToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4MzgwZjkzMTRlOThhMmM5Yjk1YWE3IiwiZW1haWwiOiJqYXNpbG1lbGVkYXRoQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbInBvcnRmb2xpbzpyZWFkIiwicG9ydGZvbGlvOndyaXRlIiwiYmxvZzpyZWFkIiwiYmxvZzp3cml0ZSIsImJsb2c6ZGVsZXRlIiwiY29tbWVudHM6bW9kZXJhdGUiLCJtZWRpYTp1cGxvYWQiLCJtZWRpYTpkZWxldGUiLCJhbmFseXRpY3M6dmlldyIsInNldHRpbmdzOm1hbmFnZSIsInVzZXJzOm1hbmFnZSJdLCJpYXQiOjE3NTM1NDI0NDUsImV4cCI6MTc1NjEzNDQ0NSwiYXVkIjoicG9ydGZvbGlvLWZyb250ZW5kIiwiaXNzIjoicG9ydGZvbGlvLWFwaSJ9.xDHDfDwnHQ9JYgCHrpSXzps1aFXNHo6IkS7aoOPV5ZE';
         
         Cookies.set('auth_token', devToken, {
           expires: 7,

@@ -874,6 +874,28 @@ class PortfolioManagementController {
         location, companyUrl, technologies, achievements, order
       } = req.body;
       
+      // Parse JSON strings for arrays (sent from FormData)
+      let parsedTechnologies = [];
+      let parsedAchievements = [];
+      
+      if (technologies) {
+        try {
+          parsedTechnologies = typeof technologies === 'string' ? JSON.parse(technologies) : technologies;
+        } catch (e) {
+          console.warn('[Experience] Failed to parse technologies:', technologies);
+          parsedTechnologies = [];
+        }
+      }
+      
+      if (achievements) {
+        try {
+          parsedAchievements = typeof achievements === 'string' ? JSON.parse(achievements) : achievements;
+        } catch (e) {
+          console.warn('[Experience] Failed to parse achievements:', achievements);
+          parsedAchievements = [];
+        }
+      }
+      
       // Handle file uploads
       let companyLogo = null;
       
@@ -888,13 +910,13 @@ class PortfolioManagementController {
         description,
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
-        isCurrent: isCurrent || false,
+        isCurrent: isCurrent === 'true' || isCurrent === true,
         location,
         companyUrl,
         companyLogo,
-        technologies: technologies || [],
-        achievements: achievements || [],
-        order: order || 0
+        technologies: parsedTechnologies,
+        achievements: parsedAchievements,
+        order: parseInt(order) || 0
       });
       
       await newExperience.save();
@@ -931,6 +953,28 @@ class PortfolioManagementController {
         location, companyUrl, technologies, achievements, order
       } = req.body;
       
+      // Parse JSON strings for arrays (sent from FormData)
+      let parsedTechnologies = [];
+      let parsedAchievements = [];
+      
+      if (technologies) {
+        try {
+          parsedTechnologies = typeof technologies === 'string' ? JSON.parse(technologies) : technologies;
+        } catch (e) {
+          console.warn('[Experience] Failed to parse technologies:', technologies);
+          parsedTechnologies = [];
+        }
+      }
+      
+      if (achievements) {
+        try {
+          parsedAchievements = typeof achievements === 'string' ? JSON.parse(achievements) : achievements;
+        } catch (e) {
+          console.warn('[Experience] Failed to parse achievements:', achievements);
+          parsedAchievements = [];
+        }
+      }
+      
       // Find existing experience
       const existingExperience = await Experience.findOne({ _id: id, userId });
       if (!existingExperience) {
@@ -954,13 +998,13 @@ class PortfolioManagementController {
         description,
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
-        isCurrent,
+        isCurrent: isCurrent === 'true' || isCurrent === true,
         location,
         companyUrl,
         companyLogo,
-        technologies,
-        achievements,
-        order
+        technologies: parsedTechnologies,
+        achievements: parsedAchievements,
+        order: parseInt(order) || 0
       };
       
       const updatedExperience = await Experience.findOneAndUpdate(
