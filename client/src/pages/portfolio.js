@@ -31,6 +31,7 @@ import {
   FileText,
 } from "lucide-react"
 import { usePortfolioData } from "../hooks/usePortfolioData"
+import HangingIDCard from "../components/ui/HangingIDCard"
 
 export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("hero")
@@ -287,7 +288,7 @@ export default function PortfolioPage() {
             ? 'bg-black/20 border-white/10' 
             : 'bg-white/20 border-black/10'
         }`}>
-          <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="max-w-7xl mx-auto px-6 py-4 relative">
             <div className="flex items-center justify-between">
               <Link
                 href="/"
@@ -318,27 +319,29 @@ export default function PortfolioPage() {
                 ))}
               </div>
 
-              <motion.button
-                onClick={toggleDarkMode}
-                whileHover={{ scale: 1.1, rotate: 180 }}
-                whileTap={{ scale: 0.9 }}
-                className={`p-3 rounded-xl backdrop-blur-sm border transition-all duration-300 ${
-                  isClient && isDark 
-                    ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' 
-                    : 'bg-black/10 border-black/20 text-black hover:bg-black/20'
-                }`}
-              >
-                <div className="text-xl">{isClient && isDark ? "☀️" : "🌙"}</div>
-              </motion.button>
+              <div className="flex items-center space-x-4">
+                <motion.button
+                  onClick={toggleDarkMode}
+                  whileHover={{ scale: 1.1, rotate: 180 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`p-3 rounded-xl backdrop-blur-sm border transition-all duration-300 ${
+                    isClient && isDark 
+                      ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' 
+                      : 'bg-black/10 border-black/20 text-black hover:bg-black/20'
+                  }`}
+                >
+                  <div className="text-xl">{isClient && isDark ? "☀️" : "🌙"}</div>
+                </motion.button>
+              </div>
             </div>
           </div>
         </nav>
 
         {/* Hero Section */}
-        <section id="about" className="pt-32 pb-20 px-6">
+        <section id="about" className="pt-32 pb-20 px-6 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Content */}
+            <div className="grid lg:grid-cols-2 gap-16 items-start">
+              {/* Left Content */}
               <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="space-y-8">
                 <motion.div variants={fadeInUp}>
                   <motion.h1
@@ -421,65 +424,37 @@ export default function PortfolioPage() {
                 </motion.div>
               </motion.div>
 
-              {/* 3D Profile Section - Hidden on Mobile */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, rotateY: -30 }}
-                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                transition={{ duration: 1, delay: 0.3 }}
-                className="hidden lg:flex justify-center lg:justify-end"
-              >
-                <div className="relative">
-                  <motion.div
-                    style={{
-                      rotateY: heroRotateY,
-                      rotateX: heroRotateX,
-                    }}
-                    className="relative w-96 h-96 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-2 shadow-2xl"
-                  >
-                    <div className="w-full h-full rounded-full bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
-                      {personalInfo.profileImage || personalInfo.avatarUrl ? (
-                        <img 
-                          src={personalInfo.profileImage || personalInfo.avatarUrl || "/placeholder.svg"}
-                          alt={`${personalInfo.name} Avatar`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'block';
-                          }}
-                        />
-                      ) : null}
-                      <div className="text-8xl" style={{ display: personalInfo.profileImage || personalInfo.avatarUrl ? 'none' : 'block' }}>
-                        👨‍💻
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Floating tech badges */}
-                  {[
-                    { icon: Code, color: "from-cyan-400 to-blue-500", position: "top-4 right-4", delay: 0 },
-                    { icon: Database, color: "from-purple-400 to-pink-500", position: "bottom-4 left-4", delay: 0.5 },
-                    { icon: Server, color: "from-green-400 to-emerald-500", position: "top-1/2 -left-8", delay: 1 },
-                    { icon: Zap, color: "from-yellow-400 to-orange-500", position: "top-1/2 -right-8", delay: 1.5 },
-                  ].map(({ icon: Icon, color, position, delay }, index) => (
-                    <motion.div
-                      key={index}
-                      className={`absolute ${position} w-16 h-16 bg-gradient-to-br ${color} rounded-2xl flex items-center justify-center shadow-lg`}
-                      animate={{
-                        y: [-10, 10, -10],
-                        rotate: [0, 5, -5, 0],
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: "easeInOut",
-                        delay: delay,
-                      }}
-                    >
-                      <Icon className="w-8 h-8 text-white" />
-                    </motion.div>
-                  ))}
+              {/* Right Half - ID Card positioned in middle, aligned with name */}
+              <div className="hidden lg:flex justify-center items-start relative">
+                {/* Invisible Hanging Point - Maintains structure without visual element */}
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-10 opacity-0 pointer-events-none">
+                  <div className="w-4 h-4" />
                 </div>
-              </motion.div>
+
+                {/* ID Card Container - Scrollable with page, centered vertically */}
+                <motion.div
+                  initial={{ opacity: 0, y: -50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+                  className="relative pt-8" // Padding to maintain spacing
+                  style={{ 
+                    marginTop: '0px' // Align with the name level
+                  }}
+                >
+                  <HangingIDCard 
+                    personalInfo={personalInfo}
+                    isDark={isDark}
+                    physicsConfig={{
+                      gravity: 0.3,
+                      damping: 0.96,
+                      springStrength: 0.025,
+                      maxSwingAngle: 25,
+                      stringLength: 80, // String connects to hanging point above
+                      attachmentPoint: 'pinned-top'
+                    }}
+                  />
+                </motion.div>
+              </div>
             </div>
           </div>
         </section>
