@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
    */
   const checkAuth = async () => {
     try {
-      const token = Cookies.get('auth_token');
+      let token = Cookies.get('auth_token');
       
       if (!token) {
         setLoading(false);
@@ -49,23 +49,19 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // For development, create a mock admin user if no backend verification
-      if (process.env.NODE_ENV === 'development') {
-        // Mock admin user for development
-        const mockUser = {
-          id: 1,
-          email: 'admin@portfolio.com',
-          firstName: 'Admin',
-          lastName: 'User',
-          role: 'admin',
-          isAdmin: true,
-          permissions: ['portfolio:write', 'blog:write', 'blog:delete', 'comments:moderate', 'media:upload', 'analytics:view', 'settings:manage']
-        };
+      // For development, set the admin token and then verify it normally
+      if (process.env.NODE_ENV === 'development' && !token) {
+        // Set the real admin token for development
+        const devToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI2ODM4MGY5MzE0ZTk4YTJjOWI5NWFhNyIsImVtYWlsIjoiamFzaWxtZWxlZGF0aEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJwb3J0Zm9saW86cmVhZCIsInBvcnRmb2xpbzp3cml0ZSIsImJsb2c6cmVhZCIsImJsb2c6d3JpdGUiLCJibG9nOmRlbGV0ZSIsImNvbW1lbnRzOm1vZGVyYXRlIiwibWVkaWE6dXBsb2FkIiwibWVkaWE6ZGVsZXRlIiwiYW5hbHl0aWNzOnZpZXciLCJzZXR0aW5nczptYW5hZ2UiLCJ1c2VyczptYW5hZ2UiXSwiaWF0IjoxNzUzNTM4Mjc2LCJleHAiOjE3NTQxNDMwNzYsImF1ZCI6InBvcnRmb2xpby1mcm9udGVuZCIsImlzcyI6InBvcnRmb2xpby1hcGkifQ.HzRib08rDPcDuFoXh4_NnboQuME3-LSoNWBpFtzfbHo';
         
-        setUser(mockUser);
-        setLoading(false);
-        setInitialized(true);
-        return;
+        Cookies.set('auth_token', devToken, {
+          expires: 7,
+          secure: false,
+          sameSite: 'strict'
+        });
+        
+        token = devToken;
+        console.log('[Auth] Development mode: Set admin token for verification');
       }
 
       // Verify token with backend

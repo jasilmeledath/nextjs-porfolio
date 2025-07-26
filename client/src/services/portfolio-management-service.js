@@ -1,5 +1,12 @@
 /**
- * @fileoverview Portfolio Management Service - API Integration
+ * @fileoverview Portfo    // In development mode, if no token is found, use the real admin token for testing
+    if (!token && process.env.NODE_ENV === 'development') {
+      console.log('[PortfolioManagementService] Using real admin token for development testing');
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM4MGY5MzE0ZTk4YTJjOWI5NWFhNyIsImVtYWlsIjoiamFzaWxtZWxlZGF0aEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJwb3J0Zm9saW86cmVhZCIsInBvcnRmb2xpbzp3cml0ZSIsImJsb2c6cmVhZCIsImJsb2c6d3JpdGUiLCJibG9nOmRlbGV0ZSIsImNvbW1lbnRzOm1vZGVyYXRlIiwibWVkaWE6dXBsb2FkIiwibWVkaWE6ZGVsZXRlIiwiYW5hbHl0aWNzOnZpZXciLCJzZXR0aW5nczptYW5hZ2UiLCJ1c2VyczptYW5hZ2UiXSwiaWF0IjoxNzUzNTM4Mjc2LCJleHAiOjE3NTQxNDMwNzYsImF1ZCI6InBvcnRmb2xpby1mcm9udGVuZCIsImlzcyI6InBvcnRmb2xpby1hcGkifQ.HzRib08rDPcDuFoXh4_NnboQuME3-LSoNWBpFtzfbHo'
+      };
+    }gement Service - API Integration
  * @author Professional Developer <dev@portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
@@ -25,12 +32,12 @@ class PortfolioManagementService {
     // Get token from cookies (matches AuthContext implementation)
     const token = typeof window !== 'undefined' ? Cookies.get('auth_token') : null;
     
-    // In development mode, if no token is found, use a mock admin token
+    // In development mode, if no token is found, use the real admin token for testing
     if (!token && process.env.NODE_ENV === 'development') {
-      console.log('[PortfolioManagementService] Using mock admin token for development');
+      console.log('[PortfolioManagementService] Using real admin token for development testing');
       return {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer mock-admin-token'
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM4MGY5MzE0ZTk4YTJjOWI5NWFhNyIsImVtYWlsIjoiamFzaWxtZWxlZGF0aEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJwb3J0Zm9saW86cmVhZCIsInBvcnRmb2xpbzp3cml0ZSIsImJsb2c6cmVhZCIsImJsb2c6d3JpdGUiLCJibG9nOmRlbGV0ZSIsImNvbW1lbnRzOm1vZGVyYXRlIiwibWVkaWE6dXBsb2FkIiwibWVkaWE6ZGVsZXRlIiwiYW5hbHl0aWNzOnZpZXciLCJzZXR0aW5nczptYW5hZ2UiLCJ1c2VyczptYW5hZ2UiXSwiaWF0IjoxNzUzNTM3NjA3LCJleHAiOjE3NTQxNDI0MDcsImF1ZCI6InBvcnRmb2xpby1mcm9udGVuZCIsImlzcyI6InBvcnRmb2xpby1hcGkifQ.7Kn2AtQR4MvkOVKNpyXOjH9vX3F6onCfKWRcZVQ_z4Y'
       };
     }
     
