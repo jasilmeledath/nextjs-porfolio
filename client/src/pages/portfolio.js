@@ -30,6 +30,7 @@ import {
   Terminal,
   FileText,
 } from "lucide-react"
+import { usePortfolioData } from "../hooks/usePortfolioData"
 
 export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("hero")
@@ -37,6 +38,18 @@ export default function PortfolioPage() {
   const [isDark, setIsDark] = useState(true)
   const [isClient, setIsClient] = useState(false)
   const containerRef = useRef(null)
+
+  // Load portfolio data from backend
+  const { portfolioData, loading, error } = usePortfolioData()
+  const { personalInfo, socialLinks, skills, projects, experience } = portfolioData
+
+  // Debug log for projects
+  useEffect(() => {
+    if (projects.length > 0) {
+      console.log('Projects loaded:', projects.length);
+      console.log('First project image:', projects[0]?.image);
+    }
+  }, [projects]);
 
   // Enhanced scroll animations
   const { scrollY } = useScroll()
@@ -48,6 +61,20 @@ export default function PortfolioPage() {
   const springConfig = { stiffness: 150, damping: 15 }
   const mouseX = useSpring(0, springConfig)
   const mouseY = useSpring(0, springConfig)
+
+  // Transform values for 3D animations
+  const mouseTransformX1 = useTransform(mouseX, [-20, 20], [-100, 100])
+  const mouseTransformY1 = useTransform(mouseY, [-20, 20], [-100, 100])
+  const mouseRotateX1 = useTransform(mouseY, [-20, 20], [10, -10])
+  const mouseRotateY1 = useTransform(mouseX, [-20, 20], [-10, 10])
+  
+  const mouseTransformX2 = useTransform(mouseX, [-20, 20], [50, -50])
+  const mouseTransformY2 = useTransform(mouseY, [-20, 20], [50, -50])
+  const mouseRotateX2 = useTransform(mouseY, [-20, 20], [-10, 10])
+  const mouseRotateY2 = useTransform(mouseX, [-20, 20], [10, -10])
+  
+  const heroRotateY = useTransform(mouseX, [-20, 20], [-10, 10])
+  const heroRotateX = useTransform(mouseY, [-20, 20], [5, -5])
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -133,75 +160,36 @@ export default function PortfolioPage() {
     },
   }
 
-  // Sample data
-  const personalInfo = {
-    name: "Professional Developer",
-    title: "Full Stack Developer & Tech Innovator",
-    location: "San Francisco, CA",
-    email: "hello@developer.com",
-    phone: "+1 (555) 123-4567",
-    description:
-      "Passionate full-stack developer with 5+ years of experience building scalable web applications. I love turning complex problems into simple, beautiful solutions that make a real impact.",
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-400 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/70 text-lg font-mono">Loading portfolio...</p>
+        </div>
+      </div>
+    )
   }
 
-  const skills = {
-    frontend: [
-      { name: "React", level: 95, icon: "⚛️" },
-      { name: "Next.js", level: 90, icon: "▲" },
-      { name: "TypeScript", level: 88, icon: "📘" },
-      { name: "Tailwind CSS", level: 92, icon: "🎨" },
-    ],
-    backend: [
-      { name: "Node.js", level: 90, icon: "🟢" },
-      { name: "Python", level: 85, icon: "🐍" },
-      { name: "GraphQL", level: 80, icon: "📊" },
-      { name: "PostgreSQL", level: 85, icon: "🐘" },
-    ],
-    tools: [
-      { name: "Docker", level: 82, icon: "🐳" },
-      { name: "AWS", level: 78, icon: "☁️" },
-      { name: "Git", level: 95, icon: "📝" },
-      { name: "Figma", level: 75, icon: "🎯" },
-    ],
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h2 className="text-white text-2xl mb-2">Failed to load portfolio</h2>
+          <p className="text-white/70 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
   }
-
-  const projects = [
-    {
-      id: 1,
-      title: "AI-Powered E-Commerce Platform",
-      description:
-        "Full-stack MERN application with AI recommendations, real-time inventory, and advanced analytics dashboard.",
-      tech: ["React", "Node.js", "MongoDB", "TensorFlow", "Stripe"],
-      image: "/placeholder.svg?height=300&width=500",
-      liveUrl: "https://demo.example.com",
-      githubUrl: "https://github.com/yourusername/ecommerce",
-      featured: true,
-      stats: { users: "10K+", performance: "99.9%", rating: 4.9 },
-    },
-    {
-      id: 2,
-      title: "Real-Time Collaboration Suite",
-      description: "WebRTC-powered collaboration platform with video calls, shared whiteboards, and document editing.",
-      tech: ["Next.js", "Socket.io", "WebRTC", "Redis", "PostgreSQL"],
-      image: "/placeholder.svg?height=300&width=500",
-      liveUrl: "https://collab.example.com",
-      githubUrl: "https://github.com/yourusername/collab",
-      featured: true,
-      stats: { users: "5K+", performance: "98.5%", rating: 4.8 },
-    },
-    {
-      id: 3,
-      title: "3D Portfolio Terminal",
-      description:
-        "Interactive terminal-based portfolio with 3D animations, multiple themes, and command-line interface.",
-      tech: ["React", "Three.js", "Framer Motion", "TypeScript"],
-      image: "/placeholder.svg?height=300&width=500",
-      liveUrl: "/terminal",
-      githubUrl: "https://github.com/yourusername/portfolio",
-      featured: true,
-      stats: { users: "2K+", performance: "100%", rating: 5.0 },
-    },
-  ]
 
   return (
     <>
@@ -226,10 +214,10 @@ export default function PortfolioPage() {
           {/* Animated geometric shapes */}
           <motion.div
             style={{
-              x: useTransform(mouseX, [-20, 20], [-100, 100]),
-              y: useTransform(mouseY, [-20, 20], [-100, 100]),
-              rotateX: useTransform(mouseY, [-20, 20], [10, -10]),
-              rotateY: useTransform(mouseX, [-20, 20], [-10, 10]),
+              x: mouseTransformX1,
+              y: mouseTransformY1,
+              rotateX: mouseRotateX1,
+              rotateY: mouseRotateY1,
             }}
             className="absolute top-1/4 left-1/4 w-96 h-96 opacity-30"
           >
@@ -242,10 +230,10 @@ export default function PortfolioPage() {
 
           <motion.div
             style={{
-              x: useTransform(mouseX, [-20, 20], [50, -50]),
-              y: useTransform(mouseY, [-20, 20], [50, -50]),
-              rotateX: useTransform(mouseY, [-20, 20], [-10, 10]),
-              rotateY: useTransform(mouseX, [-20, 20], [10, -10]),
+              x: mouseTransformX2,
+              y: mouseTransformY2,
+              rotateX: mouseRotateX2,
+              rotateY: mouseRotateY2,
             }}
             className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-30"
           >
@@ -435,8 +423,8 @@ export default function PortfolioPage() {
                 <div className="relative">
                   <motion.div
                     style={{
-                      rotateY: useTransform(mouseX, [-20, 20], [-10, 10]),
-                      rotateX: useTransform(mouseY, [-20, 20], [5, -5]),
+                      rotateY: heroRotateY,
+                      rotateX: heroRotateX,
                     }}
                     className="relative w-96 h-96 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 p-2 shadow-2xl"
                   >
@@ -523,11 +511,16 @@ export default function PortfolioPage() {
                         {category === "frontend" && <Smartphone className="w-6 h-6 text-white" />}
                         {category === "backend" && <Server className="w-6 h-6 text-white" />}
                         {category === "tools" && <Database className="w-6 h-6 text-white" />}
+                        {category === "design" && <Code className="w-6 h-6 text-white" />}
                       </div>
                       <h3 className={`text-2xl font-bold capitalize ${
                         isDark ? 'text-white' : 'text-gray-900'
                       }`}>
-                        {category === "frontend" ? "Frontend" : category === "backend" ? "Backend" : "Tools & DevOps"}
+                        {category === "frontend" ? "Frontend" : 
+                         category === "backend" ? "Backend" : 
+                         category === "tools" ? "Tools & DevOps" :
+                         category === "design" ? "Design" :
+                         category.charAt(0).toUpperCase() + category.slice(1)}
                       </h3>
                     </div>
 
@@ -635,6 +628,14 @@ export default function PortfolioPage() {
                         src={project.image || "/placeholder.svg"}
                         alt={project.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        crossOrigin="anonymous"
+                        onError={(e) => {
+                          console.error('Image failed to load:', e.target.src);
+                          e.target.src = "/placeholder.svg";
+                        }}
+                        onLoad={() => {
+                          console.log('Image loaded successfully:', project.image);
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       <div className="absolute top-4 right-4 flex space-x-2">
@@ -845,7 +846,7 @@ export default function PortfolioPage() {
           isDark ? 'border-white/10' : 'border-black/10'
         }`}>
           <div className="max-w-7xl mx-auto text-center">
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>© 2025 Professional Developer. Built with Next.js, Framer Motion, and ❤️</p>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'}`}>© 2025 Jasil Meledath. Built with Next.js, Framer Motion, and ❤️</p>
           </div>
         </footer>
       </div>

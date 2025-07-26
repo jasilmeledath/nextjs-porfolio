@@ -105,11 +105,21 @@ export default function AdminPortfolioPage() {
   const loadPortfolioData = async () => {
     try {
       setPortfolioLoading(true);
-      const response = await PortfolioManagementService.getPortfolio();
-      if (response.success) {
-        setPortfolioData(response.data);
+      
+      // Get both complete portfolio data and statistics
+      const [statsResponse, portfolioResponse] = await Promise.all([
+        PortfolioManagementService.getPortfolioStats(),
+        PortfolioManagementService.getCompletePortfolio()
+      ]);
+      
+      if (statsResponse.success && portfolioResponse.success) {
+        // Merge statistics with portfolio data
+        setPortfolioData({
+          ...portfolioResponse.data,
+          stats: statsResponse.data
+        });
       } else {
-        toast.error(response.message || 'Failed to load portfolio data');
+        toast.error('Failed to load portfolio data');
       }
     } catch (error) {
       console.error('[Portfolio] Error loading portfolio data:', error);
@@ -282,7 +292,7 @@ export default function AdminPortfolioPage() {
                     <span className="text-xs font-mono text-blue-600">PROJECTS</span>
                   </div>
                   <div className="text-2xl font-mono font-bold text-blue-400 mb-2">
-                    {portfolioData?.projects?.length || 0}
+                    {portfolioData?.stats?.projects || 0}
                   </div>
                   <div className="text-xs text-blue-600 font-mono">
                     Active Projects
@@ -297,7 +307,7 @@ export default function AdminPortfolioPage() {
                     <span className="text-xs font-mono text-green-600">SKILLS</span>
                   </div>
                   <div className="text-2xl font-mono font-bold text-green-400 mb-2">
-                    {portfolioData?.skills?.length || 0}
+                    {portfolioData?.stats?.skills || 0}
                   </div>
                   <div className="text-xs text-green-600 font-mono">
                     Technical Skills
@@ -312,7 +322,7 @@ export default function AdminPortfolioPage() {
                     <span className="text-xs font-mono text-purple-600">EXPERIENCE</span>
                   </div>
                   <div className="text-2xl font-mono font-bold text-purple-400 mb-2">
-                    {portfolioData?.experience?.length || 0}
+                    {portfolioData?.stats?.experience || 0}
                   </div>
                   <div className="text-xs text-purple-600 font-mono">
                     Work Experience
@@ -327,7 +337,7 @@ export default function AdminPortfolioPage() {
                     <span className="text-xs font-mono text-yellow-600">SOCIAL</span>
                   </div>
                   <div className="text-2xl font-mono font-bold text-yellow-400 mb-2">
-                    {portfolioData?.socialLinks?.length || 0}
+                    {portfolioData?.stats?.socialLinks || 0}
                   </div>
                   <div className="text-xs text-yellow-600 font-mono">
                     Social Links

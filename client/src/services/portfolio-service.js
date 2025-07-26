@@ -60,6 +60,31 @@ class PortfolioService {
   }
 
   /**
+   * Make a generic API request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} options - Fetch options
+   * @returns {Promise<Object>} API response
+   */
+  static async makeRequest(endpoint, options = {}) {
+    try {
+      const url = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
+
+      return await this.handleResponse(response, false);
+    } catch (error) {
+      console.error('[PortfolioService] API request error:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all portfolio projects with filtering and pagination
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} API response with projects and pagination
@@ -377,6 +402,191 @@ class PortfolioService {
       console.error('[PortfolioService] Error fetching related projects:', error);
       throw error;
     }
+  }
+
+  // ==================== PUBLIC VISITOR METHODS ====================
+
+  /**
+   * Get complete portfolio data for visitor mode
+   * @returns {Promise<Object>} Complete portfolio data
+   */
+  static async getVisitorPortfolio() {
+    try {
+      const response = await this.makeRequest('/portfolio/visitor');
+      return response;
+    } catch (error) {
+      console.error('[PortfolioService] Error fetching visitor portfolio:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get public personal information
+   * @returns {Promise<Object>} Personal info data
+   */
+  static async getPublicPersonalInfo() {
+    try {
+      const response = await this.makeRequest('/portfolio/personal-info');
+      return response;
+    } catch (error) {
+      console.error('[PortfolioService] Error fetching personal info:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get public skills
+   * @returns {Promise<Object>} Skills data
+   */
+  static async getPublicSkills() {
+    try {
+      const response = await this.makeRequest('/portfolio/skills');
+      return response;
+    } catch (error) {
+      console.error('[PortfolioService] Error fetching skills:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get public experience
+   * @returns {Promise<Object>} Experience data
+   */
+  static async getPublicExperience() {
+    try {
+      const response = await this.makeRequest('/portfolio/experience');
+      return response;
+    } catch (error) {
+      console.error('[PortfolioService] Error fetching experience:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get public social links
+   * @returns {Promise<Object>} Social links data
+   */
+  static async getPublicSocialLinks() {
+    try {
+      const response = await this.makeRequest('/portfolio/social-links');
+      return response;
+    } catch (error) {
+      console.error('[PortfolioService] Error fetching social links:', error);
+      throw error;
+    }
+  }
+
+  // ==================== UTILITY METHODS ====================
+
+  /**
+   * Get file URL for uploads
+   * @param {string} filename - File name
+   * @param {string} folder - Folder name (avatars, projects, etc.)
+   * @returns {string} Full file URL
+   */
+  static getFileUrl(filename, folder = '') {
+    if (!filename) return null;
+    if (filename.startsWith('http')) return filename; // Already full URL
+    
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    return `${baseUrl}/uploads/${folder ? folder + '/' : ''}${filename}`;
+  }
+
+  /**
+   * Process skills data to group by category
+   * @param {Array} skills - Raw skills array
+   * @returns {Object} Grouped skills by category
+   */
+  static processSkillsData(skills) {
+    if (!Array.isArray(skills)) return {};
+    
+    return skills.reduce((acc, skill) => {
+      if (!acc[skill.category]) {
+        acc[skill.category] = [];
+      }
+      acc[skill.category].push({
+        name: skill.name,
+        level: skill.level,
+        icon: skill.icon || '🔧'
+      });
+      return acc;
+    }, {});
+  }
+
+  /**
+   * Process projects data for display
+   * @param {Array} projects - Raw projects array
+   * @returns {Array} Processed projects
+   */
+  static processProjectsData(projects) {
+    if (!Array.isArray(projects)) return [];
+    
+    return projects.map(project => {
+      const processedProject = {
+        id: project._id || project.id,
+        title: project.title,
+        description: project.description,
+        tech: (project.technologies || []).map(tech => typeof tech === 'string' ? tech : tech.name),
+        image: project.thumbnailImage || "/placeholder.svg",
+        liveUrl: project.liveUrl,
+        githubUrl: project.githubUrl,
+        featured: project.isFeatured,
+        category: project.category,
+        status: project.status,
+        stats: project.stats || {
+          users: '0',
+          performance: '97%',
+          rating: 5,
+          uptime: '99.9%',
+          githubStars: 0,
+          deployments: 0
+        }
+      };
+      
+      console.log('Processed project image URL:', processedProject.image);
+      return processedProject;
+    });
+  }
+
+  /**
+   * Process experience data for display
+   * @param {Array} experience - Raw experience array
+   * @returns {Array} Processed experience
+   */
+  static processExperienceData(experience) {
+    if (!Array.isArray(experience)) return [];
+    
+    return experience.map(exp => ({
+      id: exp._id || exp.id,
+      company: exp.company,
+      position: exp.position,
+      location: exp.location,
+      description: exp.description,
+      startDate: exp.startDate,
+      endDate: exp.endDate,
+      isCurrent: exp.isCurrent,
+      achievements: exp.achievements || [],
+      technologies: exp.technologies || []
+    }));
+  }
+
+  /**
+   * Process social links data for display
+   * @param {Array} socialLinks - Raw social links array
+   * @returns {Array} Processed social links
+   */
+  static processSocialLinksData(socialLinks) {
+    if (!Array.isArray(socialLinks)) return [];
+    
+    return socialLinks
+      .filter(link => link.isActive)
+      .sort((a, b) => a.order - b.order)
+      .map(link => ({
+        id: link._id || link.id,
+        platform: link.platform,
+        url: link.url,
+        username: link.username
+      }));
   }
 }
 

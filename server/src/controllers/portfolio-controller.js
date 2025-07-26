@@ -478,6 +478,174 @@ class PortfolioController {
       next(error);
     }
   }
+
+  // ==================== PUBLIC VISITOR METHODS ====================
+
+  /**
+   * Get complete portfolio data for visitor mode
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getVisitorPortfolio(req, res, next) {
+    try {
+      // Get the first admin user (portfolio owner)
+      const User = require('../models/User');
+      const PersonalInfo = require('../models/PersonalInfo');
+      const SocialLink = require('../models/SocialLink');
+      const Skill = require('../models/Skill');
+      const Project = require('../models/Project');
+      const Experience = require('../models/Experience');
+
+      const portfolioOwner = await User.findOne({ role: 'admin' });
+      if (!portfolioOwner) {
+        throw new CustomError('Portfolio owner not found', HTTP_STATUS.NOT_FOUND);
+      }
+
+      const userId = portfolioOwner._id;
+
+      // Get all portfolio data
+      const [
+        personalInfo,
+        socialLinks,
+        skills,
+        projects,
+        experience
+      ] = await Promise.all([
+        PersonalInfo.findOne({ userId }),
+        SocialLink.find({ userId, isActive: true }).sort({ order: 1 }),
+        Skill.find({ userId, isActive: true }).sort({ proficiency: -1, name: 1 }),
+        Project.find({ userId, isActive: true }).sort({ priority: -1, createdAt: -1 }),
+        Experience.find({ userId }).sort({ startDate: -1 })
+      ]);
+
+      const portfolioData = {
+        personalInfo,
+        socialLinks,
+        skills,
+        projects,
+        experience
+      };
+
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(portfolioData, 'Visitor portfolio data retrieved successfully')
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get public personal information
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getPublicPersonalInfo(req, res, next) {
+    try {
+      const User = require('../models/User');
+      const PersonalInfo = require('../models/PersonalInfo');
+
+      const portfolioOwner = await User.findOne({ role: 'admin' });
+      if (!portfolioOwner) {
+        throw new CustomError('Portfolio owner not found', HTTP_STATUS.NOT_FOUND);
+      }
+
+      const personalInfo = await PersonalInfo.findOne({ userId: portfolioOwner._id });
+
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(personalInfo, 'Personal information retrieved successfully')
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get public skills
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getPublicSkills(req, res, next) {
+    try {
+      const User = require('../models/User');
+      const Skill = require('../models/Skill');
+
+      const portfolioOwner = await User.findOne({ role: 'admin' });
+      if (!portfolioOwner) {
+        throw new CustomError('Portfolio owner not found', HTTP_STATUS.NOT_FOUND);
+      }
+
+      const skills = await Skill.find({ 
+        userId: portfolioOwner._id, 
+        isActive: true 
+      }).sort({ proficiency: -1, name: 1 });
+
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(skills, 'Skills retrieved successfully')
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get public experience
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getPublicExperience(req, res, next) {
+    try {
+      const User = require('../models/User');
+      const Experience = require('../models/Experience');
+
+      const portfolioOwner = await User.findOne({ role: 'admin' });
+      if (!portfolioOwner) {
+        throw new CustomError('Portfolio owner not found', HTTP_STATUS.NOT_FOUND);
+      }
+
+      const experience = await Experience.find({ 
+        userId: portfolioOwner._id 
+      }).sort({ startDate: -1 });
+
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(experience, 'Experience retrieved successfully')
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get public social links
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getPublicSocialLinks(req, res, next) {
+    try {
+      const User = require('../models/User');
+      const SocialLink = require('../models/SocialLink');
+
+      const portfolioOwner = await User.findOne({ role: 'admin' });
+      if (!portfolioOwner) {
+        throw new CustomError('Portfolio owner not found', HTTP_STATUS.NOT_FOUND);
+      }
+
+      const socialLinks = await SocialLink.find({ 
+        userId: portfolioOwner._id, 
+        isActive: true 
+      }).sort({ order: 1 });
+
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(socialLinks, 'Social links retrieved successfully')
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = PortfolioController;

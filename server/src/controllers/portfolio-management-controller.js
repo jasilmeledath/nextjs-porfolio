@@ -37,10 +37,31 @@ class PortfolioManagementController {
     try {
       const userId = req.user.id;
       
-      const portfolioData = await Portfolio.getCompletePortfolio(userId);
+      // Get all portfolio data
+      const [
+        personalInfo,
+        socialLinks,
+        skills,
+        projects,
+        experience
+      ] = await Promise.all([
+        PersonalInfo.findOne({ userId }),
+        SocialLink.find({ userId }).sort({ order: 1 }),
+        Skill.find({ userId, isActive: true }).sort({ proficiency: -1, name: 1 }),
+        Project.find({ userId, isActive: true }).sort({ priority: -1, createdAt: -1 }),
+        Experience.find({ userId }).sort({ startDate: -1 })
+      ]);
+
+      const portfolioData = {
+        personalInfo,
+        socialLinks,
+        skills,
+        projects,
+        experience
+      };
       
       return res.status(HTTP_STATUS.SUCCESS).json(
-        ApiResponse.success('Portfolio data retrieved successfully', portfolioData)
+        ApiResponse.success(portfolioData, 'Portfolio data retrieved successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Get complete portfolio error:', error);
@@ -97,7 +118,7 @@ class PortfolioManagementController {
       };
       
       return res.status(HTTP_STATUS.SUCCESS).json(
-        ApiResponse.success('Portfolio statistics retrieved successfully', stats)
+        ApiResponse.success(stats, 'Portfolio statistics retrieved successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Get portfolio stats error:', error);
@@ -288,7 +309,7 @@ class PortfolioManagementController {
       const socialLinks = await SocialLink.find({ userId }).sort({ order: 1 });
       
       return res.status(HTTP_STATUS.SUCCESS).json(
-        ApiResponse.success('Social links retrieved successfully', socialLinks)
+        ApiResponse.success(socialLinks, 'Social links retrieved successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Get social links error:', error);
@@ -319,7 +340,7 @@ class PortfolioManagementController {
       await newSocialLink.save();
       
       return res.status(HTTP_STATUS.CREATED).json(
-        ApiResponse.success('Social link created successfully', newSocialLink)
+        ApiResponse.success(newSocialLink, 'Social link created successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Create social link error:', error);
@@ -362,7 +383,7 @@ class PortfolioManagementController {
       }
       
       return res.status(HTTP_STATUS.SUCCESS).json(
-        ApiResponse.success('Social link updated successfully', updatedSocialLink)
+        ApiResponse.success(updatedSocialLink, 'Social link updated successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Update social link error:', error);

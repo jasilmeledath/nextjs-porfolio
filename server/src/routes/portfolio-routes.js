@@ -50,6 +50,44 @@ router.get('/stats', authenticate, requireAdmin, PortfolioController.getPortfoli
 router.get('/metadata', PortfolioController.getMetadata);
 
 /**
+ * @route GET /api/v1/portfolio/visitor
+ * @desc Get complete portfolio data for visitor mode
+ * @access Public
+ */
+router.get('/visitor', PortfolioController.getVisitorPortfolio);
+
+/**
+ * @route GET /api/v1/portfolio/personal-info
+ * @desc Get personal information
+ * @access Public
+ */
+router.get('/personal-info', PortfolioController.getPublicPersonalInfo);
+
+/**
+ * @route GET /api/v1/portfolio/skills
+ * @desc Get skills
+ * @access Public
+ */
+router.get('/skills', PortfolioController.getPublicSkills);
+
+/**
+ * @route GET /api/v1/portfolio/experience
+ * @desc Get experience
+ * @access Public
+ */
+router.get('/experience', PortfolioController.getPublicExperience);
+
+/**
+ * @route GET /api/v1/portfolio/social-links
+ * @desc Get social links
+ * @access Public
+ */
+router.get('/social-links', PortfolioController.getPublicSocialLinks);
+
+/**
+ * @route GET /api/v1/portfolio/slug/:slug
+
+/**
  * @route GET /api/v1/portfolio/category/:category
  * @desc Get projects by category
  * @access Public
