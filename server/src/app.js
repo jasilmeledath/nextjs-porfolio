@@ -161,17 +161,31 @@ const createApp = () => {
             process.env.FRONTEND_URL
         ].filter(Boolean);
         
+        // More permissive CORS for image requests
         if (!origin || allowedOrigins.includes(origin)) {
             res.setHeader('Access-Control-Allow-Origin', origin || '*');
             res.setHeader('Access-Control-Allow-Credentials', 'true');
-            res.setHeader('Access-Control-Allow-Methods', 'GET');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        }
+        
+        // Set cache headers for images
+        if (req.url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+            res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
         }
         
         next();
     }, express.static('uploads', {
         maxAge: '1d',
-        etag: false
+        etag: true,
+        setHeaders: (res, path, stat) => {
+            // Additional headers for images
+            if (path.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            }
+        }
     }));
 
     // Static file serving for public assets

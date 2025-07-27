@@ -398,31 +398,52 @@ export default function PortfolioPage() {
             }`}
           />
 
-          {/* Floating tech icons - Only render on client to prevent hydration mismatch */}
-          {isClient && [...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute text-2xl opacity-20"
-              style={{
-                left: `${(i * 7.3) % 100}%`,
-                top: `${(i * 11.2) % 100}%`,
-              }}
-              animate={{
-                y: [-30, 30, -30],
-                x: [-20, 20, -20],
-                rotate: [0, 360, 0],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: 8 + (i % 4),
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.3,
-              }}
-            >
-              {techIcons[i % 7]}
-            </motion.div>
-          ))}
+          {/* Enhanced Floating tech icons - Only render on client to prevent hydration mismatch */}
+          {isClient && [...Array(22)].map((_, i) => {
+            // More emoji variety
+            const allEmojis = [
+              ...techIcons,
+              "🦾", "🧑‍💻", "🛰️", "🧬", "🦄", "🪐", "🌌", "🧠", "🔬", "🛠️", "🧲", "📡", "🦉", "🦋"
+            ];
+            const emoji = allEmojis[i % allEmojis.length];
+            // Randomize size, speed, and path (smaller, more subtle)
+            const size = 1.2 + ((i * 0.7) % 1.0); // 1.2em to 2.2em
+            const duration = 7 + (i % 6) + ((i % 3) * 0.7); // 7-13s
+            const delay = i * 0.22;
+            const left = `${(i * 7.3 + (i % 3) * 9) % 100}%`;
+            const top = `${(i * 11.2 + (i % 4) * 13) % 100}%`;
+            const rotateStart = (i % 2 === 0 ? 0 : 180);
+            const rotateEnd = rotateStart + 360;
+            const scaleStart = 0.8 + ((i % 4) * 0.1);
+            const scaleEnd = 1.1 + ((i % 5) * 0.1);
+            return (
+              <motion.div
+                key={i}
+                className="absolute opacity-20 select-none pointer-events-none"
+                style={{
+                  left,
+                  top,
+                  fontSize: `${size}em`,
+                  filter: `blur(${i % 2 === 0 ? 0 : 1.5}px)`
+                }}
+                animate={{
+                  y: [-40, 40, -40],
+                  x: [-30, 30, -30],
+                  rotate: [rotateStart, rotateEnd, rotateStart],
+                  scale: [scaleStart, scaleEnd, scaleStart],
+                  opacity: [0.12, 0.32, 0.12],
+                }}
+                transition={{
+                  duration,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay,
+                }}
+              >
+                {emoji}
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Navigation */}

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react"
@@ -26,21 +27,33 @@ if (typeof document !== 'undefined') {
 }
 
 const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physicsConfig = {} }) => {
+  // Helper function to normalize image URL
+  const normalizeImageUrl = (url) => {
+    if (!url) return null;
+    
+    // Remove any extra spaces and ensure proper encoding
+    const trimmedUrl = url.trim();
+    
+    try {
+      // Test if URL is valid
+      new URL(trimmedUrl);
+      return trimmedUrl;
+    } catch (e) {
+      console.warn('Invalid avatar URL format:', trimmedUrl);
+      return null;
+    }
+  };
+
   // Image loading state
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Debug logging for avatar
-  useEffect(() => {
-    console.log('[HangingIDCard] Received personalInfo:', personalInfo);
-    console.log('[HangingIDCard] Avatar URL:', personalInfo?.avatar);
-    console.log('[HangingIDCard] Image states - loaded:', imageLoaded, 'error:', imageError);
-  }, [personalInfo, imageLoaded, imageError]);
-
   // Reset image states when personalInfo changes
   useEffect(() => {
-    setImageLoaded(false);
-    setImageError(false);
+    if (personalInfo?.avatar) {
+      setImageLoaded(false);
+      setImageError(false);
+    }
   }, [personalInfo?.avatar]);
 
   // Responsive sizing based on viewport
@@ -841,6 +854,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                     `
                   }}
                 >
+
                   {/* Inner frame with beveled edge */}
                   <div 
                     className="absolute inset-1 rounded-md overflow-hidden"
@@ -852,27 +866,25 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                       `
                     }}
                   >
-                    {/* Avatar Image */}
-                    {personalInfo?.avatar && (
+                    {/* Avatar Image - With multiple fallback strategies */}
+                    {normalizeImageUrl(personalInfo?.avatar) && (
                       <img
-                        src={personalInfo.avatar}
+                        src={normalizeImageUrl(personalInfo.avatar)}
                         alt={`${personalInfo?.name || "Developer"} Professional Photo`}
                         className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
                         onLoad={() => {
-                          console.log('✅ Avatar image loaded successfully:', personalInfo.avatar);
                           setImageLoaded(true);
                           setImageError(false);
                         }}
-                        onError={(e) => {
-                          console.log('❌ Avatar image failed to load:', personalInfo.avatar);
-                          console.log('❌ Error details:', e.type, e.target?.src);
+                        onError={() => {
                           setImageError(true);
                           setImageLoaded(false);
                         }}
                         style={{
-                          display: imageError ? "none" : "block",
                           filter: "contrast(1.05) saturate(1.1)",
-                          opacity: imageLoaded ? 1 : 0.8
+                          opacity: imageLoaded ? 1 : 0.8,
+                          transition: "opacity 0.3s ease-in-out"
                         }}
                       />
                     )}
@@ -972,12 +984,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                   </span>
                 </div>
                 
-                {/* Temporary debug info */}
-                {personalInfo?.avatar && (
-                  <div className="absolute -top-8 left-0 right-0 text-xs text-center bg-black/50 text-white p-1 rounded">
-                    {imageLoaded ? "✅ Loaded" : imageError ? "❌ Error" : "⏳ Loading"}
-                  </div>
-                )}
+
               </div>
             </div>
 
