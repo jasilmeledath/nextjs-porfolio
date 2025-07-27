@@ -12,7 +12,8 @@ import { useEffect, useState, useRef } from "react"
 import Head from "next/head"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Terminal, Monitor, Wifi, WifiOff } from "lucide-react"
+import PortfolioService from '../services/portfolio-service'
 
 export default function TerminalPage() {
   const [input, setInput] = useState("")
@@ -26,13 +27,35 @@ export default function TerminalPage() {
   const [userName] = useState("guest")
   const [hostName] = useState("portfolio-terminal")
   const [isClient, setIsClient] = useState(false)
+  const [portfolioData, setPortfolioData] = useState(null)
+  const [connectionStatus, setConnectionStatus] = useState('connected')
+  const [terminalStartTime] = useState(new Date())
   const inputRef = useRef(null)
   const outputRef = useRef(null)
 
   // Fix hydration mismatch by only rendering dynamic content on client
   useEffect(() => {
     setIsClient(true)
+    loadPortfolioData()
   }, [])
+
+  // Load portfolio data from backend
+  const loadPortfolioData = async () => {
+    try {
+      setConnectionStatus('connecting')
+      const response = await PortfolioService.getVisitorPortfolio()
+      if (response.success) {
+        setPortfolioData(response.data)
+        setConnectionStatus('connected')
+      } else {
+        setConnectionStatus('error')
+        console.error('Failed to load portfolio data:', response.message)
+      }
+    } catch (error) {
+      setConnectionStatus('error')
+      console.error('Error loading portfolio data:', error)
+    }
+  }
 
   // Enhanced welcome message with ASCII art
   const welcomeMessage = [
@@ -53,7 +76,9 @@ export default function TerminalPage() {
     "╰─────────────────────────────────────────────────────────────────────────╯",
     "",
     "🌟 System initialized successfully...",
-    "⚡ All modules loaded and ready to go!",
+    "⚡ Loading portfolio data from backend...",
+    connectionStatus === 'connected' ? "✅ Backend connection established" : 
+    connectionStatus === 'connecting' ? "🔄 Connecting to backend..." : "❌ Backend connection failed",
     "",
   ]
 
@@ -70,9 +95,7 @@ export default function TerminalPage() {
         "  about         - About me and my background",
         "  skills        - Technical skills and expertise",
         "  projects      - View my featured projects",
-        "  experience    - Work experience and history",
         "  contact       - Contact information",
-        "  resume        - Download my resume",
         "  social        - Social media links",
         "",
         "🎮 System:",
@@ -83,6 +106,8 @@ export default function TerminalPage() {
         "  theme         - Change terminal theme",
         "  pwd           - Print working directory",
         "  ls            - List directory contents",
+        "  status        - System and connection status",
+        "  reload        - Reload portfolio data from backend",
         "",
         "🚀 Navigation:",
         "  portfolio     - Switch to portfolio mode",
@@ -98,122 +123,132 @@ export default function TerminalPage() {
         "  cowsay        - Make the cow say something",
         "",
         "💡 Tip: Use ↑/↓ arrow keys to navigate command history",
+        "🔄 Tip: Use 'reload' to refresh data from backend",
         "",
       ],
     },
 
     about: {
       description: "About me",
-      action: () => [
-        "👨‍💻 About Me",
-        "═══════════════",
-        "",
-        "Hello! I'm a passionate Full-Stack Developer with expertise in:",
-        "",
-        "🎯 Frontend Technologies:",
-        "  • React.js & Next.js - Building modern, responsive UIs",
-        "  • TypeScript - Type-safe development",
-        "  • Tailwind CSS - Rapid styling and design systems",
-        "  • Framer Motion - Smooth animations and interactions",
-        "",
-        "⚙️ Backend Technologies:",
-        "  • Node.js & Express - Scalable server applications",
-        "  • Python & Django - Robust web frameworks",
-        "  • GraphQL & REST APIs - Efficient data communication",
-        "  • MongoDB & PostgreSQL - Database design and optimization",
-        "",
-        "☁️ DevOps & Tools:",
-        "  • Docker & Kubernetes - Containerization and orchestration",
-        "  • AWS & Vercel - Cloud deployment and hosting",
-        "  • Git & GitHub Actions - Version control and CI/CD",
-        "  • Jest & Cypress - Testing and quality assurance",
-        "",
-        "🚀 What I Love:",
-        "  • Building scalable web applications",
-        "  • Solving complex problems with elegant solutions",
-        "  • Learning new technologies and best practices",
-        "  • Contributing to open-source projects",
-        "  • Mentoring junior developers",
-        "",
-        "🎯 Always learning, always coding, always improving!",
-        "",
-      ],
+      action: () => {
+        if (!portfolioData) {
+          return ["❌ Portfolio data not loaded. Try running 'reload' command.", ""]
+        }
+        
+        const personalInfo = portfolioData.personalInfo || {}
+        const skills = portfolioData.skills || []
+        
+        return [
+          `👨‍💻 About ${personalInfo.name || 'Developer'}`,
+          "═══════════════",
+          "",
+          personalInfo.bio || "Full-Stack Developer passionate about creating amazing digital experiences.",
+          "",
+          `📍 Location: ${personalInfo.location || 'Not specified'}`,
+          `💼 Title: ${personalInfo.title || 'Full-Stack Developer'}`,
+          `📧 Email: ${personalInfo.email || 'Not specified'}`,
+          "",
+          "🎯 Core Technologies:",
+          ...skills.slice(0, 8).map(skill => `  • ${skill.name} - ${skill.level}% proficiency`),
+          "",
+          "🚀 What drives me:",
+          "  • Building scalable web applications",
+          "  • Solving complex problems with elegant solutions", 
+          "  • Learning new technologies and best practices",
+          "  • Creating meaningful user experiences",
+          "",
+          "🎯 Always learning, always coding, always improving!",
+          "",
+        ]
+      },
     },
 
     skills: {
       description: "Technical skills",
-      action: () => [
-        "🛠️ Technical Skills Matrix",
-        "═══════════════════════════",
-        "",
-        "Frontend Development:",
-        "  ████████████████████ React.js (95%)",
-        "  ██████████████████░░ Next.js (90%)",
-        "  ████████████████████ JavaScript/TypeScript (95%)",
-        "  ██████████████████░░ CSS/Tailwind (90%)",
-        "  ████████████████░░░░ Vue.js (80%)",
-        "",
-        "Backend Development:",
-        "  ██████████████████░░ Node.js (90%)",
-        "  ████████████████░░░░ Express.js (85%)",
-        "  ██████████████░░░░░░ Python (75%)",
-        "  ████████████████░░░░ MongoDB (80%)",
-        "  ██████████████░░░░░░ PostgreSQL (75%)",
-        "",
-        "DevOps & Cloud:",
-        "  ██████████████░░░░░░ Docker (70%)",
-        "  ████████████░░░░░░░░ AWS (60%)",
-        "  ████████████████████ Git (95%)",
-        "  ██████████████░░░░░░ Kubernetes (65%)",
-        "",
-        "🏆 Certifications:",
-        "  • AWS Certified Developer",
-        "  • MongoDB Certified Developer",
-        "  • Google Cloud Professional",
-        "",
-      ],
+      action: () => {
+        if (!portfolioData?.skills) {
+          return ["❌ Skills data not loaded. Try running 'reload' command.", ""]
+        }
+        
+        const skills = portfolioData.skills
+        const categories = {}
+        
+        // Group skills by category
+        skills.forEach(skill => {
+          const category = skill.category || 'Other'
+          if (!categories[category]) {
+            categories[category] = []
+          }
+          categories[category].push(skill)
+        })
+        
+        const result = [
+          "🛠️ Technical Skills Matrix",
+          "═══════════════════════════",
+          "",
+        ]
+        
+        Object.entries(categories).forEach(([category, categorySkills]) => {
+          result.push(`${category}:`)
+          categorySkills.forEach(skill => {
+            const barLength = Math.floor(skill.level / 5)
+            const bar = '█'.repeat(barLength) + '░'.repeat(20 - barLength)
+            result.push(`  ${bar} ${skill.name} (${skill.level}%)`)
+          })
+          result.push("")
+        })
+        
+        result.push("🏆 Expertise Level:")
+        result.push("  • Expert (90-100%): Advanced proficiency")
+        result.push("  • Advanced (75-89%): Strong working knowledge")
+        result.push("  • Intermediate (60-74%): Comfortable usage")
+        result.push("  • Beginner (40-59%): Basic understanding")
+        result.push("")
+        
+        return result
+      },
     },
 
     projects: {
       description: "View projects",
-      action: () => [
-        "🚀 Featured Projects",
-        "═══════════════════════",
-        "",
-        "1. 🛒 AI-Powered E-Commerce Platform",
-        "   ├─ Full-stack MERN application with AI recommendations",
-        "   ├─ Real-time inventory management and analytics",
-        "   ├─ Payment integration with Stripe and PayPal",
-        "   ├─ Tech: React, Node.js, MongoDB, TensorFlow, Stripe",
-        "   ├─ Users: 10,000+ active users",
-        "   └─ GitHub: github.com/yourusername/ecommerce-ai",
-        "",
-        "2. 🤝 Real-Time Collaboration Suite",
-        "   ├─ WebRTC-powered video calls and screen sharing",
-        "   ├─ Collaborative whiteboards and document editing",
-        "   ├─ Real-time messaging and file sharing",
-        "   ├─ Tech: Next.js, Socket.io, WebRTC, Redis, PostgreSQL",
-        "   ├─ Performance: 99.9% uptime",
-        "   └─ Live: collab.yoursite.com",
-        "",
-        "3. 💻 3D Portfolio Terminal (This App!)",
-        "   ├─ Interactive terminal interface with 3D animations",
-        "   ├─ Multiple themes and responsive design",
-        "   ├─ Command history and auto-completion",
-        "   ├─ Tech: React, Three.js, Framer Motion, TypeScript",
-        "   ├─ Rating: ⭐⭐⭐⭐⭐ (5.0/5.0)",
-        "   └─ GitHub: github.com/yourusername/portfolio-terminal",
-        "",
-        "4. 📊 Analytics Dashboard",
-        "   ├─ Real-time data visualization and reporting",
-        "   ├─ Custom chart components and interactive filters",
-        "   ├─ Export functionality and scheduled reports",
-        "   ├─ Tech: React, D3.js, Node.js, InfluxDB",
-        "   └─ Processing: 1M+ data points daily",
-        "",
-        "💡 Type 'portfolio' to see more projects in visual mode!",
-        "",
-      ],
+      action: () => {
+        if (!portfolioData?.projects) {
+          return ["❌ Projects data not loaded. Try running 'reload' command.", ""]
+        }
+        
+        const projects = portfolioData.projects
+        const result = [
+          "🚀 Featured Projects",
+          "═══════════════════════",
+          "",
+        ]
+        
+        projects.slice(0, 5).forEach((project, index) => {
+          result.push(`${index + 1}. ${project.emoji || '🛠️'} ${project.title}`)
+          result.push(`   ├─ ${project.description}`)
+          result.push(`   ├─ Status: ${project.status || 'Active'}`)
+          result.push(`   ├─ Tech: ${project.technologies?.join(', ') || 'Not specified'}`)
+          if (project.liveUrl) {
+            result.push(`   ├─ Live: ${project.liveUrl}`)
+          }
+          if (project.githubUrl) {
+            result.push(`   └─ GitHub: ${project.githubUrl}`)
+          } else {
+            result.push(`   └─ Code: Private repository`)
+          }
+          result.push("")
+        })
+        
+        if (projects.length > 5) {
+          result.push(`📝 Showing top 5 of ${projects.length} projects`)
+          result.push("")
+        }
+        
+        result.push("💡 Type 'portfolio' to see all projects in visual mode!")
+        result.push("")
+        
+        return result
+      },
     },
 
     experience: {
@@ -256,43 +291,46 @@ export default function TerminalPage() {
 
     contact: {
       description: "Contact information",
-      action: () => [
-        "📧 Contact Information",
-        "═══════════════════════",
-        "",
-        "📬 Primary Contact:",
-        "  ✉️  Email: hello@developer.com",
-        "  📱 Phone: +1 (555) 123-4567",
-        "  📍 Location: San Francisco, CA",
-        "  🌐 Website: https://portfolio.dev",
-        "",
-        "🔗 Professional Networks:",
-        "  💼 LinkedIn: linkedin.com/in/developer",
-        "  🐙 GitHub: github.com/developer",
-        "  🐦 Twitter: @developer",
-        "  📝 Medium: medium.com/@developer",
-        "",
-        "💬 Preferred Contact Methods:",
-        "  1. Email (fastest response)",
-        "  2. LinkedIn message",
-        "  3. Phone call (business hours)",
-        "",
-        "⏰ Response Time:",
-        "  • Email: Within 24 hours",
-        "  • LinkedIn: Within 48 hours",
-        "  • Phone: Same day (if available)",
-        "",
-        "🤝 Open to:",
-        "  • Full-time opportunities",
-        "  • Freelance projects",
-        "  • Technical consultations",
-        "  • Speaking engagements",
-        "  • Open source collaborations",
-        "",
-        "💡 Feel free to reach out for opportunities, collaborations,",
-        "   or just to say hello! I love connecting with fellow developers.",
-        "",
-      ],
+      action: () => {
+        if (!portfolioData?.personalInfo) {
+          return ["❌ Contact data not loaded. Try running 'reload' command.", ""]
+        }
+        
+        const personalInfo = portfolioData.personalInfo
+        const socialLinks = portfolioData.socialLinks || []
+        
+        return [
+          "📧 Contact Information",
+          "═══════════════════════",
+          "",
+          "📬 Primary Contact:",
+          `  ✉️  Email: ${personalInfo.email || 'Not specified'}`,
+          `  📱 Phone: ${personalInfo.phone || 'Not specified'}`,
+          `  📍 Location: ${personalInfo.location || 'Not specified'}`,
+          "",
+          "🔗 Professional Networks:",
+          ...socialLinks.map(link => `  ${link.icon || '�'} ${link.platform}: ${link.url}`),
+          "",
+          "💬 Preferred Contact Methods:",
+          "  1. Email (fastest response)",
+          "  2. LinkedIn message",
+          "  3. Professional inquiry form",
+          "",
+          "⏰ Response Time:",
+          "  • Email: Within 24 hours",
+          "  • LinkedIn: Within 48 hours",
+          "  • Professional inquiries: Same day",
+          "",
+          "🤝 Open to:",
+          "  • Full-time opportunities",
+          "  • Freelance projects",
+          "  • Technical consultations",
+          "  • Collaboration opportunities",
+          "",
+          "💡 Feel free to reach out for opportunities or collaborations!",
+          "",
+        ]
+      },
     },
 
     whoami: {
@@ -510,29 +548,77 @@ export default function TerminalPage() {
 
     social: {
       description: "Social media links",
-      action: () => [
-        "🔗 Social Media & Professional Links",
-        "═══════════════════════════════════",
-        "",
-        "💼 Professional:",
-        "  🔗 LinkedIn: linkedin.com/in/developer",
-        "  🐙 GitHub: github.com/developer",
-        "  🌐 Portfolio: https://portfolio.dev",
-        "  📧 Email: hello@developer.com",
-        "",
-        "📝 Content & Writing:",
-        "  📝 Medium: medium.com/@developer",
-        "  📚 Dev.to: dev.to/developer",
-        "  📖 Personal Blog: blog.portfolio.dev",
-        "",
-        "🎮 Social & Fun:",
-        "  🐦 Twitter: @developer",
-        "  📷 Instagram: @developer_life",
-        "  🎵 Spotify: Developer's Coding Playlist",
-        "",
-        "🤝 Let's connect and build something amazing together!",
-        "",
-      ],
+      action: () => {
+        if (!portfolioData?.socialLinks) {
+          return ["❌ Social links data not loaded. Try running 'reload' command.", ""]
+        }
+        
+        const socialLinks = portfolioData.socialLinks
+        const personalInfo = portfolioData.personalInfo || {}
+        
+        return [
+          "🔗 Social Media & Professional Links",
+          "═══════════════════════════════════",
+          "",
+          "💼 Professional:",
+          ...socialLinks.filter(link => ['LinkedIn', 'GitHub', 'Portfolio'].includes(link.platform))
+            .map(link => `  ${link.icon || '🔗'} ${link.platform}: ${link.url}`),
+          "",
+          "� Content & Writing:",
+          ...socialLinks.filter(link => ['Medium', 'Dev.to', 'Blog'].includes(link.platform))
+            .map(link => `  ${link.icon || '📝'} ${link.platform}: ${link.url}`),
+          "",
+          "🎮 Social:",
+          ...socialLinks.filter(link => !['LinkedIn', 'GitHub', 'Portfolio', 'Medium', 'Dev.to', 'Blog'].includes(link.platform))
+            .map(link => `  ${link.icon || '🔗'} ${link.platform}: ${link.url}`),
+          "",
+          "🤝 Let's connect and build something amazing together!",
+          "",
+        ]
+      },
+    },
+
+    reload: {
+      description: "Reload portfolio data",
+      action: () => {
+        loadPortfolioData()
+        return [
+          "� Reloading portfolio data from backend...",
+          "⏳ Please wait while we fetch the latest information...",
+          "",
+        ]
+      },
+    },
+
+    status: {
+      description: "System status",
+      action: () => {
+        const uptime = Math.floor((new Date() - terminalStartTime) / 1000)
+        const formatUptime = (seconds) => {
+          const mins = Math.floor(seconds / 60)
+          const secs = seconds % 60
+          return `${mins}m ${secs}s`
+        }
+        
+        return [
+          "📊 System Status",
+          "═══════════════",
+          "",
+          `🟢 Terminal Status: Online`,
+          `� Backend Connection: ${connectionStatus === 'connected' ? '🟢 Connected' : connectionStatus === 'connecting' ? '🟡 Connecting' : '🔴 Disconnected'}`,
+          `⏱️  Uptime: ${formatUptime(uptime)}`,
+          `� Data Loaded: ${portfolioData ? '✅ Yes' : '❌ No'}`,
+          `� Current Theme: ${theme}`,
+          `📱 Client Rendered: ${isClient ? '✅ Yes' : '❌ No'}`,
+          `🖥️  Screen Mode: ${isFullscreen ? 'Fullscreen' : 'Windowed'}`,
+          "",
+          "📈 Performance:",
+          `  • Commands Executed: ${commandHistory.length}`,
+          `  • History Entries: ${history.length}`,
+          `  • Memory Usage: Light`,
+          "",
+        ]
+      },
     },
   }
 
@@ -578,8 +664,17 @@ export default function TerminalPage() {
       const delay = isClient ? Math.floor(Date.now() / 100) % 300 + 200 : 300
       setTimeout(
         () => {
-          const result = COMMANDS[trimmedCommand].action()
-          setHistory((prev) => [...prev, ...commandOutput, ...result])
+          try {
+            const result = COMMANDS[trimmedCommand].action()
+            setHistory((prev) => [...prev, ...commandOutput, ...result])
+          } catch (error) {
+            console.error('Command execution error:', error)
+            setHistory((prev) => [...prev, ...commandOutput, 
+              "❌ Error executing command. Please try again.",
+              "💡 Tip: Try 'reload' to refresh data from backend.",
+              ""
+            ])
+          }
           setIsLoading(false)
           // Scroll to bottom
           setTimeout(() => {
@@ -591,13 +686,21 @@ export default function TerminalPage() {
         delay,
       ) // Random delay for realism
     } else {
-      // Command not found
+      // Command not found with helpful suggestions
+      const suggestions = Object.keys(COMMANDS).filter(cmd => 
+        cmd.includes(trimmedCommand.substring(0, 3)) || 
+        trimmedCommand.includes(cmd.substring(0, 3))
+      ).slice(0, 3)
+      
+      const suggestionText = suggestions.length > 0 
+        ? [`💡 Did you mean: ${suggestions.join(', ')}?`, ""]
+        : ["💡 Type 'help' for available commands.", ""]
+      
       setHistory((prev) => [
         ...prev,
         ...commandOutput,
-        `bash: ${trimmedCommand}: command not found`,
-        "Type 'help' for available commands.",
-        "",
+        `❌ Command '${trimmedCommand}' not found.`,
+        ...suggestionText
       ])
     }
   }
@@ -642,12 +745,39 @@ export default function TerminalPage() {
   // Initialize terminal - only after client loads
   useEffect(() => {
     if (isClient) {
-      setHistory(welcomeMessage)
+      // Update welcome message based on connection status
+      const dynamicWelcome = [
+        "╭─────────────────────────────────────────────────────────────╮",
+        "│  ██████╗  ██████╗ ██████╗ ████████╗███████╗ ██████╗ ██╗     ██╗ ██████╗ │",
+        "│  ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██║     ██║██╔═══██╗│",
+        "│  ██████╔╝██║   ██║██████╔╝   ██║   █████╗  ██║   ██║██║     ██║██║   ██║│",
+        "│  ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══╝  ██║   ██║██║     ██║██║   ██║│",
+        "│  ██║     ╚██████╔╝██║  ██║   ██║   ██║     ╚██████╔╝███████╗██║╚██████╔╝│",
+        "│  ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ │",
+        "│                                                                         │",
+        "│           🚀 Welcome to the Interactive Portfolio Terminal 🚀           │",
+        "│                                                                         │",
+        "│  Type 'help' to see available commands                                  │",
+        "│  Type 'about' to learn more about me                                    │",
+        "│  Type 'clear' to clear the terminal                                     │",
+        "│                                                                         │",
+        "╰─────────────────────────────────────────────────────────────────────────╯",
+        "",
+        "🌟 System initialized successfully...",
+        "⚡ Loading portfolio data from backend...",
+        connectionStatus === 'connected' ? "✅ Backend connection established" : 
+        connectionStatus === 'connecting' ? "🔄 Connecting to backend..." : "❌ Backend connection failed - using fallback data",
+        portfolioData ? `📊 Portfolio data loaded: ${Object.keys(portfolioData).length} sections` : "📊 Portfolio data: Loading...",
+        "",
+        "💡 Pro tip: Try 'status' to check system health or 'reload' to refresh data!",
+        "",
+      ]
+      setHistory(dynamicWelcome)
     }
     if (inputRef.current) {
       inputRef.current.focus()
     }
-  }, [isClient])
+  }, [isClient, connectionStatus, portfolioData])
 
   // Keep input focused
   useEffect(() => {
@@ -665,31 +795,38 @@ export default function TerminalPage() {
     switch (theme) {
       case "matrix":
         return {
-          bg: "bg-black",
+          bg: "#000000",
           text: "text-green-400",
           accent: "text-green-300",
           border: "border-green-500",
         }
       case "cyberpunk":
         return {
-          bg: "bg-purple-900",
+          bg: "#1a0b2e",
           text: "text-cyan-400",
           accent: "text-pink-400",
           border: "border-cyan-500",
         }
       case "retro":
         return {
-          bg: "bg-amber-900",
+          bg: "#2d1b00",
           text: "text-amber-300",
           accent: "text-orange-400",
           border: "border-amber-500",
         }
-      default:
+      case "minimal":
         return {
-          bg: "bg-gray-900",
+          bg: "#1f2937",
           text: "text-gray-300",
           accent: "text-blue-400",
           border: "border-gray-600",
+        }
+      default:
+        return {
+          bg: "#000000",
+          text: "text-green-400",
+          accent: "text-green-300",
+          border: "border-green-500",
         }
     }
   }
@@ -706,46 +843,101 @@ export default function TerminalPage() {
         />
       </Head>
 
-      <div className={`min-h-screen ${themeStyles.bg} ${themeStyles.text} font-mono relative overflow-hidden`}>
-        {/* Enhanced Mobile-Responsive Header */}
-        <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="sticky top-0 z-30 backdrop-blur-lg border-b"
-          style={{
-            background: `linear-gradient(135deg, ${themeStyles.bg}ee, ${themeStyles.bg}dd)`,
-            borderColor: themeStyles.accent
-          }}
-        >
+      <div 
+        className={`min-h-screen ${themeStyles.text} font-mono relative overflow-hidden`}
+        style={{ backgroundColor: themeStyles.bg }}
+      >
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="sticky top-0 z-30 backdrop-blur-lg border-b"
+            style={{
+              background: `linear-gradient(135deg, ${themeStyles.bg}ee, ${themeStyles.bg}dd)`,
+              borderColor: themeStyles.accent.replace('text-', '')
+            }}
+          >
           <div className="flex items-center justify-between p-3 sm:p-4 max-w-7xl mx-auto">
-            <Link
-              href="/"
-              className={`flex items-center space-x-2 transition-all duration-200 hover:scale-105 ${themeStyles.text} hover:${themeStyles.accent}`}
-            >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm sm:text-base font-medium">Back to Home</span>
-            </Link>
+            <div className="flex items-center space-x-3">
+              <Link
+                href="/"
+                className={`flex items-center space-x-2 transition-all duration-200 hover:scale-105 ${themeStyles.text} hover:${themeStyles.accent}`}
+              >
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-sm sm:text-base font-medium">Back to Home</span>
+              </Link>
+              
+              {/* Connection Status Indicator */}
+              <div className="flex items-center space-x-2">
+                {connectionStatus === 'connected' ? (
+                  <Wifi className={`w-4 h-4 ${themeStyles.accent.replace('text-', 'text-')}`} />
+                ) : connectionStatus === 'connecting' ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Monitor className={`w-4 h-4 ${themeStyles.text}`} />
+                  </motion.div>
+                ) : (
+                  <WifiOff className="w-4 h-4 text-red-400" />
+                )}
+                <span className={`text-xs ${themeStyles.text} hidden sm:inline`}>
+                  {connectionStatus === 'connected' ? 'Online' : 
+                   connectionStatus === 'connecting' ? 'Connecting' : 'Offline'}
+                </span>
+              </div>
+            </div>
             
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <select
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                className={`${themeStyles.bg} ${themeStyles.text} text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-lg border transition-all duration-200 focus:ring-2 focus:ring-opacity-50`}
-                style={{ borderColor: themeStyles.accent, '--tw-ring-color': themeStyles.accent }}
+              {/* Theme Toggle Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  const themes = ["matrix", "cyberpunk", "retro", "minimal"]
+                  const currentIndex = themes.indexOf(theme)
+                  const nextTheme = themes[(currentIndex + 1) % themes.length]
+                  setTheme(nextTheme)
+                }}
+                className={`${themeStyles.text} transition-all duration-200 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-lg border font-medium hover:opacity-80 flex items-center space-x-1`}
+                style={{ 
+                  backgroundColor: `${themeStyles.bg}80`,
+                  borderColor: themeStyles.accent.replace('text-', '')
+                }}
+                title="Click to cycle through themes"
               >
-                <option value="matrix">🔰 Matrix</option>
-                <option value="hacker">👨‍💻 Hacker</option>
-                <option value="classic">📟 Classic</option>
-              </select>
+                <span>
+                  {theme === 'matrix' && '🔰'}
+                  {theme === 'cyberpunk' && '🎯'}
+                  {theme === 'retro' && '🌴'}
+                  {theme === 'minimal' && '🎨'}
+                </span>
+                <span className="capitalize">{theme}</span>
+              </motion.button>
               
+              {/* Reload Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={loadPortfolioData}
+                disabled={connectionStatus === 'connecting'}
+                className={`${themeStyles.text} transition-all duration-200 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-lg border font-medium disabled:opacity-50 hover:opacity-80`}
+                style={{ 
+                  backgroundColor: `${themeStyles.bg}80`,
+                  borderColor: themeStyles.accent.replace('text-', '')
+                }}
+              >
+                🔄 Sync
+              </motion.button>
+              
+              {/* Fullscreen Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className={`${themeStyles.text} hover:${themeStyles.accent} transition-all duration-200 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-lg border font-medium`}
+                className={`${themeStyles.text} transition-all duration-200 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded-lg border font-medium hover:opacity-80`}
                 style={{ 
                   backgroundColor: `${themeStyles.bg}80`,
-                  borderColor: themeStyles.accent 
+                  borderColor: themeStyles.accent.replace('text-', '')
                 }}
               >
                 {isFullscreen ? "⛶ Exit" : "⛶ Full"}
@@ -795,7 +987,7 @@ export default function TerminalPage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
             style={{
-              background: `linear-gradient(135deg, ${themeStyles.bg}f0, ${themeStyles.bg}e0)`,
+              background: `linear-gradient(135deg, ${themeStyles.bg}f0, ${themeStyles.bg}e0)`
             }}
           >
             <div className="p-3 sm:p-6 space-y-1 sm:space-y-2">
@@ -849,8 +1041,8 @@ export default function TerminalPage() {
             transition={{ delay: 0.3 }}
             className={`border-t p-3 sm:p-4`}
             style={{ 
-              borderColor: themeStyles.accent,
-              background: `linear-gradient(135deg, ${themeStyles.bg}f0, ${themeStyles.bg}e0)`,
+              borderColor: themeStyles.accent.replace('text-', ''),
+              background: `linear-gradient(135deg, ${themeStyles.bg}f0, ${themeStyles.bg}e0)`
             }}
           >
             <form onSubmit={handleSubmit} className="flex items-center space-x-1 sm:space-x-2">
@@ -871,7 +1063,7 @@ export default function TerminalPage() {
               />
               <motion.span
                 animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
+                transition={{ duration: 1, repeat: Infinity }}
                 className={`${themeStyles.accent} flex-shrink-0`}
               >
                 █
@@ -881,12 +1073,21 @@ export default function TerminalPage() {
         </div>
 
         {/* Mobile optimization hints */}
-        <div className="md:hidden fixed bottom-4 right-4 bg-black/80 text-white text-xs p-2 rounded-lg shadow-lg backdrop-blur-sm border border-white/20 max-w-xs">
-          <div className="flex items-center space-x-2">
-            <span>💡</span>
-            <span>Rotate to landscape for better view</span>
+        {isClient && (
+          <div className="md:hidden fixed bottom-4 right-4 bg-black/90 text-white text-xs p-3 rounded-lg shadow-lg backdrop-blur-sm border border-white/20 max-w-xs z-50">
+            <div className="flex items-center space-x-2">
+              <Terminal className="w-4 h-4" />
+              <div>
+                <div className="font-semibold">Terminal Tips:</div>
+                <div className="text-xs opacity-80 mt-1">
+                  • Type 'help' for commands
+                  • Use ↑/↓ for history
+                  • 'reload' to sync data
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   )
