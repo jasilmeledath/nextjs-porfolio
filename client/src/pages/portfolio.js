@@ -241,8 +241,41 @@ export default function PortfolioPage() {
     design: "Design"
   }), [])
 
-  // Memoized floating tech icons
-  const techIcons = useMemo(() => ["⚛️", "🚀", "💻", "🔧", "⚡", "🎯", "🌟"], [])
+  // Memoized floating tech icons - SVG tech icons
+  const techIcons = useMemo(() => [
+    // React
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M12 10.11c1.03 0 1.87.84 1.87 1.89s-.84 1.85-1.87 1.85-1.87-.82-1.87-1.85.84-1.89 1.87-1.89M7.37 20c.63.38 2.01-.2 3.6-1.7-.52-.59-1.03-1.23-1.51-1.9a22.7 22.7 0 0 1-2.4-.36c-.51 2.14-.32 3.61.31 3.96m.71-5.74-.29-.51c-.11.29-.22.58-.29.86.27.06.57.11.88.16l-.3-.51m6.54-.76.81-1.5-.81-1.5c-.3-.53-.62-1-.91-1.47C13.17 9 12.6 9 12 9s-1.17 0-1.71.03c-.29.47-.61.94-.91 1.47L8.57 12l.81 1.5c.3.53.62 1 .91 1.47.54.03 1.11.03 1.71.03s1.17 0 1.71-.03c.29-.47.61-.94.91-1.47M12 6.78c-.19.22-.39.45-.59.72h1.18c-.2-.27-.4-.5-.59-.72m0 10.44c.19-.22.39-.45.59-.72h-1.18c.2.27.4.5.59.72M16.62 4c-.62-.38-2 .2-3.59 1.7.52.59 1.03 1.23 1.51 1.9.82.08 1.63.2 2.4.36.51-2.14.32-3.61-.32-3.96m-.7 5.74.29.51c.11-.29.22-.58.29-.86-.27-.06-.57-.11-.88-.16l.3.51m1.45-7.05c1.47.84 1.63 3.05 1.01 5.63 2.54.75 4.37 1.99 4.37 3.68s-1.83 2.93-4.37 3.68c.62 2.58.46 4.79-1.01 5.63-1.46.84-3.45-.12-5.37-1.95-1.92 1.83-3.91 2.79-5.37 1.95-1.47-.84-1.63-3.05-1.01-5.63-2.54-.75-4.37-1.99-4.37-3.68s1.83-2.93 4.37-3.68c-.62-2.58-.46-4.79 1.01-5.63 1.46-.84 3.45.12 5.37 1.95 1.92-1.83 3.91-2.79 5.37-1.95z"/>
+    </svg>,
+    // Node.js
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M12 1.85c-.27 0-.55.07-.78.2l-7.44 4.3c-.48.28-.78.8-.78 1.36v8.58c0 .56.3 1.08.78 1.36l1.95 1.12c.95.46 1.31.46 1.76.46 1.45 0 2.28-.88 2.28-2.4V9.85c0-.13-.1-.23-.23-.23H8.55c-.13 0-.23.1-.23.23v6.58c0 .85-.89 1.7-2.34 1.22L4.04 16.5c-.03-.02-.06-.06-.06-.11V7.81c0-.05.03-.09.06-.11l7.44-4.3c.03-.02.07-.02.1 0l7.44 4.3c.03.02.06.06.06.11v8.58c0 .05-.03.09-.06.11l-7.44 4.3c-.03.02-.07.02-.1 0L9.5 19.67c-.02-.01-.05-.02-.07-.02-.17 0-.34.07-.46.2-.26.26-.24.65.06.88l1.94 1.12c.22.13.49.2.78.2s.56-.07.78-.2l7.44-4.3c.48-.28.78-.8.78-1.36V7.61c0-.56-.3-1.08-.78-1.36l-7.44-4.3c-.23-.13-.51-.2-.78-.2z"/>
+    </svg>,
+    // Git
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M23.546 10.93L13.067.452c-.604-.603-1.582-.603-2.188 0L8.708 2.627l2.76 2.76c.645-.215 1.379-.07 1.889.441.516.515.658 1.258.438 1.9l2.658 2.66c.645-.223 1.387-.078 1.9.435.721.72.721 1.884 0 2.604-.719.719-1.881.719-2.6 0-.539-.541-.674-1.337-.404-1.996L12.86 8.955v6.525c.176.086.342.203.488.348.713.721.713 1.883 0 2.6-.719.721-1.889.721-2.609 0-.719-.719-.719-1.879 0-2.598.182-.18.387-.316.605-.406V8.835c-.217-.091-.424-.222-.6-.401-.545-.545-.676-1.342-.396-2.009L7.636 3.7.45 10.881c-.6.605-.6 1.584 0 2.189l10.48 10.477c.604.604 1.582.604 2.186 0l10.43-10.43c.605-.603.605-1.582 0-2.187"/>
+    </svg>,
+    // JavaScript
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M3 3h18v18H3V3zm16.525 13.707c-.131-.821-.666-1.511-2.252-2.155-.552-.259-1.165-.438-1.349-.854-.068-.248-.078-.382-.034-.529.113-.484.687-.629 1.137-.495.293.09.563.315.732.676.775-.507.775-.507 1.316-.844-.203-.314-.304-.451-.439-.586-.473-.528-1.103-.798-2.126-.77l-.528.067c-.507.124-.991.395-1.283.754-.855.968-.608 2.655.427 3.354 1.023.765 2.521.933 2.712 1.653.18.878-.652 1.159-1.475 1.058-.607-.136-.945-.439-1.316-1.002l-1.372.788c.157.359.337.517.607.832 1.305 1.316 4.568 1.249 5.153-.754.021-.067.18-.528.056-1.237l.034.049zm-6.737-5.434h-1.686c0 1.453-.007 2.898-.007 4.354 0 .924.047 1.772-.104 2.033-.247.517-.886.451-1.175.359-.297-.146-.448-.349-.623-.641-.047-.078-.082-.146-.095-.146l-1.368.844c.229.473.563.879.994 1.137.641.383 1.502.507 2.404.305.588-.17 1.095-.519 1.358-1.059.384-.697.302-1.553.299-2.509.008-1.541 0-3.083 0-4.635l.003-.042z"/>
+    </svg>,
+    // TypeScript
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0H1.125zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/>
+    </svg>,
+    // Database
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M12 3C7.58 3 4 4.79 4 7s3.58 4 8 4 8-1.79 8-4-3.58-4-8-4Z M4 9v3c0 2.21 3.58 4 8 4s8-1.79 8-4V9c0 2.21-3.58 4-8 4s-8-1.79-8-4Z M4 14v3c0 2.21 3.58 4 8 4s8-1.79 8-4v-3c0 2.21-3.58 4-8 4s-8-1.79-8-4Z"/>
+    </svg>,
+    // Code
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+    </svg>,
+    // Server/Cloud
+    <svg viewBox="0 0 24 24" className="w-full h-full">
+      <path fill="currentColor" d="M4 6v2h16V6H4m0 5v3h16v-3H4m0 6v2h16v-2H4Z"/>
+    </svg>
+  ], [])
 
   // Memoized loading state check
   const shouldShowLoading = useMemo(() => 
@@ -342,6 +375,42 @@ export default function PortfolioPage() {
           .gradient-bg-light {
             background: linear-gradient(135deg, #dbeafe 0%, #faf5ff 50%, #fce7f3 100%);
           }
+
+          /* Responsive tech icons */
+          @media (max-width: 768px) {
+            .floating-tech-icon {
+              transform: scale(0.75) !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .floating-tech-icon {
+              transform: scale(0.65) !important;
+            }
+          }
+          
+          /* Enhanced theme-specific opacity adjustments */
+          .dark .floating-tech-icon {
+            opacity: 0.20 !important;
+          }
+          
+          .light .floating-tech-icon {
+            opacity: 0.14 !important;
+          }
+          
+          @media (min-width: 1200px) {
+            .dark .floating-tech-icon {
+              opacity: 0.28 !important;
+            }
+            .light .floating-tech-icon {
+              opacity: 0.18 !important;
+            }
+          }
+          
+          /* Subtle glow effect for dark mode tech icons */
+          .dark .floating-tech-icon svg {
+            filter: drop-shadow(0 0 2px currentColor);
+          }
         `}</style>
       </Head>
 
@@ -399,48 +468,56 @@ export default function PortfolioPage() {
           />
 
           {/* Enhanced Floating tech icons - Only render on client to prevent hydration mismatch */}
-          {isClient && [...Array(22)].map((_, i) => {
-            // More emoji variety
-            const allEmojis = [
-              ...techIcons,
-              "🦾", "🧑‍💻", "🛰️", "🧬", "🦄", "🪐", "🌌", "🧠", "🔬", "🛠️", "🧲", "📡", "🦉", "🦋"
-            ];
-            const emoji = allEmojis[i % allEmojis.length];
-            // Randomize size, speed, and path (smaller, more subtle)
-            const size = 1.2 + ((i * 0.7) % 1.0); // 1.2em to 2.2em
-            const duration = 7 + (i % 6) + ((i % 3) * 0.7); // 7-13s
-            const delay = i * 0.22;
-            const left = `${(i * 7.3 + (i % 3) * 9) % 100}%`;
-            const top = `${(i * 11.2 + (i % 4) * 13) % 100}%`;
-            const rotateStart = (i % 2 === 0 ? 0 : 180);
-            const rotateEnd = rotateStart + 360;
-            const scaleStart = 0.8 + ((i % 4) * 0.1);
-            const scaleEnd = 1.1 + ((i % 5) * 0.1);
+          {isClient && [...Array(24)].map((_, i) => {
+            // Tech icon selection
+            const icon = techIcons[i % techIcons.length];
+            // Enhanced randomization for better distribution and varied animations
+            const size = 1.4 + ((i * 0.3) % 1.0); // 1.4rem to 2.4rem
+            const duration = 10 + (i % 12) + ((i % 4) * 1.5); // 10-25s (more varied)
+            const delay = (i * 0.6) + ((i % 5) * 0.3); // Staggered start times
+            // More sophisticated positioning with less clustering
+            const left = `${(i * 15.7 + (i % 7) * 12 + Math.sin(i) * 8) % 95 + 2.5}%`;
+            const top = `${(i * 17.3 + (i % 6) * 14 + Math.cos(i) * 6) % 95 + 2.5}%`;
+            // Enhanced rotation patterns
+            const rotateStart = (i % 4) * 45 + ((i % 3) * 15);
+            const rotateEnd = rotateStart + (i % 2 === 0 ? 120 : -120);
+            // Dynamic scaling patterns
+            const scaleStart = 0.6 + ((i % 5) * 0.08);
+            const scaleEnd = 0.85 + ((i % 6) * 0.1);
+            // Enhanced movement patterns
+            const yAmplitude = 15 + (i % 4) * 8; // 15-39px
+            const xAmplitude = 12 + (i % 3) * 6; // 12-24px
             return (
               <motion.div
                 key={i}
-                className="absolute opacity-20 select-none pointer-events-none"
+                className="absolute select-none pointer-events-none"
                 style={{
                   left,
                   top,
-                  fontSize: `${size}em`,
-                  filter: `blur(${i % 2 === 0 ? 0 : 1.5}px)`
+                  width: `${size}rem`,
+                  height: `${size}rem`,
+                  color: isDark 
+                    ? i % 4 === 0 ? '#7c8db8' : i % 4 === 1 ? '#6366f1' : i % 4 === 2 ? '#8b5cf6' : '#06b6d4' // Enhanced colors for dark mode
+                    : i % 3 === 0 ? '#475569' : i % 3 === 1 ? '#334155' : '#1e293b', // Darker grays for light mode visibility
+                  filter: `blur(${i % 4 === 0 ? 0 : i % 4 === 1 ? 0.3 : 0.6}px)`, // Varied blur for depth
+                  zIndex: -1
                 }}
                 animate={{
-                  y: [-40, 40, -40],
-                  x: [-30, 30, -30],
+                  y: [-yAmplitude, yAmplitude, -yAmplitude],
+                  x: [-xAmplitude, xAmplitude, -xAmplitude],
                   rotate: [rotateStart, rotateEnd, rotateStart],
                   scale: [scaleStart, scaleEnd, scaleStart],
-                  opacity: [0.12, 0.32, 0.12],
+                  opacity: isDark ? [0.18, 0.32, 0.18] : [0.12, 0.20, 0.12],
                 }}
                 transition={{
                   duration,
                   repeat: Infinity,
                   ease: "easeInOut",
                   delay,
+                  type: "tween",
                 }}
               >
-                {emoji}
+                {icon}
               </motion.div>
             );
           })}
