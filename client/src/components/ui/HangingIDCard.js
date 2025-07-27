@@ -53,6 +53,48 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
     if (personalInfo?.avatar) {
       setImageLoaded(false);
       setImageError(false);
+    } else {
+      // If no avatar, consider it "loaded" to avoid showing loader
+      setImageLoaded(true);
+    }
+  }, [personalInfo?.avatar]);
+
+  // Add a backup check to ensure loader doesn't get stuck
+  useEffect(() => {
+    if (personalInfo?.avatar && !imageError) {
+      const timer = setTimeout(() => {
+        // If image hasn't loaded after 10 seconds, assume it's loaded to hide loader
+        const imgElement = document.querySelector(`img[src="${normalizeImageUrl(personalInfo.avatar)}"]`);
+        if (imgElement && imgElement.complete) {
+          setImageLoaded(true);
+        }
+      }, 10000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [personalInfo?.avatar, imageError]);
+
+  // Check if image is already cached/loaded immediately
+  useEffect(() => {
+    if (personalInfo?.avatar && normalizeImageUrl(personalInfo?.avatar)) {
+      const imgElement = new Image();
+      imgElement.src = normalizeImageUrl(personalInfo.avatar);
+      
+      // If already cached/loaded, set loaded state immediately
+      if (imgElement.complete) {
+        setImageLoaded(true);
+        setImageError(false);
+      } else {
+        // Otherwise, wait for load/error events
+        imgElement.onload = () => {
+          setImageLoaded(true);
+          setImageError(false);
+        };
+        imgElement.onerror = () => {
+          setImageError(true);
+          setImageLoaded(false);
+        };
+      }
     }
   }, [personalInfo?.avatar]);
 
@@ -834,7 +876,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
           </div>
 
           {/* Main Content */}
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 pb-14"> {/* Added bottom padding to prevent footer overlap */}
             {/* Avatar */}
             <div className="flex justify-center">
               <div className="relative">
@@ -867,40 +909,47 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                     }}
                   >
                     {/* Avatar Image - With multiple fallback strategies */}
-                    {normalizeImageUrl(personalInfo?.avatar) && (
+                    {normalizeImageUrl(personalInfo?.avatar) && !imageError && (
                       <img
                         src={normalizeImageUrl(personalInfo.avatar)}
                         alt={`${personalInfo?.name || "Developer"} Professional Photo`}
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
-                        onLoad={() => {
+                        onLoad={(e) => {
+                          console.log('Image loaded successfully');
                           setImageLoaded(true);
                           setImageError(false);
                         }}
-                        onError={() => {
+                        onError={(e) => {
+                          console.log('Image failed to load');
                           setImageError(true);
+                          setImageLoaded(false);
+                        }}
+                        onLoadStart={() => {
+                          console.log('Image loading started');
                           setImageLoaded(false);
                         }}
                         style={{
                           filter: "contrast(1.05) saturate(1.1)",
-                          opacity: imageLoaded ? 1 : 0.8,
-                          transition: "opacity 0.3s ease-in-out"
+                          opacity: 1,
+                          transition: "opacity 0.3s ease-in-out",
+                          zIndex: 2
                         }}
                       />
                     )}
                     
-                    {/* Loading state with professional spinner */}
-                    {personalInfo?.avatar && !imageLoaded && !imageError && (
+                    {/* Loading state - Only show when we have avatar URL, no error, AND image hasn't loaded yet */}
+                    {personalInfo?.avatar && normalizeImageUrl(personalInfo?.avatar) && !imageError && !imageLoaded && (
                       <div
                         className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center ${
-                          isDark ? "bg-slate-700/80" : "bg-gray-100/80"
+                          isDark ? "bg-slate-700/40" : "bg-gray-100/40"
                         }`}
                         style={{ zIndex: 1 }}
                       >
-                        <div className={`${isMobile ? "text-2xl" : "text-3xl"} mb-2`}>
+                        <div className={`${isMobile ? "text-lg" : "text-xl"} mb-1 opacity-60`}>
                           <div className="animate-spin">⚪</div>
                         </div>
-                        <div className={`text-xs ${isDark ? "text-slate-400" : "text-gray-500"}`}>
+                        <div className={`text-xs ${isDark ? "text-slate-400" : "text-gray-500"} opacity-60`}>
                           Loading...
                         </div>
                       </div>
@@ -989,7 +1038,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
             </div>
 
             {/* Information */}
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-2"> {/* Reduced space-y from 3 to 2 */}
               <h3 className={`font-bold ${textSizes.name} leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
                 {personalInfo?.name || "Loading..."}
               </h3>
@@ -997,39 +1046,51 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                 {personalInfo?.title || "Portfolio Loading..."}
               </p>
 
-              {/* Details */}
+              {/* Enhanced Details Section with better spacing */}
               <div
-                className={`space-y-2 ${textSizes.details} p-3 rounded-xl ${
+                className={`space-y-1.5 ${textSizes.details} p-3 mx-1 rounded-xl ${
                   isDark ? "bg-slate-800/50 border border-slate-600/30" : "bg-gray-100/50 border border-gray-300/30"
                 }`}
+                style={{
+                  boxShadow: `
+                    inset 0 1px 3px rgba(0,0,0,0.1),
+                    0 1px 2px rgba(0,0,0,0.05)
+                  `
+                }}
               >
                 <div
                   className={`flex items-center justify-center space-x-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
                 >
-                  <span>📍</span>
-                  <span>{personalInfo?.location || "Location Loading..."}</span>
+                  <span className="flex-shrink-0">📍</span>
+                  <span className="truncate">{personalInfo?.location || "Location Loading..."}</span>
                 </div>
                 <div
                   className={`flex items-center justify-center space-x-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
                 >
-                  <span>✉️</span>
-                  <span className="font-mono text-xs">{personalInfo?.email || "email@loading.com"}</span>
+                  <span className="flex-shrink-0">✉️</span>
+                  <span className="font-mono text-xs truncate">{personalInfo?.email || "email@loading.com"}</span>
                 </div>
                 <div
                   className={`flex items-center justify-center space-x-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
                 >
-                  <span>🏢</span>
-                  <span>Software Development</span>
+                  <span className="flex-shrink-0">🏢</span>
+                  <span className="truncate">Software Development</span>
                 </div>
               </div>
             </div>
 
-            {/* QR Code */}
+            {/* Compact QR Code */}
             <div className="flex justify-center">
               <div
-                className={`${isMobile ? "w-16 h-16" : "w-18 h-18"} rounded-xl p-2 ${
+                className={`${isMobile ? "w-14 h-14" : "w-16 h-16"} rounded-lg p-1.5 ${
                   isDark ? "bg-white" : "bg-gray-900"
                 }`}
+                style={{
+                  boxShadow: `
+                    0 2px 8px rgba(0,0,0,0.15),
+                    inset 0 1px 2px rgba(255,255,255,0.1)
+                  `
+                }}
               >
                 <div
                   className={`w-full h-full grid gap-0 rounded-lg overflow-hidden`}
@@ -1050,18 +1111,25 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
             </div>
           </div>
 
-          {/* Footer */}
+          {/* Enhanced Footer with better positioning */}
           <div
-            className={`absolute bottom-0 left-0 right-0 h-10 flex items-center justify-between px-4 ${
+            className={`absolute bottom-0 left-0 right-0 h-12 flex items-center justify-between px-4 ${
               isDark ? "bg-gradient-to-r from-slate-800 to-slate-700" : "bg-gradient-to-r from-gray-100 to-gray-200"
             }`}
+            style={{
+              borderTop: `1px solid ${isDark ? '#475569' : '#cbd5e1'}`,
+              boxShadow: `
+                inset 0 1px 3px rgba(255,255,255,0.1),
+                0 -2px 4px rgba(0,0,0,0.1)
+              `
+            }}
           >
-            <div className={`${textSizes.details} font-mono ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+            <div className={`${textSizes.details} font-mono font-semibold ${isDark ? "text-gray-400" : "text-gray-600"}`}>
               AUTHORIZED • VERIFIED
             </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className={`${textSizes.details} font-mono ${isDark ? "text-green-400" : "text-green-600"}`}>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-sm" />
+              <span className={`${textSizes.details} font-mono font-semibold ${isDark ? "text-green-400" : "text-green-600"}`}>
                 ACTIVE
               </span>
             </div>
