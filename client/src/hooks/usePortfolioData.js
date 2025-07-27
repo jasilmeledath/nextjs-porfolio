@@ -14,104 +14,21 @@ import PortfolioService from '../services/portfolio-service';
  * @returns {Object} Portfolio data and loading states
  */
 export const usePortfolioData = () => {
-  // Default portfolio data for immediate display
-  const defaultPortfolioData = {
-    personalInfo: {
-      name: 'Jasil Meledath',
-      title: 'Full Stack Developer & UI/UX Designer',
-      description: `Passionate full-stack developer with 5+ years of experience creating innovative web applications and user interfaces. I specialize in React, Node.js, and modern web technologies, with a keen eye for design and user experience.
-
-I love turning complex problems into simple, beautiful solutions. When I'm not coding, you can find me exploring new technologies, contributing to open source projects, or designing the next big thing.`,
-      email: 'jasil@example.com',
-      location: 'San Francisco, CA',
-      phone: '+1 (555) 123-4567'
-    },
-    socialLinks: [
-      { platform: 'github', url: 'https://github.com/jasilmeledath', username: 'jasilmeledath' },
-      { platform: 'linkedin', url: 'https://linkedin.com/in/jasilmeledath', username: 'jasilmeledath' },
-      { platform: 'twitter', url: 'https://twitter.com/jasilmeledath', username: 'jasilmeledath' },
-      { platform: 'website', url: 'https://jasilmeledath.dev', username: 'Portfolio' }
-    ],
+  // Initialize with empty data structure - will be populated by API
+  const emptyPortfolioData = {
+    personalInfo: {},
+    socialLinks: [],
     skills: {
-      frontend: [
-        { name: 'React', icon: '⚛️', level: 95 },
-        { name: 'Next.js', icon: '🔼', level: 90 },
-        { name: 'TypeScript', icon: '📘', level: 88 },
-        { name: 'Tailwind CSS', icon: '🎨', level: 92 },
-        { name: 'Framer Motion', icon: '🎭', level: 85 },
-        { name: 'Vue.js', icon: '💚', level: 80 }
-      ],
-      backend: [
-        { name: 'Node.js', icon: '🟢', level: 90 },
-        { name: 'Express.js', icon: '🚀', level: 88 },
-        { name: 'MongoDB', icon: '🍃', level: 85 },
-        { name: 'PostgreSQL', icon: '🐘', level: 82 },
-        { name: 'GraphQL', icon: '📊', level: 80 },
-        { name: 'Docker', icon: '🐳', level: 75 }
-      ],
-      tools: [
-        { name: 'Git', icon: '📝', level: 95 },
-        { name: 'VS Code', icon: '💻', level: 98 },
-        { name: 'Figma', icon: '🎨', level: 85 },
-        { name: 'AWS', icon: '☁️', level: 75 },
-        { name: 'Webpack', icon: '📦', level: 80 },
-        { name: 'Jest', icon: '🧪', level: 78 }
-      ]
+      frontend: [],
+      backend: [],
+      tools: []
     },
-    projects: [
-      {
-        id: 1,
-        title: 'E-Commerce Platform',
-        description: 'A modern, responsive e-commerce platform built with React, Node.js, and MongoDB. Features include user authentication, payment processing, admin dashboard, and real-time inventory management.',
-        image: '/placeholder.svg',
-        tech: ['React', 'Node.js', 'MongoDB', 'Stripe', 'Tailwind CSS'],
-        liveUrl: 'https://demo-ecommerce.com',
-        githubUrl: 'https://github.com/jasilmeledath/ecommerce-platform',
-        stats: { users: '10K+', performance: '95%', rating: '4.8' }
-      },
-      {
-        id: 2,
-        title: 'Task Management App',
-        description: 'Collaborative task management application with real-time updates, team collaboration features, and advanced project tracking capabilities.',
-        image: '/placeholder.svg',
-        tech: ['Next.js', 'Socket.io', 'PostgreSQL', 'Prisma', 'TypeScript'],
-        liveUrl: 'https://task-manager-demo.com',
-        githubUrl: 'https://github.com/jasilmeledath/task-manager',
-        stats: { users: '5K+', performance: '98%', rating: '4.9' }
-      },
-      {
-        id: 3,
-        title: 'Portfolio Website',
-        description: 'This very portfolio website you\'re viewing! Built with Next.js, featuring interactive animations, dark/light mode, and a terminal interface for developers.',
-        image: '/placeholder.svg',
-        tech: ['Next.js', 'Framer Motion', 'Tailwind CSS', 'MongoDB'],
-        liveUrl: 'https://jasilmeledath.dev',
-        githubUrl: 'https://github.com/jasilmeledath/portfolio',
-        stats: { users: '2K+', performance: '100%', rating: '5.0' }
-      }
-    ],
-    experience: [
-      {
-        id: 1,
-        title: 'Senior Full Stack Developer',
-        company: 'TechCorp Inc.',
-        duration: '2022 - Present',
-        description: 'Leading development of web applications, mentoring junior developers, and architecting scalable solutions.',
-        technologies: ['React', 'Node.js', 'AWS', 'MongoDB']
-      },
-      {
-        id: 2,
-        title: 'Frontend Developer',
-        company: 'StartupXYZ',
-        duration: '2020 - 2022',
-        description: 'Built responsive web applications and implemented modern UI/UX designs using React and TypeScript.',
-        technologies: ['React', 'TypeScript', 'Sass', 'Jest']
-      }
-    ]
+    projects: [],
+    experience: []
   };
 
-  const [portfolioData, setPortfolioData] = useState(defaultPortfolioData);
-  const [loading, setLoading] = useState(false); // Start with false since we have default data
+  const [portfolioData, setPortfolioData] = useState(emptyPortfolioData);
+  const [loading, setLoading] = useState(true); // Start with true since we need to load data
   const [error, setError] = useState(null);
 
   /**
@@ -122,55 +39,59 @@ I love turning complex problems into simple, beautiful solutions. When I'm not c
       setLoading(true);
       setError(null);
 
-      // Try to load data from API
-      const response = await PortfolioService.getVisitorPortfolio();
-      
-      if (response.success && response.data) {
-        const data = response.data;
+        // Try to load data from API
+        const response = await PortfolioService.getVisitorPortfolio();
         
-        // Process the data
-        const processedSkills = data.skills && Array.isArray(data.skills) && data.skills.length > 0
-          ? PortfolioService.processSkillsData(data.skills) 
-          : null;
+        console.log('[usePortfolioData] API Response:', response);
         
-        const processedProjects = data.projects && data.projects.length > 0
-          ? PortfolioService.processProjectsData(data.projects)
-          : null;
+        if (response.success && response.data) {
+          const data = response.data;
           
-        const processedSocialLinks = data.socialLinks && data.socialLinks.length > 0
-          ? PortfolioService.processSocialLinksData(data.socialLinks)
-          : null;
+          console.log('[usePortfolioData] Raw personalInfo from API:', data.personalInfo);
+          console.log('[usePortfolioData] Avatar URL from API:', data.personalInfo?.avatar);
+        
+          // Process the data
+          const processedSkills = data.skills && Array.isArray(data.skills) && data.skills.length > 0
+            ? PortfolioService.processSkillsData(data.skills) 
+            : null;
           
-        const processedExperience = data.experience && data.experience.length > 0
-          ? PortfolioService.processExperienceData(data.experience)
-          : null;
-        
-        // Merge API data with defaults, keeping defaults as fallback
-        setPortfolioData(prevData => ({
-          personalInfo: data.personalInfo && Object.keys(data.personalInfo).length > 0
-            ? {
-                ...prevData.personalInfo,
-                ...data.personalInfo
-              }
-            : prevData.personalInfo,
-          socialLinks: processedSocialLinks || prevData.socialLinks,
-          skills: processedSkills || prevData.skills,
-          projects: processedProjects || prevData.projects,
-          experience: processedExperience || prevData.experience
-        }));
-        
-        console.log('[usePortfolioData] Successfully loaded data from API');
-      } else {
-        console.log('[usePortfolioData] API response unsuccessful, using default data');
+          const processedProjects = data.projects && data.projects.length > 0
+            ? PortfolioService.processProjectsData(data.projects)
+            : null;
+            
+          const processedSocialLinks = data.socialLinks && data.socialLinks.length > 0
+            ? PortfolioService.processSocialLinksData(data.socialLinks)
+            : null;
+            
+          const processedExperience = data.experience && data.experience.length > 0
+            ? PortfolioService.processExperienceData(data.experience)
+            : null;
+          
+          // Use only API data - no fallback to defaults
+          const finalData = {
+            personalInfo: data.personalInfo || {},
+            socialLinks: processedSocialLinks || [],
+            skills: processedSkills || { frontend: [], backend: [], tools: [] },
+            projects: processedProjects || [],
+            experience: processedExperience || []
+          };
+          
+          console.log('[usePortfolioData] Final personalInfo to be set:', finalData.personalInfo);
+          console.log('[usePortfolioData] Final avatar URL to be set:', finalData.personalInfo?.avatar);
+          
+          setPortfolioData(finalData);
+          
+          console.log('[usePortfolioData] Successfully loaded data from API');
+        } else {
+          console.log('[usePortfolioData] API response unsuccessful');
+          setError('Failed to load portfolio data');
+        }
+      } catch (err) {
+        console.log('[usePortfolioData] API failed:', err.message);
+        setError('Failed to connect to portfolio service');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.log('[usePortfolioData] API failed, using default data:', err.message);
-      setError(null); // Don't show error to user since we have fallback data
-      
-      // Keep the default data that was already set
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {

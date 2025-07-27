@@ -650,7 +650,6 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
               : "bg-gradient-to-b from-amber-600 to-amber-700"
           } rounded-full shadow-sm opacity-90`} />
         </motion.div>
-        
         {/* Enhanced Shadow System with Ground Shadow */}
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-40"
@@ -928,6 +927,16 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                       </div>
                     )}
                     
+                    {/* Professional photo overlay effects */}                        {/* Professional avatar placeholder */}
+                        <div className={`${isMobile ? "text-4xl" : "text-5xl"} mb-2 filter drop-shadow-sm`}>
+                          �
+                        </div>
+                        <div className={`text-xs font-medium ${isDark ? "text-slate-300" : "text-gray-600"}`}>
+                          Professional Photo
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Professional photo overlay effects */}
                     <div 
                       className="absolute inset-0 pointer-events-none"
@@ -982,7 +991,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
             </div>
 
             {/* Information */}
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-3 ">
               <h3 className={`font-bold ${textSizes.name} leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
                 {personalInfo?.name || "Loading..."}
               </h3>
@@ -992,7 +1001,7 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
 
               {/* Details */}
               <div
-                className={`space-y-2 ${textSizes.details} p-3 rounded-xl ${
+                className={`space-y-2 ${textSizes.details}  rounded-xl ${
                   isDark ? "bg-slate-800/50 border border-slate-600/30" : "bg-gray-100/50 border border-gray-300/30"
                 }`}
               >

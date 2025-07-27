@@ -150,8 +150,26 @@ const createApp = () => {
     app.use('/api/v1/portfolio-management', portfolioManagementRoutes);
     // app.use('/api/v1/admin', adminRoutes);
 
-    // Static file serving for uploads
-    app.use('/uploads', express.static('uploads', {
+    // Static file serving for uploads with CORS headers
+    app.use('/uploads', (req, res, next) => {
+        // Add CORS headers for static files
+        const origin = req.headers.origin;
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:3001', 
+            'https://yourportfolio.vercel.app',
+            process.env.FRONTEND_URL
+        ].filter(Boolean);
+        
+        if (!origin || allowedOrigins.includes(origin)) {
+            res.setHeader('Access-Control-Allow-Origin', origin || '*');
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
+            res.setHeader('Access-Control-Allow-Methods', 'GET');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        }
+        
+        next();
+    }, express.static('uploads', {
         maxAge: '1d',
         etag: false
     }));

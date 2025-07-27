@@ -47,6 +47,12 @@ export default function PortfolioPage() {
   const { portfolioData, loading, error } = usePortfolioData()
   const { personalInfo, socialLinks, skills, projects, experience } = portfolioData
 
+  // Debug log for avatar
+  useEffect(() => {
+    console.log('[PortfolioPage] personalInfo:', personalInfo);
+    console.log('[PortfolioPage] personalInfo.avatar:', personalInfo?.avatar);
+  }, [personalInfo]);
+
   // Debug log for projects
   useEffect(() => {
     if (projects.length > 0) {
