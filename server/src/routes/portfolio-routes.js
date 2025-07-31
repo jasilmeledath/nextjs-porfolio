@@ -1,6 +1,6 @@
 /**
  * @fileoverview Portfolio Routes - API routes for portfolio operations
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -146,5 +146,19 @@ router.patch('/:id/status', authenticate, requireAdmin, PortfolioController.togg
  * @param {string} id - Project ID
  */
 router.patch('/:id/featured', authenticate, requireAdmin, PortfolioController.toggleFeatured);
+
+/**
+ * @route GET /api/v1/portfolio/resume/download
+ * @desc Download resume file
+ * @access Public
+ */
+router.get('/resume/download', PortfolioController.downloadResume);
+
+/**
+ * @route GET /api/v1/portfolio/resume/view
+ * @desc View resume file in browser
+ * @access Public
+ */
+router.get('/resume/view', PortfolioController.viewResume);
 
 module.exports = router;

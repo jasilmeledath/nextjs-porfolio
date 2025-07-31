@@ -1,21 +1,15 @@
 /**
- * @fileoverview Portfo    // In development mode, if no token is found, use the real admin token for testing
-    if (!token && process.env.NODE_ENV === 'development') {
-      console.log('[PortfolioManagementService] Using real admin token for development testing');
-      return {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM4MGY5MzE0ZTk4YTJjOWI5NWFhNyIsImVtYWlsIjoiamFzaWxtZWxlZGF0aEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJwb3J0Zm9saW86cmVhZCIsInBvcnRmb2xpbzp3cml0ZSIsImJsb2c6cmVhZCIsImJsb2c6d3JpdGUiLCJibG9nOmRlbGV0ZSIsImNvbW1lbnRzOm1vZGVyYXRlIiwibWVkaWE6dXBsb2FkIiwibWVkaWE6ZGVsZXRlIiwiYW5hbHl0aWNzOnZpZXciLCJzZXR0aW5nczptYW5hZ2UiLCJ1c2VyczptYW5hZ2UiXSwiaWF0IjoxNzUzNTM4Mjc2LCJleHAiOjE3NTQxNDMwNzYsImF1ZCI6InBvcnRmb2xpby1mcm9udGVuZCIsImlzcyI6InBvcnRmb2xpby1hcGkifQ.HzRib08rDPcDuFoXh4_NnboQuME3-LSoNWBpFtzfbHo'
-      };
-    }gement Service - API Integration
- * @author Professional Developer <dev@portfolio.com>
+ * @fileoverview Portfolio Management Service - API Integration
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
  */
 
 import Cookies from 'js-cookie';
+import { getApiBaseUrl, getServerBaseUrl } from '../utils/api-config';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = getApiBaseUrl();
 const PORTFOLIO_MANAGEMENT_URL = `${API_BASE_URL}/portfolio-management`;
 
 /**
@@ -248,6 +242,143 @@ class PortfolioManagementService {
     });
   }
 
+  // ==================== RESUME MANAGEMENT ====================
+
+  /**
+   * Get resume URL from personal info
+   * @returns {Promise<Object>} Resume URL data
+   */
+  static async getResumeUrl() {
+    try {
+      console.log('[PortfolioManagementService] Getting resume URL...');
+      
+      const personalInfo = await this.getPersonalInfo();
+      if (!personalInfo.success || !personalInfo.data?.resumeUrl) {
+        return {
+          success: false,
+          message: 'No resume available'
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          resumeUrl: personalInfo.data.resumeUrl,
+          fileName: personalInfo.data.resumeUrl.split('/').pop()
+        }
+      };
+    } catch (error) {
+      console.error('[PortfolioManagementService] Error getting resume URL:', error);
+      return {
+        success: false,
+        message: 'Failed to get resume URL'
+      };
+    }
+  }
+
+  /**
+   * Download resume file
+   * @returns {Promise<Object>} Download result
+   */
+  static async downloadResume() {
+    try {
+      console.log('[PortfolioManagementService] Downloading resume...');
+      
+      // Download the resume file
+      const response = await fetch(`${API_BASE_URL}/portfolio/resume/download`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Resume file not found');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Get the filename from the Content-Disposition header
+      const contentDisposition = response.headers.get('content-disposition');
+      let fileName = 'resume.pdf';
+      if (contentDisposition) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+        if (matches != null && matches[1]) {
+          fileName = matches[1].replace(/['"]/g, '');
+        }
+      }
+
+      const blob = await response.blob();
+      
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      return {
+        success: true,
+        message: 'Resume downloaded successfully',
+        data: { fileName }
+      };
+    } catch (error) {
+      console.error('[PortfolioManagementService] Error downloading resume:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * View resume in browser (opens in new tab)
+   * @returns {Promise<Object>} Resume view URL
+   */
+  static async viewResume() {
+    try {
+      console.log('[PortfolioManagementService] Getting resume view URL...');
+      
+      const resumeData = await this.getResumeUrl();
+      if (!resumeData.success) {
+        throw new Error(resumeData.message);
+      }
+
+      const viewUrl = `${API_BASE_URL}/portfolio/resume/view`;
+      return {
+        success: true,
+        data: {
+          viewUrl,
+          fileName: resumeData.data.fileName
+        }
+      };
+    } catch (error) {
+      console.error('[PortfolioManagementService] Error getting resume view URL:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if resume exists
+   * @returns {Promise<Object>} Resume availability status
+   */
+  static async checkResumeAvailability() {
+    try {
+      const personalInfo = await this.getPersonalInfo();
+      return {
+        success: true,
+        data: {
+          hasResume: !!(personalInfo.success && personalInfo.data?.resumeUrl),
+          resumeUrl: personalInfo.data?.resumeUrl || null
+        }
+      };
+    } catch (error) {
+      console.error('[PortfolioManagementService] Error checking resume availability:', error);
+      return {
+        success: false,
+        data: { hasResume: false, resumeUrl: null }
+      };
+    }
+  }
+
   // ==================== SKILLS ====================
 
   /**
@@ -368,10 +499,23 @@ class PortfolioManagementService {
   static async updateProject(id, project, projectImages = [], thumbnailImage = null) {
     const formData = new FormData();
     
-    // Add text fields
+    // Add text fields with proper handling for arrays
     Object.keys(project).forEach(key => {
       if (project[key] !== null && project[key] !== undefined) {
-        if (typeof project[key] === 'object') {
+        if (Array.isArray(project[key])) {
+          // Handle arrays properly - send each item individually
+          if (key === 'challenges' || key === 'learnings') {
+            project[key].forEach((item, index) => {
+              formData.append(`${key}[${index}]`, item);
+            });
+          } else if (key === 'technologies') {
+            // Handle technologies as JSON since it's more complex
+            formData.append(key, JSON.stringify(project[key]));
+          } else {
+            // For other arrays, stringify as JSON
+            formData.append(key, JSON.stringify(project[key]));
+          }
+        } else if (typeof project[key] === 'object') {
           formData.append(key, JSON.stringify(project[key]));
         } else {
           formData.append(key, project[key]);
@@ -504,7 +648,8 @@ class PortfolioManagementService {
     if (!filename) return null;
     if (filename.startsWith('http')) return filename; // Already full URL
     
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    // Use the same API config utilities for consistency
+    const baseUrl = getServerBaseUrl();
     return `${baseUrl}/uploads/${folder ? folder + '/' : ''}${filename}`;
   }
 

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Common Form Footer Component with Save Button
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-07-26
  * @lastModified 2025-07-26
  * @version 1.0.0

@@ -1,18 +1,19 @@
 /**
  * @fileoverview Authentication Service - API calls for user authentication
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
  */
 
 import axios from 'axios';
+import { getApiBaseUrl } from '../utils/api-config';
 
 /**
  * API Base URL
  * @constant {string} API_BASE_URL
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = getApiBaseUrl().replace('/api/v1', '');
 
 /**
  * Create axios instance with default configuration

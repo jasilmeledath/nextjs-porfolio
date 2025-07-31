@@ -1,6 +1,6 @@
 /**
  * @fileoverview Portfolio Management Routes - Admin CRUD Operations
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -204,5 +204,21 @@ router.put('/experience/:id',
  * @access  Private (Admin)
  */
 router.delete('/experience/:id', PortfolioManagementController.deleteExperience);
+
+// ==================== RESUME MANAGEMENT ROUTES ====================
+
+/**
+ * @route   GET /api/portfolio-management/resume/download
+ * @desc    Download resume file
+ * @access  Private (Admin)
+ */
+router.get('/resume/download', PortfolioManagementController.downloadResume);
+
+/**
+ * @route   GET /api/portfolio-management/resume/view
+ * @desc    View resume in browser
+ * @access  Private (Admin)
+ */
+router.get('/resume/view', PortfolioManagementController.viewResume);
 
 module.exports = router;

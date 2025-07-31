@@ -1,6 +1,6 @@
 /**
  * @fileoverview Portfolio Controller - Handles portfolio project operations
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -8,6 +8,7 @@
 
 const Portfolio = require('../models/Portfolio');
 const User = require('../models/User');
+const PersonalInfo = require('../models/PersonalInfo');
 const ApiResponse = require('../utils/ApiResponse');
 const { HTTP_STATUS } = require('../constants/http-status');
 const { CustomError } = require('../errors/custom-errors');
@@ -643,6 +644,120 @@ class PortfolioController {
       res.status(HTTP_STATUS.SUCCESS).json(
         ApiResponse.success(socialLinks, 'Social links retrieved successfully')
       );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Download resume file
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async downloadResume(req, res, next) {
+    const fs = require('fs');
+    const path = require('path');
+    
+    try {
+      // Get personal info from the PersonalInfo collection
+      const personalInfo = await PersonalInfo.findOne({ isActive: true });
+      
+      if (!personalInfo || !personalInfo.resumeUrl) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json(
+          ApiResponse.error('Resume not found', HTTP_STATUS.NOT_FOUND)
+        );
+      }
+
+      let resumePath = personalInfo.resumeUrl;
+      
+      // If it's a URL, extract the file path
+      if (resumePath.startsWith('http://') || resumePath.startsWith('https://')) {
+        // Extract the path from the URL (e.g., /uploads/resumes/filename.pdf)
+        const url = new URL(resumePath);
+        resumePath = url.pathname;
+      }
+      
+      // Construct full file path from server root
+      const fullPath = path.join(__dirname, '../../', resumePath);
+      
+      // Check if file exists
+      if (!fs.existsSync(fullPath)) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json(
+          ApiResponse.error('Resume file not found', HTTP_STATUS.NOT_FOUND)
+        );
+      }
+
+      // Get file stats
+      const stats = fs.statSync(fullPath);
+      const customFileName = 'jasil-meledath-resume.pdf';
+      
+      // Set headers for download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${customFileName}"`);
+      res.setHeader('Content-Length', stats.size);
+      
+      // Create read stream and pipe to response
+      const fileStream = fs.createReadStream(fullPath);
+      fileStream.pipe(res);
+      
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * View resume file in browser
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async viewResume(req, res, next) {
+    const fs = require('fs');
+    const path = require('path');
+    
+    try {
+      // Get personal info from the PersonalInfo collection
+      const personalInfo = await PersonalInfo.findOne({ isActive: true });
+      
+      if (!personalInfo || !personalInfo.resumeUrl) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json(
+          ApiResponse.error('Resume not found', HTTP_STATUS.NOT_FOUND)
+        );
+      }
+
+      let resumePath = personalInfo.resumeUrl;
+      
+      // If it's a URL, extract the file path
+      if (resumePath.startsWith('http://') || resumePath.startsWith('https://')) {
+        // Extract the path from the URL (e.g., /uploads/resumes/filename.pdf)
+        const url = new URL(resumePath);
+        resumePath = url.pathname;
+      }
+      
+      // Construct full file path from server root
+      const fullPath = path.join(__dirname, '../../', resumePath);
+      
+      // Check if file exists
+      if (!fs.existsSync(fullPath)) {
+        return res.status(HTTP_STATUS.NOT_FOUND).json(
+          ApiResponse.error('Resume file not found', HTTP_STATUS.NOT_FOUND)
+        );
+      }
+
+      // Get file stats
+      const stats = fs.statSync(fullPath);
+      const customFileName = 'jasil-meledath-resume.pdf';
+      
+      // Set headers for inline viewing
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${customFileName}"`);
+      res.setHeader('Content-Length', stats.size);
+      
+      // Create read stream and pipe to response
+      const fileStream = fs.createReadStream(fullPath);
+      fileStream.pipe(res);
+      
     } catch (error) {
       next(error);
     }

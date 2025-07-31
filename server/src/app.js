@@ -1,6 +1,6 @@
 /**
  * @fileoverview Express Application Configuration
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -61,6 +61,11 @@ const createApp = () => {
     // CORS Configuration
     const corsOptions = {
         origin: function (origin, callback) {
+            // In development mode, allow any origin for mobile testing
+            if (process.env.NODE_ENV === 'development') {
+                return callback(null, true);
+            }
+
             const allowedOrigins = [
                 'http://localhost:3000', // Next.js development
                 'http://localhost:3001', // Alternative development port
@@ -71,15 +76,38 @@ const createApp = () => {
             // Allow requests with no origin (mobile apps, Postman, etc.)
             if (!origin) return callback(null, true);
             
+            // Allow local network IPs (for mobile phone access)
+            if (origin) {
+                const localNetworkPatterns = [
+                    /^http:\/\/localhost:\d+$/,
+                    /^http:\/\/127\.0\.0\.1:\d+$/,
+                    /^http:\/\/192\.168\.\d+\.\d+:\d+$/,  // Most common local network
+                    /^http:\/\/10\.\d+\.\d+\.\d+:\d+$/,   // Another common local network
+                    /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+:\d+$/, // Docker/container range
+                    /^https:\/\/.*\.vercel\.app$/,        // Vercel deployments
+                    /^https:\/\/.*\.netlify\.app$/,       // Netlify deployments
+                    /^https:\/\/.*\.herokuapp\.com$/,     // Heroku deployments
+                    /^https:\/\/.*\.trycloudflare\.com$/, // Cloudflare tunnels
+                    /^https:\/\/.*\.ngrok\.io$/,          // Ngrok tunnels
+                    /^https:\/\/.*\.loca\.lt$/            // Localtunnel
+                ];
+
+                const isLocalNetwork = localNetworkPatterns.some(pattern => pattern.test(origin));
+                if (isLocalNetwork) {
+                    return callback(null, true);
+                }
+            }
+            
             if (allowedOrigins.indexOf(origin) !== -1) {
                 callback(null, true);
             } else {
+                console.log(`CORS: Blocked origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
     };
     app.use(cors(corsOptions));
 
@@ -154,6 +182,17 @@ const createApp = () => {
     app.use('/uploads', (req, res, next) => {
         // Add CORS headers for static files
         const origin = req.headers.origin;
+        
+        // In development mode, allow any origin for mobile testing
+        if (process.env.NODE_ENV === 'development') {
+            res.setHeader('Access-Control-Allow-Origin', origin || '*');
+            res.setHeader('Access-Control-Allow-Credentials', 'true');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+            next();
+            return;
+        }
+
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:3001', 
@@ -161,8 +200,29 @@ const createApp = () => {
             process.env.FRONTEND_URL
         ].filter(Boolean);
         
-        // More permissive CORS for image requests
+        // Check for local network patterns (same as main CORS config)
+        let isAllowed = false;
         if (!origin || allowedOrigins.includes(origin)) {
+            isAllowed = true;
+        } else if (origin) {
+            const localNetworkPatterns = [
+                /^http:\/\/localhost:\d+$/,
+                /^http:\/\/127\.0\.0\.1:\d+$/,
+                /^http:\/\/192\.168\.\d+\.\d+:\d+$/,
+                /^http:\/\/10\.\d+\.\d+\.\d+:\d+$/,
+                /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+:\d+$/,
+                /^https:\/\/.*\.vercel\.app$/,
+                /^https:\/\/.*\.netlify\.app$/,
+                /^https:\/\/.*\.herokuapp\.com$/,
+                /^https:\/\/.*\.trycloudflare\.com$/,
+                /^https:\/\/.*\.ngrok\.io$/,
+                /^https:\/\/.*\.loca\.lt$/
+            ];
+            isAllowed = localNetworkPatterns.some(pattern => pattern.test(origin));
+        }
+        
+        // More permissive CORS for image requests
+        if (isAllowed) {
             res.setHeader('Access-Control-Allow-Origin', origin || '*');
             res.setHeader('Access-Control-Allow-Credentials', 'true');
             res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');

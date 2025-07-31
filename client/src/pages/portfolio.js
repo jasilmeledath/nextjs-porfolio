@@ -1,6 +1,6 @@
 /**
  * @fileoverview Portfolio Page - Professional Visitor Mode
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -12,6 +12,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import Head from "next/head"
 import Link from "next/link"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import toast from "react-hot-toast"
 import {
   ArrowLeft,
   Download,
@@ -33,6 +34,7 @@ import {
 import { usePortfolioData } from "../hooks/usePortfolioData"
 import HangingIDCard from "../components/ui/HangingIDCard"
 import ProjectPreview from "../components/ui/ProjectPreview"
+import PortfolioManagementService from "../services/portfolio-management-service"
 
 export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("hero")
@@ -41,6 +43,7 @@ export default function PortfolioPage() {
   const [isClient, setIsClient] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
   const [isProjectPreviewOpen, setIsProjectPreviewOpen] = useState(false)
+  const [isDownloadingResume, setIsDownloadingResume] = useState(false)
   const containerRef = useRef(null)
 
   // Load portfolio data from backend
@@ -301,6 +304,66 @@ export default function PortfolioPage() {
     setSelectedProject(null)
     document.body.style.overflow = 'unset' // Restore scroll
   }, [])
+
+  const handleResumeDownload = useCallback(async () => {
+    if (isDownloadingResume) return;
+    
+    setIsDownloadingResume(true);
+    
+    // Dismiss any existing toasts
+    toast.dismiss();
+    
+    try {
+      const result = await PortfolioManagementService.downloadResume();
+      
+      if (result.success) {
+        toast.success('Resume downloaded successfully!', {
+          id: 'resume-download-success',
+          style: {
+            background: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+            color: isDark ? '#10b981' : '#059669',
+            border: `1px solid ${isDark ? '#10b981' : '#059669'}`,
+            borderRadius: '12px',
+            backdropFilter: 'blur(12px)',
+            fontSize: '14px',
+            fontWeight: '500',
+          },
+          iconTheme: {
+            primary: isDark ? '#10b981' : '#059669',
+            secondary: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          },
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      let errorMessage = 'Sorry, there was an error downloading the resume. Please try again later.';
+      
+      if (error.message.includes('Resume file not found') || error.message.includes('404')) {
+        errorMessage = 'Resume file is not available at the moment. Please check back later.';
+      }
+      
+      toast.error(errorMessage, {
+        id: 'resume-download-error',
+        style: {
+          background: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          color: isDark ? '#ef4444' : '#dc2626',
+          border: `1px solid ${isDark ? '#ef4444' : '#dc2626'}`,
+          borderRadius: '12px',
+          backdropFilter: 'blur(12px)',
+          fontSize: '14px',
+          fontWeight: '500',
+        },
+        iconTheme: {
+          primary: isDark ? '#ef4444' : '#dc2626',
+          secondary: isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        },
+        duration: 4000,
+      });
+    } finally {
+      setIsDownloadingResume(false);
+    }
+  }, [isDownloadingResume])
 
   // Client-side hydration fix
   useEffect(() => {
@@ -626,12 +689,16 @@ export default function PortfolioPage() {
 
                 <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-3 md:gap-4">
                   <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl md:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 text-sm md:text-base"
+                    onClick={handleResumeDownload}
+                    disabled={isDownloadingResume}
+                    whileHover={{ scale: isDownloadingResume ? 1 : 1.05, y: isDownloadingResume ? 0 : -2 }}
+                    whileTap={{ scale: isDownloadingResume ? 1 : 0.95 }}
+                    className={`inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl md:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 text-sm md:text-base ${
+                      isDownloadingResume ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                   >
-                    <Download className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                    Download Resume
+                    <Download className={`w-4 h-4 md:w-5 md:h-5 mr-2 ${isDownloadingResume ? 'animate-spin' : ''}`} />
+                    {isDownloadingResume ? 'Downloading...' : 'Download Resume'}
                   </motion.button>
                   <motion.a
                     href="#contact"

@@ -1,6 +1,6 @@
 /**
  * @fileoverview Project Form Component - Create/Edit Projects
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -61,7 +61,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       users: '0',
       performance: '0%',
       rating: 0,
-      uptime: null,
+      uptime: '',
       githubStars: 0,
       deployments: 0
     },
@@ -150,14 +150,48 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
         demoUrl: editingProject.demoUrl || '',
         caseStudyUrl: editingProject.caseStudyUrl || '',
         isFeatured: editingProject.isFeatured || false,
+        isActive: editingProject.isActive !== undefined ? editingProject.isActive : true,
         status: editingProject.status || 'in-progress',
-        stats: editingProject.stats || { users: '', performance: '', rating: 0 },
+        stats: {
+          users: editingProject.stats?.users || '0',
+          performance: editingProject.stats?.performance || '0%',
+          rating: editingProject.stats?.rating || 0,
+          uptime: editingProject.stats?.uptime || '',
+          githubStars: editingProject.stats?.githubStars || 0,
+          deployments: editingProject.stats?.deployments || 0
+        },
         startDate: editingProject.startDate ? new Date(editingProject.startDate).toISOString().split('T')[0] : '',
         endDate: editingProject.endDate ? new Date(editingProject.endDate).toISOString().split('T')[0] : '',
         teamSize: editingProject.teamSize || 1,
         myRole: editingProject.myRole || '',
-        challenges: editingProject.challenges || [],
-        learnings: editingProject.learnings || [],
+        challenges: (() => {
+          try {
+            if (Array.isArray(editingProject.challenges)) {
+              return editingProject.challenges;
+            }
+            if (editingProject.challenges?.[0] && typeof editingProject.challenges[0] === 'string') {
+              return JSON.parse(editingProject.challenges[0]);
+            }
+            return [];
+          } catch (e) {
+            console.warn('Failed to parse challenges:', e);
+            return [];
+          }
+        })(),
+        learnings: (() => {
+          try {
+            if (Array.isArray(editingProject.learnings)) {
+              return editingProject.learnings;
+            }
+            if (editingProject.learnings?.[0] && typeof editingProject.learnings[0] === 'string') {
+              return JSON.parse(editingProject.learnings[0]);
+            }
+            return [];
+          } catch (e) {
+            console.warn('Failed to parse learnings:', e);
+            return [];
+          }
+        })(),
         order: editingProject.order || 0
       });
 
@@ -183,7 +217,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       console.log('[ProjectForm] Projects response:', response);
       
       if (response.success) {
-        setProjects(response.message || []);
+        setProjects(response.data?.projects || []);
       } else {
         console.error('[ProjectForm] Failed to load projects:', response.message);
         showMessage('error', 'Failed to load projects');
@@ -201,6 +235,11 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
    */
   const handleEditProject = (project) => {
     console.log('[ProjectForm] Edit project button clicked', project);
+    console.log('[ProjectForm] Project ID check:', {
+      _id: project._id,
+      id: project.id,
+      keys: Object.keys(project)
+    });
     setEditingProject(project);
     setShowForm(true);
     resetForm();
@@ -543,8 +582,20 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       
       let response;
       if (editingProject) {
+        // Handle different possible ID field names
+        const projectId = editingProject._id || editingProject.id;
+        console.log('[ProjectForm] Updating project with:', {
+          id: projectId,
+          editingProject: editingProject,
+          formData: formData
+        });
+        
+        if (!projectId) {
+          throw new Error('Project ID is missing');
+        }
+        
         response = await PortfolioManagementService.updateProject(
-          editingProject._id,
+          projectId,
           formData,
           projectImages,
           thumbnailImage
@@ -573,7 +624,21 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       }
     } catch (error) {
       console.error('[ProjectForm] Save error:', error);
-      showMessage('error', error.message || `Failed to ${editingProject ? 'update' : 'create'} project`);
+      
+      // Extract meaningful error message
+      let errorMessage = `Failed to ${editingProject ? 'update' : 'create'} project`;
+      
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.message && typeof error.message === 'string') {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      }
+      
+      showMessage('error', errorMessage);
     } finally {
       setSaving(false);
     }
@@ -661,18 +726,19 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.isArray(projects) && projects.map((proj) => (
                   <div
-                    key={proj._id}
+                    key={proj.id || proj._id}
                     className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 p-6 hover:border-green-500/40 transition-all duration-300"
                   >
                     {/* Project Thumbnail */}
                     {proj.thumbnailImage && (
-                      <div className="mb-4 relative">
-                        <div className="w-full h-32 rounded-lg overflow-hidden bg-gray-800">
+                      <div className="mb-4 relative h-32">
+                        <div className="w-full h-full rounded-lg overflow-hidden bg-gray-800 relative">
                           <Image
                             src={proj.thumbnailImage}
                             alt={proj.title}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            priority={false}
                             style={{ objectFit: 'cover' }}
                             unoptimized={proj.thumbnailImage.startsWith('blob:')}
                           />

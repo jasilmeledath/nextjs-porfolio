@@ -1,6 +1,6 @@
 /**
  * @fileoverview Admin Portfolio Management Page - Cyber Themed
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -38,10 +38,12 @@ import {
   FiLink,
   FiStar,
   FiAward,
-  FiTarget
+  FiTarget,
+  FiDownload
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import PortfolioManagementService from '../../services/portfolio-management-service';
+import ResumeManager from '../../components/admin/ResumeManager';
 
 /**
  * Admin Portfolio Management Page Component
@@ -411,6 +413,11 @@ export default function AdminPortfolioPage() {
                   </Link>
                 </div>
               </div>
+            </motion.div>
+
+            {/* Resume Manager */}
+            <motion.div variants={fadeInUp}>
+              <ResumeManager />
             </motion.div>
           </motion.div>
         </main>

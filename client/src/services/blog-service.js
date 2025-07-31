@@ -1,6 +1,6 @@
 /**
  * @fileoverview Blog Service - API calls for blog operations
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -8,8 +8,9 @@
 
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { getApiBaseUrl } from '../utils/api-config';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Blog Service Class

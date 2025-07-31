@@ -1,6 +1,6 @@
 /**
  * @fileoverview Portfolio Management Controller - Complete CRUD Operations
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 2.0.0
@@ -582,7 +582,7 @@ class PortfolioManagementController {
       const projects = await Project.find(query).sort({ order: 1, createdAt: -1 });
       
       return res.status(HTTP_STATUS.SUCCESS).json(
-        ApiResponse.success('Projects retrieved successfully', projects)
+        ApiResponse.success({ projects }, 'Projects retrieved successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Get projects error:', error);
@@ -728,6 +728,7 @@ class PortfolioManagementController {
         demoUrl, caseStudyUrl, isFeatured, status, stats, startDate, endDate,
         teamSize, myRole, challenges, learnings, order
       } = req.body;
+      console.log(challenges, learnings);
       
       // Find existing project
       const existingProject = await Project.findOne({ _id: id, userId });
@@ -736,13 +737,14 @@ class PortfolioManagementController {
       }
       
       // Handle file uploads
-      let images = existingProject.images;
-      let thumbnailImage = existingProject.thumbnailImage;
+      let images = existingProject.images || ['/placeholder.svg'];
+      let thumbnailImage = existingProject.thumbnailImage || '/placeholder.svg';
       
       if (req.files) {
         if (req.files.projectImages) {
-          // Delete old images
-          if (existingProject.images && existingProject.images.length > 0) {
+          // Delete old images (but not placeholder)
+          if (existingProject.images && existingProject.images.length > 0 && 
+              !existingProject.images.includes('/placeholder.svg')) {
             deleteOldFiles(existingProject.images, 'projects');
           }
           images = req.files.projectImages.map(file => 
@@ -750,8 +752,9 @@ class PortfolioManagementController {
           );
         }
         if (req.files.thumbnailImage && req.files.thumbnailImage[0]) {
-          // Delete old thumbnail
-          if (existingProject.thumbnailImage) {
+          // Delete old thumbnail (but not placeholder)
+          if (existingProject.thumbnailImage && 
+              existingProject.thumbnailImage !== '/placeholder.svg') {
             deleteOldFiles([existingProject.thumbnailImage], 'projects');
           }
           thumbnailImage = getFileUrl(req, req.files.thumbnailImage[0].filename, 'projects');
@@ -778,13 +781,47 @@ class PortfolioManagementController {
         }
       }
       
+      // Parse challenges array from FormData format
+      let parsedChallenges = challenges;
+      if (req.body && typeof req.body === 'object') {
+        const challengeKeys = Object.keys(req.body).filter(key => key.startsWith('challenges['));
+        if (challengeKeys.length > 0) {
+          parsedChallenges = challengeKeys.map(key => req.body[key]).filter(item => item && item.trim());
+        } else if (typeof challenges === 'string') {
+          try {
+            parsedChallenges = JSON.parse(challenges);
+          } catch (e) {
+            parsedChallenges = existingProject.challenges || [];
+          }
+        } else if (!Array.isArray(challenges)) {
+          parsedChallenges = existingProject.challenges || [];
+        }
+      }
+      
+      // Parse learnings array from FormData format
+      let parsedLearnings = learnings;
+      if (req.body && typeof req.body === 'object') {
+        const learningKeys = Object.keys(req.body).filter(key => key.startsWith('learnings['));
+        if (learningKeys.length > 0) {
+          parsedLearnings = learningKeys.map(key => req.body[key]).filter(item => item && item.trim());
+        } else if (typeof learnings === 'string') {
+          try {
+            parsedLearnings = JSON.parse(learnings);
+          } catch (e) {
+            parsedLearnings = existingProject.learnings || [];
+          }
+        } else if (!Array.isArray(learnings)) {
+          parsedLearnings = existingProject.learnings || [];
+        }
+      }
+      
       const updateData = {
         title,
         description,
         longDescription,
         technologies: parsedTechnologies,
-        images,
-        thumbnailImage,
+        images: images && images.length > 0 ? images : ['/placeholder.svg'],
+        thumbnailImage: thumbnailImage || '/placeholder.svg',
         liveUrl,
         githubUrl,
         demoUrl,
@@ -796,8 +833,8 @@ class PortfolioManagementController {
         endDate: endDate ? new Date(endDate) : null,
         teamSize,
         myRole,
-        challenges,
-        learnings,
+        challenges: parsedChallenges,
+        learnings: parsedLearnings,
         order
       };
       
@@ -808,7 +845,7 @@ class PortfolioManagementController {
       );
       
       return res.status(HTTP_STATUS.SUCCESS).json(
-        ApiResponse.success('Project updated successfully', updatedProject)
+        ApiResponse.success(updatedProject, 'Project updated successfully')
       );
     } catch (error) {
       console.error('[PortfolioController] Update project error:', error);
@@ -1079,6 +1116,116 @@ class PortfolioManagementController {
     } catch (error) {
       console.error('[PortfolioController] Delete experience error:', error);
       next(new CustomError('Failed to delete experience', HTTP_STATUS.INTERNAL_SERVER_ERROR));
+    }
+  }
+
+  // ==================== RESUME MANAGEMENT ====================
+
+  /**
+   * Download resume file
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async downloadResume(req, res, next) {
+    try {
+      const userId = req.user.id;
+      
+      console.log(`[PortfolioController] Downloading resume for user: ${userId}`);
+      
+      // Get personal info with resume URL
+      const personalInfo = await PersonalInfo.findOne({ userId });
+      if (!personalInfo || !personalInfo.resumeUrl) {
+        return next(new CustomError('Resume not found', HTTP_STATUS.NOT_FOUND));
+      }
+      
+      // Extract filename from URL
+      const resumeFileName = personalInfo.resumeUrl.split('/').pop();
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Construct file path
+      const resumeFilePath = path.join(process.cwd(), 'uploads', 'resumes', resumeFileName);
+      
+      // Check if file exists
+      if (!fs.existsSync(resumeFilePath)) {
+        console.error(`[PortfolioController] Resume file not found at: ${resumeFilePath}`);
+        return next(new CustomError('Resume file not found on server', HTTP_STATUS.NOT_FOUND));
+      }
+      
+      // Set appropriate headers for download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${resumeFileName}"`);
+      res.setHeader('Cache-Control', 'no-cache');
+      
+      // Stream the file
+      const fileStream = fs.createReadStream(resumeFilePath);
+      fileStream.pipe(res);
+      
+      fileStream.on('error', (error) => {
+        console.error('[PortfolioController] File stream error:', error);
+        next(new CustomError('Error reading resume file', HTTP_STATUS.INTERNAL_SERVER_ERROR));
+      });
+      
+      console.log(`[PortfolioController] Resume download started: ${resumeFileName}`);
+      
+    } catch (error) {
+      console.error('[PortfolioController] Download resume error:', error);
+      next(new CustomError('Failed to download resume', HTTP_STATUS.INTERNAL_SERVER_ERROR));
+    }
+  }
+
+  /**
+   * View resume in browser
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async viewResume(req, res, next) {
+    try {
+      const userId = req.user.id;
+      
+      console.log(`[PortfolioController] Viewing resume for user: ${userId}`);
+      
+      // Get personal info with resume URL
+      const personalInfo = await PersonalInfo.findOne({ userId });
+      if (!personalInfo || !personalInfo.resumeUrl) {
+        return next(new CustomError('Resume not found', HTTP_STATUS.NOT_FOUND));
+      }
+      
+      // Extract filename from URL
+      const resumeFileName = personalInfo.resumeUrl.split('/').pop();
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Construct file path
+      const resumeFilePath = path.join(process.cwd(), 'uploads', 'resumes', resumeFileName);
+      
+      // Check if file exists
+      if (!fs.existsSync(resumeFilePath)) {
+        console.error(`[PortfolioController] Resume file not found at: ${resumeFilePath}`);
+        return next(new CustomError('Resume file not found on server', HTTP_STATUS.NOT_FOUND));
+      }
+      
+      // Set appropriate headers for inline viewing
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${resumeFileName}"`);
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+      
+      // Stream the file
+      const fileStream = fs.createReadStream(resumeFilePath);
+      fileStream.pipe(res);
+      
+      fileStream.on('error', (error) => {
+        console.error('[PortfolioController] File stream error:', error);
+        next(new CustomError('Error reading resume file', HTTP_STATUS.INTERNAL_SERVER_ERROR));
+      });
+      
+      console.log(`[PortfolioController] Resume view started: ${resumeFileName}`);
+      
+    } catch (error) {
+      console.error('[PortfolioController] View resume error:', error);
+      next(new CustomError('Failed to view resume', HTTP_STATUS.INTERNAL_SERVER_ERROR));
     }
   }
 }

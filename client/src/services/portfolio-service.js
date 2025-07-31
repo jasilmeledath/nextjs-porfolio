@@ -1,6 +1,6 @@
 /**
  * @fileoverview Portfolio Service - API calls for portfolio operations
- * @author Professional Developer <dev@portfolio.com>
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
  * @created 2025-01-27
  * @lastModified 2025-01-27
  * @version 1.0.0
@@ -8,14 +8,34 @@
 
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { getApiBaseUrl, getServerBaseUrl, isTunneledEnvironment } from '../utils/api-config';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Portfolio Service Class
  * @class PortfolioService
  */
 class PortfolioService {
+  /**
+   * Process image URLs for tunnel compatibility
+   * @param {string} url - Image URL to process
+   * @returns {string} Processed URL
+   */
+  static processImageUrl(url) {
+    if (!url || url === "/placeholder.svg" || !url.startsWith('http://localhost')) {
+      return url;
+    }
+    // Convert localhost URLs to proxy routes for tunnel environments
+    if (typeof window !== 'undefined' && 
+        (window.location.origin.includes('.trycloudflare.com') ||
+         window.location.origin.includes('.ngrok.io') ||
+         window.location.origin.includes('.loca.lt'))) {
+      return url.replace('http://localhost:8000', '/api');
+    }
+    return url;
+  }
+
   /**
    * Get authentication headers
    * @returns {Object} Headers object
@@ -121,7 +141,14 @@ class PortfolioService {
         headers: this.getAuthHeaders()
       });
 
-      return await this.handleResponse(response, false);
+      const result = await this.handleResponse(response, false);
+      
+      // Process the project data if it exists
+      if (result.success && result.data) {
+        result.data = this.processSingleProject(result.data);
+      }
+      
+      return result;
     } catch (error) {
       console.error('[PortfolioService] Error fetching project:', error);
       throw error;
@@ -427,11 +454,26 @@ class PortfolioService {
   static async getPublicPersonalInfo() {
     try {
       const response = await this.makeRequest('/portfolio/personal-info');
-      return response;
+      return this.processPersonalInfoData(response);
     } catch (error) {
       console.error('[PortfolioService] Error fetching personal info:', error);
       throw error;
     }
+  }
+
+  /**
+   * Process personal info data for display
+   * @param {Object} personalInfo - Raw personal info object
+   * @returns {Object} Processed personal info
+   */
+  static processPersonalInfoData(personalInfo) {
+    if (!personalInfo) return null;
+    
+    return {
+      ...personalInfo,
+      avatar: this.processImageUrl(personalInfo.avatar),
+      resumeUrl: this.processImageUrl(personalInfo.resumeUrl)
+    };
   }
 
   /**
@@ -455,7 +497,7 @@ class PortfolioService {
   static async getPublicExperience() {
     try {
       const response = await this.makeRequest('/portfolio/experience');
-      return response;
+      return this.processExperienceData(response);
     } catch (error) {
       console.error('[PortfolioService] Error fetching experience:', error);
       throw error;
@@ -488,7 +530,7 @@ class PortfolioService {
     if (!filename) return null;
     if (filename.startsWith('http')) return filename; // Already full URL
     
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
+    const baseUrl = getServerBaseUrl();
     return `${baseUrl}/uploads/${folder ? folder + '/' : ''}${filename}`;
   }
 
@@ -514,6 +556,108 @@ class PortfolioService {
   }
 
   /**
+   * Parse array field that might be a stringified JSON
+   * @param {string|Array} field - Field to parse
+   * @returns {Array} Parsed array
+   */
+  static parseArrayField(field) {
+    if (!field) return [];
+    
+    // If it's already an array, return it
+    if (Array.isArray(field)) return field;
+    
+    // If it's a string, try to parse it
+    if (typeof field === 'string') {
+      try {
+        // Handle the case where the field is a stringified array of stringified JSON
+        // e.g., "[\"[\\\"item1\\\",\\\"item2\\\"]\"]"
+        let parsed = JSON.parse(field);
+        
+        // If the parsed result is an array with one string element that looks like JSON
+        if (Array.isArray(parsed) && parsed.length === 1 && typeof parsed[0] === 'string') {
+          try {
+            const innerParsed = JSON.parse(parsed[0]);
+            if (Array.isArray(innerParsed)) {
+              return innerParsed;
+            }
+          } catch (e) {
+            // If inner parsing fails, return the outer parsed array
+            return parsed;
+          }
+        }
+        
+        // If the parsed result is already a proper array
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+        
+        // If it's a single string that should be an array
+        return [parsed];
+      } catch (error) {
+        console.warn('Failed to parse array field:', field, error);
+        // If parsing fails, try to split by comma or return as single item array
+        if (field.includes(',')) {
+          return field.split(',').map(item => item.trim());
+        }
+        return [field];
+      }
+    }
+    
+    return [];
+  }
+
+  /**
+   * Process single project data for display
+   * @param {Object} project - Raw project object
+   * @returns {Object} Processed project
+   */
+  static processSingleProject(project) {
+    if (!project) return null;
+    
+    const processedProject = {
+      id: project._id || project.id,
+      title: project.title,
+      description: project.description,
+      longDescription: project.longDescription,
+      tech: (project.technologies || []).map(tech => typeof tech === 'string' ? tech : tech.name),
+      technologies: project.technologies || [],
+      image: this.processImageUrl(project.thumbnailImage) || "/placeholder.svg",
+      images: project.images && project.images.length > 0 ? 
+        project.images.map(img => this.processImageUrl(img)) : 
+        [this.processImageUrl(project.thumbnailImage) || "/placeholder.svg"],
+      thumbnailImage: this.processImageUrl(project.thumbnailImage) || "/placeholder.svg",
+      liveUrl: project.liveUrl,
+      githubUrl: project.githubUrl,
+      demoUrl: project.demoUrl,
+      caseStudyUrl: project.caseStudyUrl,
+      featured: project.isFeatured,
+      isFeatured: project.isFeatured,
+      category: project.category,
+      status: project.status,
+      startDate: project.startDate,
+      endDate: project.endDate,
+      teamSize: project.teamSize,
+      myRole: project.myRole,
+      challenges: this.parseArrayField(project.challenges) || [],
+      learnings: this.parseArrayField(project.learnings) || [],
+      features: project.features || [],
+      stats: project.stats || {
+        users: '0',
+        performance: '97%',
+        rating: 5,
+        uptime: '99.9%',
+        githubStars: 0,
+        deployments: 0
+      }
+    };
+    
+    console.log('Processed single project challenges:', processedProject.challenges);
+    console.log('Processed single project learnings:', processedProject.learnings);
+    
+    return processedProject;
+  }
+
+  /**
    * Process projects data for display
    * @param {Array} projects - Raw projects array
    * @returns {Array} Processed projects
@@ -521,31 +665,7 @@ class PortfolioService {
   static processProjectsData(projects) {
     if (!Array.isArray(projects)) return [];
     
-    return projects.map(project => {
-      const processedProject = {
-        id: project._id || project.id,
-        title: project.title,
-        description: project.description,
-        tech: (project.technologies || []).map(tech => typeof tech === 'string' ? tech : tech.name),
-        image: project.thumbnailImage || "/placeholder.svg",
-        liveUrl: project.liveUrl,
-        githubUrl: project.githubUrl,
-        featured: project.isFeatured,
-        category: project.category,
-        status: project.status,
-        stats: project.stats || {
-          users: '0',
-          performance: '97%',
-          rating: 5,
-          uptime: '99.9%',
-          githubStars: 0,
-          deployments: 0
-        }
-      };
-      
-      console.log('Processed project image URL:', processedProject.image);
-      return processedProject;
-    });
+    return projects.map(project => this.processSingleProject(project)).filter(Boolean);
   }
 
   /**
@@ -565,6 +685,8 @@ class PortfolioService {
       startDate: exp.startDate,
       endDate: exp.endDate,
       isCurrent: exp.isCurrent,
+      companyLogo: this.processImageUrl(exp.companyLogo),
+      companyUrl: exp.companyUrl,
       achievements: exp.achievements || [],
       technologies: exp.technologies || []
     }));
