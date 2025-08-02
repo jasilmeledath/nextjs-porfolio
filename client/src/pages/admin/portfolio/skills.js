@@ -30,6 +30,7 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import PortfolioManagementService from '../../../services/portfolio-management-service';
+import IconPicker from '../../../components/ui/IconPicker';
 
 export default function SkillsPage() {
   const router = useRouter();
@@ -42,12 +43,15 @@ export default function SkillsPage() {
   const [editingSkill, setEditingSkill] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
     name: '',
     level: 80,
     icon: '⚛️',
+    logoIdentifier: '',
+    logoLibrary: 'react-icons/si',
     category: 'frontend',
     yearsOfExperience: 1,
     isActive: true,
@@ -110,7 +114,19 @@ export default function SkillsPage() {
       console.log('[SkillsPage] Skills response:', response);
       
       if (response.success) {
-        setSkills(response.message || []);
+        const skillsData = response.message || [];
+        console.log('[SkillsPage] Skills data received:', skillsData);
+        
+        // Log icon fields for each skill
+        skillsData.forEach((skill, index) => {
+          console.log(`[SkillsPage] Skill ${index + 1} (${skill.name}):`, {
+            icon: skill.icon,
+            logoIdentifier: skill.logoIdentifier,
+            logoLibrary: skill.logoLibrary
+          });
+        });
+        
+        setSkills(skillsData);
       } else {
         console.error('[SkillsPage] Failed to load skills:', response.message);
         showMessage('error', 'Failed to load skills');
@@ -179,6 +195,14 @@ export default function SkillsPage() {
     try {
       setIsLoading(true);
       
+      // Log the form data being submitted
+      console.log('[SkillsPage] Form data being submitted:', formData);
+      console.log('[SkillsPage] Icon fields:', {
+        icon: formData.icon,
+        logoIdentifier: formData.logoIdentifier,
+        logoLibrary: formData.logoLibrary
+      });
+      
       let response;
       if (editingSkill) {
         console.log('[SkillsPage] Updating skill:', editingSkill.id, formData);
@@ -187,6 +211,8 @@ export default function SkillsPage() {
         console.log('[SkillsPage] Creating skill:', formData);
         response = await PortfolioManagementService.createSkill(formData);
       }
+      
+      console.log('[SkillsPage] Server response:', response);
       
       if (response.success) {
         showMessage('success', editingSkill ? 'Skill updated successfully!' : 'Skill created successfully!');
@@ -214,6 +240,8 @@ export default function SkillsPage() {
       name: skill.name || '',
       level: skill.level || 80,
       icon: skill.icon || '⚛️',
+      logoIdentifier: skill.logoIdentifier || '',
+      logoLibrary: skill.logoLibrary || 'react-icons/si',
       category: skill.category || 'frontend',
       yearsOfExperience: skill.yearsOfExperience || 1,
       isActive: skill.isActive !== undefined ? skill.isActive : true,
@@ -241,6 +269,8 @@ export default function SkillsPage() {
       name: '',
       level: 80,
       icon: '⚛️',
+      logoIdentifier: '',
+      logoLibrary: 'react-icons/si',
       category: 'frontend',
       yearsOfExperience: 1,
       isActive: true,
@@ -249,6 +279,48 @@ export default function SkillsPage() {
     setEditingSkill(null);
     setShowForm(false);
     setErrors({});
+    setShowIconPicker(false);
+  };
+
+  /**
+   * Handle icon selection from icon picker
+   */
+  const handleIconSelect = (iconData) => {
+    console.log('[SkillsPage] Icon selected:', iconData);
+    setFormData(prev => ({
+      ...prev,
+      logoIdentifier: iconData.logoIdentifier,
+      logoLibrary: iconData.logoLibrary,
+      // Keep the existing emoji icon as fallback, don't replace it
+      icon: prev.icon || '⚛️'
+    }));
+    setShowIconPicker(false);
+  };
+
+  /**
+   * Get icon component for display
+   */
+  const getIconComponent = (logoLibrary, logoIdentifier) => {
+    if (!logoLibrary || !logoIdentifier) return null;
+    
+    try {
+      switch (logoLibrary) {
+        case 'react-icons/si':
+          return require('react-icons/si')[logoIdentifier];
+        case 'react-icons/fa':
+          return require('react-icons/fa')[logoIdentifier];
+        case 'react-icons/di':
+          return require('react-icons/di')[logoIdentifier];
+        case 'react-icons/bs':
+          return require('react-icons/bs')[logoIdentifier];
+        case 'react-icons/ai':
+          return require('react-icons/ai')[logoIdentifier];
+        default:
+          return null;
+      }
+    } catch (error) {
+      return null;
+    }
   };
 
   /**
@@ -584,36 +656,89 @@ export default function SkillsPage() {
                         )}
                       </div>
 
-                      {/* Icon Selection */}
+                      {/* Enhanced Icon Selection */}
                       <div>
                         <label className="block text-green-400 font-mono text-sm mb-2">
-                          ICON
+                          SKILL_LOGO
                         </label>
-                        <div className="grid grid-cols-10 gap-2 mb-2">
-                          {commonIcons.map((icon) => (
+                        
+                        {/* Current Icon Preview */}
+                        <div className="mb-4 p-4 bg-gray-900/50 border border-green-500/30 rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-lg flex items-center justify-center border border-green-500/30">
+                              {(() => {
+                                const IconComponent = getIconComponent(formData.logoLibrary, formData.logoIdentifier);
+                                return IconComponent ? (
+                                  <IconComponent className="w-6 h-6 text-green-400" />
+                                ) : (
+                                  <span className="text-xl">{formData.icon}</span>
+                                );
+                              })()}
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-green-300 font-mono text-sm">
+                                {formData.logoIdentifier || 'No logo selected'}
+                              </div>
+                              <div className="text-green-400/60 font-mono text-xs">
+                                {formData.logoLibrary || 'Legacy emoji icon'}
+                              </div>
+                            </div>
                             <button
-                              key={icon}
                               type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, icon }))}
-                              className={`p-2 text-xl border rounded-lg transition-all duration-200 ${
-                                formData.icon === icon
-                                  ? 'border-green-500 bg-green-500/20'
-                                  : 'border-green-500/30 hover:border-green-500/50'
-                              }`}
+                              onClick={() => setShowIconPicker(true)}
+                              className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 font-mono text-sm transition-all duration-200"
                             >
-                              {icon}
+                              CHOOSE_LOGO
                             </button>
-                          ))}
+                          </div>
                         </div>
+
+                        {/* Legacy Emoji Icons (fallback) */}
+                        <div className="mb-3">
+                          <div className="text-green-400/60 font-mono text-xs mb-2">LEGACY_EMOJI_FALLBACK:</div>
+                          <div className="grid grid-cols-10 gap-2 mb-2">
+                            {commonIcons.map((icon) => (
+                              <button
+                                key={icon}
+                                type="button"
+                                onClick={() => setFormData(prev => ({ 
+                                  ...prev, 
+                                  icon,
+                                  logoIdentifier: '', // Clear React icon when selecting emoji
+                                  logoLibrary: 'react-icons/si'
+                                }))}
+                                className={`p-2 text-xl border rounded-lg transition-all duration-200 ${
+                                  formData.icon === icon && !formData.logoIdentifier
+                                    ? 'border-green-500 bg-green-500/20'
+                                    : 'border-green-500/30 hover:border-green-500/50'
+                                }`}
+                              >
+                                {icon}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Custom Emoji Input */}
                         <input
                           type="text"
                           name="icon"
                           value={formData.icon}
-                          onChange={handleInputChange}
+                          onChange={(e) => {
+                            handleInputChange(e);
+                            // Clear React icon when typing custom emoji
+                            if (e.target.value && formData.logoIdentifier) {
+                              setFormData(prev => ({ 
+                                ...prev, 
+                                logoIdentifier: '',
+                                logoLibrary: 'react-icons/si'
+                              }));
+                            }
+                          }}
                           className={`w-full px-4 py-2 bg-gray-900/50 border rounded-lg font-mono text-green-300 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-300 ${
                             errors.icon ? 'border-red-500/50' : 'border-green-500/30'
                           }`}
-                          placeholder="Or enter custom emoji/icon"
+                          placeholder="Or enter custom emoji (fallback only)"
                         />
                         {errors.icon && (
                           <p className="text-red-400 text-xs font-mono mt-1">{errors.icon}</p>
@@ -742,6 +867,16 @@ export default function SkillsPage() {
             </div>
           </div>
         </main>
+
+        {/* Icon Picker Modal */}
+        <IconPicker
+          selectedIcon={formData.logoIdentifier}
+          selectedLibrary={formData.logoLibrary}
+          onSelect={handleIconSelect}
+          isOpen={showIconPicker}
+          onClose={() => setShowIconPicker(false)}
+          isDark={true}
+        />
       </div>
     </>
   );

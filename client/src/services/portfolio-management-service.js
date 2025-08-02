@@ -397,6 +397,13 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Created skill
    */
   static async createSkill(skill) {
+    console.log('[PortfolioManagementService] Creating skill with data:', skill);
+    console.log('[PortfolioManagementService] Icon fields being sent:', {
+      icon: skill.icon,
+      logoIdentifier: skill.logoIdentifier,
+      logoLibrary: skill.logoLibrary
+    });
+    
     return this.makeRequest('/skills', {
       method: 'POST',
       body: JSON.stringify(skill)
@@ -410,6 +417,13 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Updated skill
    */
   static async updateSkill(id, skill) {
+    console.log('[PortfolioManagementService] Updating skill with data:', skill);
+    console.log('[PortfolioManagementService] Icon fields being sent:', {
+      icon: skill.icon,
+      logoIdentifier: skill.logoIdentifier,
+      logoLibrary: skill.logoLibrary
+    });
+    
     return this.makeRequest(`/skills/${id}`, {
       method: 'PUT',
       body: JSON.stringify(skill)

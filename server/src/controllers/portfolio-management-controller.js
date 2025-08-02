@@ -7,13 +7,13 @@
  */
 
 const mongoose = require('mongoose');
-const Portfolio = require('../models/Portfolio');
 const PersonalInfo = require('../models/PersonalInfo');
 const SocialLink = require('../models/SocialLink');
 const Skill = require('../models/Skill');
 const Project = require('../models/Project');
 const Experience = require('../models/Experience');
 const User = require('../models/User');
+const Portfolio = require('../models/Portfolio');
 const ApiResponse = require('../utils/ApiResponse');
 const { HTTP_STATUS } = require('../constants/http-status');
 const { CustomError } = require('../errors/custom-errors');
@@ -461,13 +461,17 @@ class PortfolioManagementController {
   static async createSkill(req, res, next) {
     try {
       const userId = req.user.id;
-      const { name, level, icon, category, yearsOfExperience, isActive, order } = req.body;
+      const { name, level, icon, logoIdentifier, logoLibrary, category, yearsOfExperience, isActive, order } = req.body;
+      
+      console.log('[PortfolioController] Creating skill with data:', { name, level, icon, logoIdentifier, logoLibrary, category });
       
       const newSkill = new Skill({
         userId,
         name,
         level,
         icon,
+        logoIdentifier,
+        logoLibrary,
         category,
         yearsOfExperience,
         isActive: isActive !== undefined ? isActive : true,
@@ -475,6 +479,8 @@ class PortfolioManagementController {
       });
       
       await newSkill.save();
+      
+      console.log('[PortfolioController] Skill created successfully:', newSkill);
       
       return res.status(HTTP_STATUS.CREATED).json(
         ApiResponse.success('Skill created successfully', newSkill)
@@ -507,17 +513,21 @@ class PortfolioManagementController {
     try {
       const userId = req.user.id;
       const { id } = req.params;
-      const { name, level, icon, category, yearsOfExperience, isActive, order } = req.body;
+      const { name, level, icon, logoIdentifier, logoLibrary, category, yearsOfExperience, isActive, order } = req.body;
+      
+      console.log('[PortfolioController] Updating skill with data:', { name, level, icon, logoIdentifier, logoLibrary, category });
       
       const updatedSkill = await Skill.findOneAndUpdate(
         { _id: id, userId },
-        { name, level, icon, category, yearsOfExperience, isActive, order },
+        { name, level, icon, logoIdentifier, logoLibrary, category, yearsOfExperience, isActive, order },
         { new: true, runValidators: true }
       );
       
       if (!updatedSkill) {
         return next(new CustomError('Skill not found', HTTP_STATUS.NOT_FOUND));
       }
+
+      console.log('[PortfolioController] Skill updated successfully:', updatedSkill);
       
       return res.status(HTTP_STATUS.SUCCESS).json(
         ApiResponse.success('Skill updated successfully', updatedSkill)

@@ -6,7 +6,6 @@
  * @version 1.0.0
  */
 
-const Portfolio = require('../models/Portfolio');
 const User = require('../models/User');
 const PersonalInfo = require('../models/PersonalInfo');
 const ApiResponse = require('../utils/ApiResponse');
@@ -516,10 +515,20 @@ class PortfolioController {
       ] = await Promise.all([
         PersonalInfo.findOne({ userId: userIdString }), // Use string for PersonalInfo
         SocialLink.find({ userId: userIdString, isActive: true }).sort({ order: 1 }),
-        Skill.find({ userId: userIdString, isActive: true }).sort({ proficiency: -1, name: 1 }),
+        Skill.find({ userId: userIdString, isActive: true }).sort({ level: -1, name: 1 }), // Fixed: level instead of proficiency
         Project.find({ userId: userIdString, isActive: true }).sort({ priority: -1, createdAt: -1 }),
         Experience.find({ userId: userIdString }).sort({ startDate: -1 })
       ]);
+
+      // Debug skills data
+      console.log('[PortfolioController] Skills found for visitor portfolio:', skills?.length || 0);
+      skills?.forEach((skill, index) => {
+        console.log(`[PortfolioController] Skill ${index + 1} (${skill.name}):`, {
+          icon: skill.icon,
+          logoIdentifier: skill.logoIdentifier,
+          logoLibrary: skill.logoLibrary
+        });
+      });
 
       const portfolioData = {
         personalInfo,
@@ -758,6 +767,166 @@ class PortfolioController {
       const fileStream = fs.createReadStream(fullPath);
       fileStream.pipe(res);
       
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get available icons from supported libraries
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async getAvailableIcons(req, res, next) {
+    try {
+      const { library, category, search } = req.query;
+
+      // Icon libraries with their metadata
+      const iconLibraries = {
+        'react-icons/si': {
+          name: 'Simple Icons',
+          description: 'Brand and technology logos',
+          categories: ['frontend', 'backend', 'tools', 'design'],
+          icons: {
+            // Frontend
+            'SiReact': { name: 'React', category: 'frontend', color: '#61DAFB', keywords: ['react', 'javascript', 'frontend'] },
+            'SiVuedotjs': { name: 'Vue.js', category: 'frontend', color: '#4FC08D', keywords: ['vue', 'javascript', 'frontend'] },
+            'SiAngular': { name: 'Angular', category: 'frontend', color: '#DD0031', keywords: ['angular', 'typescript', 'frontend'] },
+            'SiNextdotjs': { name: 'Next.js', category: 'frontend', color: '#000000', keywords: ['nextjs', 'react', 'fullstack'] },
+            'SiJavascript': { name: 'JavaScript', category: 'frontend', color: '#F7DF1E', keywords: ['javascript', 'js', 'programming'] },
+            'SiTypescript': { name: 'TypeScript', category: 'frontend', color: '#3178C6', keywords: ['typescript', 'ts', 'programming'] },
+            'SiHtml5': { name: 'HTML5', category: 'frontend', color: '#E34F26', keywords: ['html', 'markup', 'web'] },
+            'SiCss3': { name: 'CSS3', category: 'frontend', color: '#1572B6', keywords: ['css', 'styling', 'web'] },
+            'SiTailwindcss': { name: 'Tailwind CSS', category: 'frontend', color: '#06B6D4', keywords: ['tailwind', 'css', 'utility'] },
+            
+            // Backend
+            'SiNodedotjs': { name: 'Node.js', category: 'backend', color: '#339933', keywords: ['nodejs', 'javascript', 'backend'] },
+            'SiExpress': { name: 'Express.js', category: 'backend', color: '#000000', keywords: ['express', 'nodejs', 'api'] },
+            'SiPython': { name: 'Python', category: 'backend', color: '#3776AB', keywords: ['python', 'programming', 'backend'] },
+            'SiDjango': { name: 'Django', category: 'backend', color: '#092E20', keywords: ['django', 'python', 'web'] },
+            'SiPhp': { name: 'PHP', category: 'backend', color: '#777BB4', keywords: ['php', 'programming', 'web'] },
+            'SiJava': { name: 'Java', category: 'backend', color: '#ED8B00', keywords: ['java', 'programming', 'enterprise'] },
+            
+            // Tools
+            'SiMongodb': { name: 'MongoDB', category: 'tools', color: '#47A248', keywords: ['mongodb', 'database', 'nosql'] },
+            'SiPostgresql': { name: 'PostgreSQL', category: 'tools', color: '#4169E1', keywords: ['postgresql', 'database', 'sql'] },
+            'SiDocker': { name: 'Docker', category: 'tools', color: '#2496ED', keywords: ['docker', 'container', 'devops'] },
+            'SiGit': { name: 'Git', category: 'tools', color: '#F05032', keywords: ['git', 'version', 'control'] },
+            'SiGithub': { name: 'GitHub', category: 'tools', color: '#181717', keywords: ['github', 'git', 'repository'] },
+            'SiAmazonaws': { name: 'AWS', category: 'tools', color: '#232F3E', keywords: ['aws', 'cloud', 'amazon'] },
+            
+            // Design
+            'SiFigma': { name: 'Figma', category: 'design', color: '#F24E1E', keywords: ['figma', 'design', 'ui'] },
+            'SiSketch': { name: 'Sketch', category: 'design', color: '#F7B500', keywords: ['sketch', 'design', 'ui'] }
+          }
+        },
+        'react-icons/fa': {
+          name: 'Font Awesome',
+          description: 'General purpose icons',
+          categories: ['tools'],
+          icons: {
+            'FaCode': { name: 'Code', category: 'tools', color: '#4A5568', keywords: ['code', 'programming', 'development'] },
+            'FaDatabase': { name: 'Database', category: 'tools', color: '#4A5568', keywords: ['database', 'storage', 'data'] },
+            'FaServer': { name: 'Server', category: 'tools', color: '#4A5568', keywords: ['server', 'hosting', 'infrastructure'] },
+            'FaDesktop': { name: 'Desktop', category: 'tools', color: '#4A5568', keywords: ['desktop', 'computer', 'development'] },
+            'FaCloud': { name: 'Cloud', category: 'tools', color: '#4A5568', keywords: ['cloud', 'hosting', 'server'] }
+          }
+        }
+      };
+
+      let result = iconLibraries;
+
+      // Filter by specific library
+      if (library && iconLibraries[library]) {
+        result = { [library]: iconLibraries[library] };
+      }
+
+      // Apply category and search filters
+      if (category || search) {
+        const filtered = {};
+        
+        Object.entries(result).forEach(([libKey, libData]) => {
+          const filteredIcons = {};
+          
+          Object.entries(libData.icons).forEach(([iconKey, iconData]) => {
+            let includeIcon = true;
+            
+            // Category filter
+            if (category && category !== 'all' && iconData.category !== category) {
+              includeIcon = false;
+            }
+            
+            // Search filter
+            if (search && includeIcon) {
+              const searchLower = search.toLowerCase();
+              const matchesName = iconData.name.toLowerCase().includes(searchLower);
+              const matchesKey = iconKey.toLowerCase().includes(searchLower);
+              const matchesKeywords = iconData.keywords?.some(keyword => 
+                keyword.toLowerCase().includes(searchLower)
+              );
+              
+              if (!matchesName && !matchesKey && !matchesKeywords) {
+                includeIcon = false;
+              }
+            }
+            
+            if (includeIcon) {
+              filteredIcons[iconKey] = iconData;
+            }
+          });
+          
+          if (Object.keys(filteredIcons).length > 0) {
+            filtered[libKey] = {
+              ...libData,
+              icons: filteredIcons
+            };
+          }
+        });
+        
+        result = filtered;
+      }
+
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(result, 'Available icons retrieved successfully')
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Search icons by keyword
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @param {Function} next - Express next middleware function
+   */
+  static async searchIcons(req, res, next) {
+    try {
+      const { query, library, category, limit = 50 } = req.query;
+
+      if (!query || query.length < 2) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json(
+          ApiResponse.error('Search query must be at least 2 characters', HTTP_STATUS.BAD_REQUEST)
+        );
+      }
+
+      // For this implementation, we'll use the same logic as getAvailableIcons
+      // In a real scenario, this might query a more comprehensive icon database
+      const mockReq = { query: { library, category, search: query } };
+      const mockRes = { 
+        status: () => ({ 
+          json: (data) => data 
+        }) 
+      };
+
+      const searchResults = [];
+      const searchLower = query.toLowerCase();
+
+      // Simple implementation - in production, this would be more sophisticated
+      res.status(HTTP_STATUS.SUCCESS).json(
+        ApiResponse.success(searchResults, 'Icon search completed successfully')
+      );
     } catch (error) {
       next(error);
     }

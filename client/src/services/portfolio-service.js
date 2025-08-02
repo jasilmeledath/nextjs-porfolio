@@ -542,15 +542,33 @@ class PortfolioService {
   static processSkillsData(skills) {
     if (!Array.isArray(skills)) return {};
     
+    console.log('[PortfolioService] Processing skills data:', skills);
+    
     return skills.reduce((acc, skill) => {
       if (!acc[skill.category]) {
         acc[skill.category] = [];
       }
-      acc[skill.category].push({
+      
+      // Debug: Log each skill being processed
+      console.log(`[PortfolioService] Processing skill "${skill.name}":`, {
+        icon: skill.icon,
+        logoIdentifier: skill.logoIdentifier,
+        logoLibrary: skill.logoLibrary,
+        color: skill.color
+      });
+      
+      const processedSkill = {
         name: skill.name,
         level: skill.level,
-        icon: skill.icon || '🔧'
-      });
+        icon: skill.icon || '🔧',
+        logoIdentifier: skill.logoIdentifier || null,
+        logoLibrary: skill.logoLibrary || 'react-icons/si',
+        color: skill.color || null
+      };
+      
+      console.log(`[PortfolioService] Processed skill "${skill.name}":`, processedSkill);
+      
+      acc[skill.category].push(processedSkill);
       return acc;
     }, {});
   }

@@ -34,6 +34,7 @@ import {
 import { usePortfolioData } from "../hooks/usePortfolioData"
 import HangingIDCard from "../components/ui/HangingIDCard"
 import ProjectPreview from "../components/ui/ProjectPreview"
+import SkillsMarquee from "../components/ui/SkillsMarquee"
 import PortfolioManagementService from "../services/portfolio-management-service"
 
 export default function PortfolioPage() {
@@ -137,26 +138,23 @@ export default function PortfolioPage() {
     }
   }, [isClient])
 
-  // Memoized animation variants for better performance
+  // Optimized animation variants for maximum FPS and performance
   const fadeInUp = useMemo(() => ({
     hidden: { 
       opacity: 0, 
-      y: 40, 
-      scale: 0.98,
-      filter: "blur(2px)"
+      y: 20, // Reduced from 40 for smoother animation
+      scale: 0.99, // Reduced from 0.98 for less intensive scaling
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      filter: "blur(0px)",
       transition: { 
-        duration: 0.6, 
-        ease: [0.25, 0.25, 0.25, 1],
-        opacity: { duration: 0.4 },
-        y: { duration: 0.6 },
-        scale: { duration: 0.6 },
-        filter: { duration: 0.4 }
+        duration: 0.4, // Reduced from 0.6 for faster animation
+        ease: [0.25, 0.46, 0.45, 0.94], // Optimized easing curve
+        opacity: { duration: 0.3 }, // Reduced from 0.4
+        y: { duration: 0.4 }, // Reduced from 0.6
+        scale: { duration: 0.4 }, // Reduced from 0.6
       },
     },
   }), [])
@@ -166,9 +164,9 @@ export default function PortfolioPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.05,
-        duration: 0.1,
+        staggerChildren: 0.08, // Reduced from 0.15 for faster stagger
+        delayChildren: 0.02, // Reduced from 0.05
+        duration: 0.05, // Reduced from 0.1
       },
     },
   }), [])
@@ -177,19 +175,16 @@ export default function PortfolioPage() {
     rest: { 
       scale: 1, 
       rotateY: 0, 
-      z: 0,
-      transition: { duration: 0.2, ease: "easeOut" }
+      transition: { duration: 0.15, ease: "easeOut" } // Reduced from 0.2
     },
     hover: {
-      scale: 1.03,
-      rotateY: 3,
-      z: 30,
+      scale: 1.02, // Reduced from 1.03 for less intensive scaling
+      rotateY: 2, // Reduced from 3 for smoother rotation
       transition: { 
-        type: "spring", 
-        stiffness: 400,
-        damping: 25,
-        duration: 0.3
-      },
+        type: "tween", // Changed from spring for better performance
+        duration: 0.15, // Faster hover animation
+        ease: "easeOut"
+      }
     },
   }), [])
 
@@ -531,7 +526,7 @@ export default function PortfolioPage() {
           />
 
           {/* Enhanced Floating tech icons - Only render on client to prevent hydration mismatch */}
-          {isClient && [...Array(24)].map((_, i) => {
+          {isClient && [...Array(16)].map((_, i) => {
             // Tech icon selection
             const icon = techIcons[i % techIcons.length];
             // Enhanced randomization for better distribution and varied animations
@@ -766,7 +761,7 @@ export default function PortfolioPage() {
           </div>
         </section>
 
-        {/* Skills Section */}
+        {/* Skills Section - Enhanced Marquee Design */}
         <section id="skills" className="py-16 md:py-20 px-4 md:px-6">
           <div className="max-w-7xl mx-auto">
             <motion.div
@@ -774,7 +769,7 @@ export default function PortfolioPage() {
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
               variants={staggerContainer}
-              className="text-center mb-12 md:mb-20"
+              className="text-center mb-12 md:mb-16"
             >
               <motion.h2 
                 variants={fadeInUp} 
@@ -790,102 +785,63 @@ export default function PortfolioPage() {
                   isDark ? 'text-gray-300' : 'text-gray-600'
                 }`}
               >
-                Cutting-edge technologies and frameworks I use to build exceptional digital experiences
+                A dynamic showcase of cutting-edge technologies and frameworks I master
               </motion.p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-              {Object.entries(skills).map(([category, skillList], categoryIndex) => (
-                <motion.div
-                  key={category}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
-                  variants={fadeInUp}
-                  transition={{ delay: categoryIndex * 0.1 }}
-                  className="relative group"
-                >
+            {/* Enhanced Skills Marquee */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="relative"
+            >
+              <SkillsMarquee 
+                skills={skills}
+                isDark={isDark}
+                speed={25} // Optimized speed for multi-row
+                pauseOnHover={true}
+                direction="left"
+                rows={2} // Multi-line marquee
+                enableTouch={true} // Touch sliding enabled
+                mobileOptimized={true} // Mobile-specific optimizations
+              />
+            </motion.div>
+
+            {/* Optional: Skills categories legend (for better UX context) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="mt-8 md:mt-12 flex flex-wrap justify-center gap-2 md:gap-4"
+            >
+              {Object.keys(skills).map((category, index) => {
+                const IconComponent = categoryIcons[category];
+                return (
                   <motion.div
-                    initial="rest"
-                    whileHover="hover"
-                    variants={cardHover}
-                    className={`backdrop-blur-xl rounded-2xl md:rounded-3xl p-4 md:p-8 border shadow-2xl hover:shadow-cyan-500/25 transition-all duration-500 ${
+                    key={category}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6 + index * 0.1, duration: 0.4 }}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-full text-xs md:text-sm font-medium backdrop-blur-sm ${
                       isDark 
-                        ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/20' 
-                        : 'bg-gradient-to-br from-black/5 to-black/2 border-black/10'
+                        ? 'bg-white/10 text-white border border-white/20' 
+                        : 'bg-black/5 text-gray-700 border border-black/10'
                     }`}
                   >
-                    <div className="flex items-center mb-4 md:mb-8">
-                      <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl md:rounded-2xl flex items-center justify-center mr-3 md:mr-4 flex-shrink-0">
-                        {(() => {
-                          const IconComponent = categoryIcons[category]
-                          return IconComponent ? <IconComponent className="w-4 h-4 md:w-6 md:h-6 text-white" /> : null
-                        })()}
-                      </div>
-                      <h3 className={`text-lg md:text-2xl font-bold capitalize ${
-                        isDark ? 'text-white' : 'text-gray-900'
-                      }`}>
-                        {categoryLabels[category] || category.charAt(0).toUpperCase() + category.slice(1)}
-                      </h3>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 md:gap-4">
-                      {skillList.map((skill, index) => (
-                        <motion.div 
-                          key={skill.name}
-                          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                          viewport={{ once: true, margin: "-50px" }}
-                          whileHover={{ 
-                            scale: 1.02, 
-                            y: -2,
-                            transition: { duration: 0.2, ease: "easeOut" }
-                          }}
-                          transition={{ 
-                            delay: index * 0.05,
-                            duration: 0.4,
-                            ease: [0.25, 0.25, 0.25, 1]
-                          }}
-                          className="relative group/skill"
-                        >
-                          <div className={`backdrop-blur-sm rounded-xl md:rounded-2xl p-2 md:p-4 border hover:border-cyan-400/50 transition-all duration-300 cursor-pointer ${
-                            isDark 
-                              ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/10' 
-                              : 'bg-gradient-to-br from-black/5 to-black/2 border-black/10'
-                          }`}>
-                            <div className="flex flex-col items-center text-center space-y-1 md:space-y-3">
-                              <motion.div 
-                                className="text-xl md:text-3xl group-hover/skill:scale-110 transition-transform duration-200"
-                                whileHover={{ scale: 1.1 }}
-                                transition={{ duration: 0.2, ease: "easeOut" }}
-                              >
-                                {skill.icon}
-                              </motion.div>
-                              <div>
-                                <div className={`font-semibold text-xs md:text-sm group-hover/skill:text-cyan-400 transition-colors leading-tight ${
-                                  isDark ? 'text-white' : 'text-gray-900'
-                                }`}>
-                                  {skill.name}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Floating level indicator */}
-                            <motion.div
-                              className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-full opacity-0 group-hover/skill:opacity-100 transition-opacity duration-300"
-                              initial={{ scale: 0 }}
-                              whileHover={{ scale: 1 }}
-                            >
-                              {skill.level}%
-                            </motion.div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
+                    {IconComponent && <IconComponent className="w-3 h-3 md:w-4 md:h-4" />}
+                    <span>{categoryLabels[category] || category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                      isDark ? 'bg-cyan-400/20 text-cyan-400' : 'bg-cyan-500/20 text-cyan-600'
+                    }`}>
+                      {skills[category]?.length || 0}
+                    </span>
                   </motion.div>
-                </motion.div>
-              ))}
-            </div>
+                );
+              })}
+            </motion.div>
           </div>
         </section>
 
@@ -923,29 +879,35 @@ export default function PortfolioPage() {
                   key={project.id}
                   initial="hidden"
                   whileInView="visible"
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }} // Reduced margin for earlier trigger
                   variants={fadeInUp}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.05 }} // Reduced delay from 0.1 to 0.05
                   className="group relative"
+                  style={{ willChange: 'transform, opacity' }} // Performance optimization
                 >
                   <motion.div
                     initial="rest"
                     whileHover="hover"
                     variants={cardHover}
                     onClick={() => openProjectPreview(project)}
-                    className={`backdrop-blur-xl rounded-2xl md:rounded-3xl overflow-hidden border shadow-2xl hover:shadow-cyan-500/25 transition-all duration-500 cursor-pointer ${
+                    className={`backdrop-blur-xl rounded-2xl md:rounded-3xl overflow-hidden border shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 cursor-pointer ${
                       isDark 
                         ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/20' 
                         : 'bg-gradient-to-br from-black/5 to-black/2 border-black/10'
                     }`}
+                    style={{ willChange: 'transform' }} // Performance optimization
                   >
                     {/* Project Image */}
                     <div className="relative h-40 md:h-48 overflow-hidden">
-                      <img
+                      <motion.img
                         src={project.image || "/placeholder.svg"}
                         alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover"
+                        whileHover={{ scale: 1.05 }} // Moved scale to motion.img for better performance
+                        transition={{ duration: 0.3, ease: "easeOut" }} // Faster transition
                         crossOrigin="anonymous"
+                        loading="lazy" // Performance optimization
+                        style={{ willChange: 'transform' }} // Performance optimization
                         onError={(e) => {
                           console.error('Image failed to load:', e.target.src);
                           e.target.src = "/placeholder.svg";
@@ -1066,15 +1028,17 @@ export default function PortfolioPage() {
             <motion.div
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: true, margin: "-30px" }} // Reduced margin for earlier trigger
               variants={staggerContainer}
               className="text-center mb-12 md:mb-16"
+              style={{ willChange: 'transform, opacity' }} // Performance optimization
             >
               <motion.h2 
                 variants={fadeInUp} 
                 className={`text-3xl sm:text-4xl md:text-5xl font-black mb-4 md:mb-6 ${
                   isDark ? 'text-white' : 'text-gray-900'
                 }`}
+                style={{ willChange: 'transform, opacity' }} // Performance optimization
               >
                 Let's Create Something Amazing
               </motion.h2>
@@ -1083,6 +1047,7 @@ export default function PortfolioPage() {
                 className={`text-base md:text-xl px-4 ${
                   isDark ? 'text-gray-300' : 'text-gray-600'
                 }`}
+                style={{ willChange: 'transform, opacity' }} // Performance optimization
               >
                 Ready to bring your ideas to life? Let's discuss your next project.
               </motion.p>
@@ -1091,13 +1056,14 @@ export default function PortfolioPage() {
             <motion.div
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "-50px" }} // Reduced margin
               variants={fadeInUp}
               className={`backdrop-blur-xl rounded-2xl md:rounded-3xl p-4 md:p-8 border shadow-2xl ${
                 isDark 
                   ? 'bg-gradient-to-br from-white/10 to-white/5 border-white/20' 
                   : 'bg-gradient-to-br from-black/5 to-black/2 border-black/10'
               }`}
+              style={{ willChange: 'transform, opacity' }} // Performance optimization
             >
               <div className="grid md:grid-cols-2 gap-6 md:gap-8">
                 <div className="space-y-4 md:space-y-6">
@@ -1129,9 +1095,11 @@ export default function PortfolioPage() {
 
                   <motion.a
                     href={`mailto:${personalInfo.email}`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl md:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/50 text-sm md:text-base"
+                    whileHover={{ scale: 1.02 }} // Reduced from 1.05
+                    whileTap={{ scale: 0.98 }} // Reduced from 0.95
+                    transition={{ duration: 0.15, ease: "easeOut" }} // Faster transition
+                    className="inline-flex items-center px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl md:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-cyan-500/50 text-sm md:text-base"
+                    style={{ willChange: 'transform' }} // Performance optimization
                   >
                     <Mail className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
                     Send Message

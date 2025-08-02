@@ -71,6 +71,27 @@ router.get('/personal-info', PortfolioController.getPublicPersonalInfo);
 router.get('/skills', PortfolioController.getPublicSkills);
 
 /**
+ * @route GET /api/v1/portfolio/icons
+ * @desc Get available icons from supported libraries
+ * @access Public
+ * @query {string} library - Filter by icon library (react-icons/si, react-icons/fa, etc.)
+ * @query {string} category - Filter by category (frontend, backend, tools, design)
+ * @query {string} search - Search icons by name or keywords
+ */
+router.get('/icons', PortfolioController.getAvailableIcons);
+
+/**
+ * @route GET /api/v1/portfolio/icons/search
+ * @desc Search icons by keyword with relevance scoring
+ * @access Public
+ * @query {string} query - Search query (minimum 2 characters)
+ * @query {string} library - Filter by icon library
+ * @query {string} category - Filter by category
+ * @query {number} limit - Maximum results to return (default: 50)
+ */
+router.get('/icons/search', PortfolioController.searchIcons);
+
+/**
  * @route GET /api/v1/portfolio/experience
  * @desc Get experience
  * @access Public

@@ -29,7 +29,17 @@ const skillSchema = new mongoose.Schema({
   icon: {
     type: String,
     required: true,
-    maxlength: 10 // For emoji or short icon identifier
+    maxlength: 10 // For emoji or short icon identifier (legacy support)
+  },
+  logoIdentifier: {
+    type: String,
+    maxlength: 50, // For React icon identifiers like 'SiReact', 'FaJavascript'
+    trim: true
+  },
+  logoLibrary: {
+    type: String,
+    enum: ['react-icons/si', 'react-icons/fa', 'react-icons/di', 'react-icons/bs', 'react-icons/ai'],
+    default: 'react-icons/si'
   },
   category: {
     type: String,
