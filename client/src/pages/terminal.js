@@ -1072,9 +1072,15 @@ export default function TerminalPage() {
           </motion.div>
         </div>
 
-        {/* Mobile optimization hints */}
-        {isClient && (
-          <div className="md:hidden fixed bottom-4 right-4 bg-black/90 text-white text-xs p-3 rounded-lg shadow-lg backdrop-blur-sm border border-white/20 max-w-xs z-50">
+        {/* Mobile optimization hints - Hide after first command */}
+        {isClient && commandHistory.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden fixed bottom-20 right-4 bg-black/90 text-white text-xs p-3 rounded-lg shadow-lg backdrop-blur-sm border border-white/20 max-w-xs z-40"
+          >
             <div className="flex items-center space-x-2">
               <Terminal className="w-4 h-4" />
               <div>
@@ -1086,7 +1092,7 @@ export default function TerminalPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </>

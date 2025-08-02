@@ -27,7 +27,7 @@ import {
   Server,
   Smartphone,
   Zap,
-  Globe,
+  Instagram,
   Terminal,
   FileText,
 } from "lucide-react"
@@ -219,10 +219,10 @@ export default function PortfolioPage() {
 
   // Memoized social links to prevent re-renders
   const socialLinksData = useMemo(() => [
-    { icon: Github, href: "https://github.com", color: "hover:text-gray-300" },
-    { icon: Linkedin, href: "https://linkedin.com", color: "hover:text-blue-400" },
-    { icon: Twitter, href: "https://twitter.com", color: "hover:text-cyan-400" },
-    { icon: Globe, href: "https://website.com", color: "hover:text-green-400" },
+    { icon: Github, href: "https://github.com/jasilmeledath", color: "hover:text-gray-300" },
+    { icon: Linkedin, href: "https://linkedin.com/in/jasilmeledath", color: "hover:text-blue-400" },
+    { icon: Twitter, href: "https://twitter.com/am__jazil", color: "hover:text-cyan-400" },
+    { icon: Instagram, href: "https://instagram.com/iam.jazil", color: "hover:text-green-400" },
   ], [])
 
   // Memoized navigation items

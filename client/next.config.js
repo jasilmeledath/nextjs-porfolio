@@ -2,14 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   
-  // Allow Cloudflare tunnel origins
-  experimental: {
-    allowedDevOrigins: [
-      'trycloudflare.com',
-      '*.trycloudflare.com'
-    ]
-  },
-  
   // Add rewrites for API proxy when using tunnels
   async rewrites() {
     return [
