@@ -13,6 +13,7 @@ import Head from "next/head"
 import Link from "next/link"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import toast from "react-hot-toast"
+import { FiCode, FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi"
 import {
   ArrowLeft,
   Download,
@@ -32,7 +33,7 @@ import {
   FileText,
 } from "lucide-react"
 import { usePortfolioData } from "../hooks/usePortfolioData"
-import HangingIDCard from "../components/ui/HangingIDCard"
+import Avatar3D from "../components/ui/Avatar3D"
 import ProjectPreview from "../components/ui/ProjectPreview"
 import SkillsMarquee from "../components/ui/SkillsMarquee"
 import PortfolioManagementService from "../services/portfolio-management-service"
@@ -653,8 +654,28 @@ export default function PortfolioPage() {
               {/* Left Content */}
               <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="space-y-6 md:space-y-8">
                 <motion.div variants={fadeInUp}>
-                  <motion.h1
-                    className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight ${
+                  {/* Mobile View - Show Name and Title */}
+                  <div className="lg:hidden">
+                    <motion.h1
+                      className={`text-4xl sm:text-5xl md:text-6xl font-black mb-4 md:mb-6 leading-tight ${
+                        isDark ? 'text-white' : 'text-gray-900'
+                      }`}
+                      style={{
+                        textShadow: isDark 
+                          ? "0 0 30px rgba(59, 130, 246, 0.5)" 
+                          : "0 0 30px rgba(59, 130, 246, 0.3)",
+                      }}
+                    >
+                      {personalInfo.name}
+                    </motion.h1>
+                    <motion.h2 className="text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent font-bold mb-6 md:mb-8 leading-tight">
+                      {personalInfo.title}
+                    </motion.h2>
+                  </div>
+
+                  {/* Desktop View - Show Welcome Message */}
+                  <motion.div
+                    className={`hidden lg:block text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-6 md:mb-8 leading-tight ${
                       isDark ? 'text-white' : 'text-gray-900'
                     }`}
                     style={{
@@ -663,11 +684,13 @@ export default function PortfolioPage() {
                         : "0 0 30px rgba(59, 130, 246, 0.3)",
                     }}
                   >
-                    {personalInfo.name}
-                  </motion.h1>
-                  <motion.h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent font-bold mb-6 md:mb-8 leading-tight">
-                    {personalInfo.title}
-                  </motion.h2>
+                    <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                      Welcome to My
+                    </span>
+                    <br />
+                    <span>Digital Portfolio</span>
+                  </motion.div>
+                  
                   <div className={`text-base md:text-lg leading-relaxed space-y-3 md:space-y-4 ${
                     isDark ? 'text-gray-300' : 'text-gray-600'
                   }`}>
@@ -726,7 +749,7 @@ export default function PortfolioPage() {
                 </motion.div>
               </motion.div>
 
-              {/* Right Half - ID Card positioned in middle, aligned with name */}
+              {/* Desktop Avatar - Right Half positioned in middle */}
               <div className="hidden lg:flex justify-center items-start relative">
                 {/* Invisible Hanging Point - Maintains structure without visual element */}
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-10 opacity-0 pointer-events-none">
@@ -743,7 +766,7 @@ export default function PortfolioPage() {
                     marginTop: '0px' // Align with the name level
                   }}
                 >
-                  <HangingIDCard 
+                  <Avatar3D 
                     personalInfo={personalInfo}
                     isDark={isDark}
                     physicsConfig={{
@@ -789,18 +812,18 @@ export default function PortfolioPage() {
               </motion.p>
             </motion.div>
 
-            {/* Enhanced Skills Marquee */}
+            {/* Enhanced Skills Marquee - Edge-to-edge on mobile */}
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative"
+              className="relative -mx-4 md:mx-0"
             >
               <SkillsMarquee 
                 skills={skills}
                 isDark={isDark}
-                speed={25} // Optimized speed for multi-row
+                speed={3} // Very slow and smooth for better readability
                 pauseOnHover={true}
                 direction="left"
                 rows={2} // Multi-line marquee
@@ -1171,12 +1194,143 @@ export default function PortfolioPage() {
           isDark={isDark}
         />
 
-        {/* Footer */}
-        <footer className={`py-6 md:py-8 px-4 md:px-6 border-t ${
-          isDark ? 'border-white/10' : 'border-black/10'
-        }`}>
-          <div className="max-w-7xl mx-auto text-center">
-            <p className={`text-sm md:text-base ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>© 2025 Jasil Meledath. Built with Next.js, Framer Motion, and ❤️</p>
+        {/* Enhanced Minimalistic Footer */}
+        <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700">
+          <div className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12">
+            {/* Main Footer Content */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {/* Brand & Social - Mobile Optimized */}
+              <div className="sm:col-span-2 lg:col-span-2">
+                <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+                  <FiCode className="text-slate-700 dark:text-slate-300 w-5 h-5 sm:w-6 sm:h-6" />
+                  <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                    jasilmeledath.me
+                  </span>
+                </div>
+                <p className="text-slate-600 dark:text-slate-300 mb-4 sm:mb-6 max-w-md text-sm sm:text-base leading-relaxed">
+                  Full-stack developer crafting modern web experiences and sharing insights through technical content.
+                </p>
+                <div className="flex space-x-3 sm:space-x-4">
+                  <a 
+                    href="https://github.com/jasilmeledath" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                    aria-label="GitHub Profile"
+                  >
+                    <FiGithub className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </a>
+                  <a 
+                    href="https://linkedin.com/in/jasilmeledath" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                    aria-label="LinkedIn Profile"
+                  >
+                    <FiLinkedin className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </a>
+                  <a 
+                    href="https://twitter.com/jasilmeledath" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                    aria-label="Twitter Profile"
+                  >
+                    <FiTwitter className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Quick Links - Mobile Optimized */}
+              <div className="hidden sm:block">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">
+                  Navigation
+                </h3>
+                <ul className="space-y-2">
+                  <li>
+                    <Link href="/" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/portfolio" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                      Portfolio
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/terminal" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                      Terminal
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Skills - Desktop Only */}
+              <div className="hidden lg:block">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-4 text-sm sm:text-base">
+                  Expertise
+                </h3>
+                <ul className="space-y-2">
+                  <li>
+                    <span className="text-slate-600 dark:text-slate-300 text-sm">
+                      React & Next.js
+                    </span>
+                  </li>
+                  <li>
+                    <span className="text-slate-600 dark:text-slate-300 text-sm">
+                      Node.js & Express
+                    </span>
+                  </li>
+                  <li>
+                    <span className="text-slate-600 dark:text-slate-300 text-sm">
+                      MongoDB & PostgreSQL
+                    </span>
+                  </li>
+                  <li>
+                    <span className="text-slate-600 dark:text-slate-300 text-sm">
+                      TypeScript & JavaScript
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Mobile Quick Links */}
+            <div className="sm:hidden mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex justify-center space-x-6">
+                <Link href="/" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium">
+                  Home
+                </Link>
+                <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium">
+                  Blog
+                </Link>
+                <Link href="/terminal" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium">
+                  Terminal
+                </Link>
+              </div>
+            </div>
+
+            {/* Bottom Section - Minimalistic */}
+            <div className="border-t border-slate-200 dark:border-slate-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
+              <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+                <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
+                  © 2025 jasilmeledath.me • Made with ❤️ using Next.js
+                </p>
+                <div className="flex items-center space-x-4 sm:space-x-6">
+                  <a 
+                    href="mailto:jasilmeledath@gmail.com" 
+                    className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-xs sm:text-sm transition-colors"
+                  >
+                    Contact
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </footer>
       </div>

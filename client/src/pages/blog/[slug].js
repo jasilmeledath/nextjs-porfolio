@@ -27,6 +27,10 @@ import {
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import BlogService from '../../services/blog-service';
+import CommentList from '../../components/blog/CommentList';
+import CommentForm from '../../components/blog/CommentForm';
+import SubscriptionForm from '../../components/SubscriptionForm';
+import useSubscriptionModal from '../../hooks/useSubscriptionModal';
 
 /**
  * Blog Detail Page Component
@@ -37,16 +41,12 @@ export default function BlogDetailPage() {
   const router = useRouter();
   const { slug } = router.query;
   const { isDark } = useTheme();
+  const { showModal, closeModal } = useSubscriptionModal();
   
   const [blog, setBlog] = useState(null);
   const [relatedBlogs, setRelatedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [commentForm, setCommentForm] = useState({
-    author: { name: '', email: '', website: '' },
-    content: ''
-  });
-  const [submittingComment, setSubmittingComment] = useState(false);
 
   // Animation variants
   const fadeInUp = {
@@ -87,59 +87,6 @@ export default function BlogDetailPage() {
       setError('Blog not found');
     } finally {
       setLoading(false);
-    }
-  };
-
-  /**
-   * Handle comment form changes
-   */
-  const handleCommentChange = (e) => {
-    const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setCommentForm(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setCommentForm(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  /**
-   * Submit comment
-   */
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!commentForm.author.name || !commentForm.author.email || !commentForm.content) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    try {
-      setSubmittingComment(true);
-      await BlogService.addComment(blog._id, commentForm);
-      
-      // Reset form
-      setCommentForm({
-        author: { name: '', email: '', website: '' },
-        content: ''
-      });
-      
-      alert('Comment submitted successfully! It will be visible after moderation.');
-    } catch (error) {
-      console.error('[BlogDetail] Error submitting comment:', error);
-      alert('Failed to submit comment. Please try again.');
-    } finally {
-      setSubmittingComment(false);
     }
   };
 
@@ -396,109 +343,42 @@ export default function BlogDetailPage() {
             className="mb-12"
           >
             <h3 className={`text-2xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Comments ({blog.commentCount || 0})
+              Comments
             </h3>
 
             {/* Comment Form */}
-            <form onSubmit={handleCommentSubmit} className="mb-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                <input
-                  type="text"
-                  name="author.name"
-                  value={commentForm.author.name}
-                  onChange={handleCommentChange}
-                  placeholder="Your Name *"
-                  required
-                  className={`px-4 py-2 rounded-lg border ${
-                    isDark 
-                      ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                />
-                <input
-                  type="email"
-                  name="author.email"
-                  value={commentForm.author.email}
-                  onChange={handleCommentChange}
-                  placeholder="Your Email *"
-                  required
-                  className={`px-4 py-2 rounded-lg border ${
-                    isDark 
-                      ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                />
-              </div>
-              <input
-                type="url"
-                name="author.website"
-                value={commentForm.author.website}
-                onChange={handleCommentChange}
-                placeholder="Your Website (optional)"
-                className={`w-full px-4 py-2 rounded-lg border mb-4 ${
-                  isDark 
-                    ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            <div className="mb-8">
+              <CommentForm 
+                blogId={blog._id}
+                onSuccess={(message) => {
+                  console.log('Comment submitted:', message);
+                  // You can add a toast notification here
+                  // Refresh the comments list
+                  window.location.reload(); // Simple refresh for now
+                }}
               />
-              <textarea
-                name="content"
-                value={commentForm.content}
-                onChange={handleCommentChange}
-                placeholder="Write your comment..."
-                rows={4}
-                required
-                className={`w-full px-4 py-2 rounded-lg border mb-4 ${
-                  isDark 
-                    ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                } focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical`}
-              />
-              <button
-                type="submit"
-                disabled={submittingComment}
-                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-medium rounded-lg transition-colors"
-              >
-                {submittingComment ? 'Submitting...' : 'Submit Comment'}
-              </button>
-            </form>
+            </div>
 
-            {/* Existing Comments */}
-            {blog.approvedComments && blog.approvedComments.length > 0 && (
-              <div className="space-y-6">
-                {blog.approvedComments.map((comment) => (
-                  <div
-                    key={comment._id}
-                    className={`p-4 rounded-lg border ${
-                      isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {comment.author.website ? (
-                          <a 
-                            href={comment.author.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-600"
-                          >
-                            {comment.author.name}
-                          </a>
-                        ) : (
-                          comment.author.name
-                        )}
-                      </div>
-                      <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {formatDate(comment.createdAt)}
-                      </div>
-                    </div>
-                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {comment.content}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Comments List */}
+            <CommentList blogId={blog._id} />
+          </motion.section>
+
+          {/* Newsletter Subscription */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mb-12"
+          >
+            <div className="text-center mb-6">
+              <h3 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Enjoyed this article?
+              </h3>
+              <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Subscribe to get notified when I publish new content
+              </p>
+            </div>
+            <SubscriptionForm position="inline" />
           </motion.section>
 
           {/* Related Posts */}
@@ -541,6 +421,13 @@ export default function BlogDetailPage() {
             </motion.section>
           )}
         </div>
+
+        {/* Subscription Modal */}
+        <SubscriptionForm 
+          showModal={showModal} 
+          onClose={closeModal} 
+          position="modal" 
+        />
       </div>
     </>
   );

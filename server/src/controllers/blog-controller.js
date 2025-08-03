@@ -10,6 +10,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const Blog = require('../models/Blog');
 const User = require('../models/User');
+const EmailService = require('../services/email-service');
+const Subscriber = require('../models/Subscriber');
 const { HTTP_STATUS } = require('../constants/http-status');
 const { 
   API_RESPONSE_STATUS, 
@@ -231,6 +233,49 @@ class BlogController {
 
       await blog.populate('author', 'firstName lastName email');
 
+      // Send newsletter email if blog is published
+      if (blog.status === 'published') {
+        try {
+          // Get all active subscribers
+          const subscribers = await Subscriber.find({ 
+            status: 'active',
+            emailConfirmed: true 
+          }).select('email firstName');
+
+          if (subscribers.length > 0) {
+            // Send blog notification emails in the background
+            setImmediate(async () => {
+              try {
+                await EmailService.sendBlogNotification({
+                  blog: {
+                    title: blog.title,
+                    excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
+                    slug: blog.slug,
+                    featuredImage: blog.featuredImage?.url || null,
+                    publishedAt: blog.publishedAt || blog.createdAt,
+                    author: {
+                      name: `${blog.author.firstName} ${blog.author.lastName}`,
+                      email: blog.author.email
+                    }
+                  },
+                  subscribers: subscribers.map(sub => ({
+                    email: sub.email,
+                    firstName: sub.firstName
+                  }))
+                });
+                console.log(`Newsletter sent to ${subscribers.length} subscribers for blog: ${blog.title}`);
+              } catch (emailError) {
+                console.error('Failed to send newsletter emails:', emailError);
+                // Don't fail the blog creation if email fails
+              }
+            });
+          }
+        } catch (emailError) {
+          console.error('Error preparing newsletter emails:', emailError);
+          // Don't fail the blog creation if email preparation fails
+        }
+      }
+
       const response = ApiResponse.created(blog, 'Blog created successfully');
       res.status(response.statusCode).json(response);
     } catch (error) {
@@ -274,6 +319,10 @@ class BlogController {
       // Remove sensitive fields that shouldn't be updated directly
       const { author, createdAt, updatedAt, ...allowedUpdateData } = updateData;
 
+      // Check if blog is being published for the first time
+      const wasUnpublished = blog.status !== 'published';
+      const willBePublished = allowedUpdateData.status === 'published';
+
       // If updating status to published, ensure publishedAt is set
       if (allowedUpdateData.status === 'published' && !blog.publishedAt) {
         allowedUpdateData.publishedAt = new Date();
@@ -285,6 +334,49 @@ class BlogController {
 
       // Populate author information for response
       await blog.populate('author', 'firstName lastName email profileImage');
+
+      // Send newsletter email if blog was just published for the first time
+      if (wasUnpublished && willBePublished) {
+        try {
+          // Get all active subscribers
+          const subscribers = await Subscriber.find({ 
+            status: 'active',
+            emailConfirmed: true 
+          }).select('email firstName');
+
+          if (subscribers.length > 0) {
+            // Send blog notification emails in the background
+            setImmediate(async () => {
+              try {
+                await EmailService.sendBlogNotification({
+                  blog: {
+                    title: blog.title,
+                    excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
+                    slug: blog.slug,
+                    featuredImage: blog.featuredImage?.url || null,
+                    publishedAt: blog.publishedAt || blog.updatedAt,
+                    author: {
+                      name: `${blog.author.firstName} ${blog.author.lastName}`,
+                      email: blog.author.email
+                    }
+                  },
+                  subscribers: subscribers.map(sub => ({
+                    email: sub.email,
+                    firstName: sub.firstName
+                  }))
+                });
+                console.log(`Newsletter sent to ${subscribers.length} subscribers for updated blog: ${blog.title}`);
+              } catch (emailError) {
+                console.error('Failed to send newsletter emails:', emailError);
+                // Don't fail the blog update if email fails
+              }
+            });
+          }
+        } catch (emailError) {
+          console.error('Error preparing newsletter emails for update:', emailError);
+          // Don't fail the blog update if email preparation fails
+        }
+      }
 
       const response = ApiResponse.success(blog, 'Blog updated successfully');
       res.status(response.statusCode).json(response);

@@ -165,6 +165,21 @@ const blogSchema = new mongoose.Schema({
     likes: {
       type: Number,
       default: 0
+    },
+    moderatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    moderatedAt: {
+      type: Date,
+      default: null
+    },
+    moderatorNote: {
+      type: String,
+      default: '',
+      trim: true,
+      maxlength: [500, 'Moderator note cannot exceed 500 characters']
     }
   }],
 

@@ -12,8 +12,10 @@
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Head from "next/head"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { Terminal, Briefcase, FileText, Moon, Sun } from "lucide-react"
+import { FiCode, FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -142,15 +144,15 @@ export default function LandingPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 onClick={toggleTheme}
-                className={`p-2 rounded-xl transition-colors duration-300 ${
-                  isClient && isDark
-                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                whileHover={{ scale: 1.1, rotate: 180 }}
+                whileTap={{ scale: 0.9 }}
+                className={`p-3 rounded-xl backdrop-blur-sm border transition-all duration-300 ${
+                  isClient && isDark 
+                    ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' 
+                    : 'bg-black/10 border-black/20 text-black hover:bg-black/20'
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
-                {isClient && isDark ? <Sun size={18} /> : <Moon size={18} />}
+                <div className="text-xl">{isClient && isDark ? "☀️" : "🌙"}</div>
               </motion.button>
             </div>
           </div>
@@ -171,12 +173,12 @@ export default function LandingPage() {
                   variants={itemVariants}
                   className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-8"
                 >
-                  Full Stack
+                  Welcome to my
                   <br />
                   <span className={`${
                     isClient && isDark ? 'text-slate-400' : 'text-slate-500'
                   }`}>
-                    Developer
+                    Digital Universe
                   </span>
                 </motion.h1>
 
@@ -294,17 +296,148 @@ export default function LandingPage() {
               </div>
             </motion.section>
 
-            {/* Footer */}
+            {/* Enhanced Minimalistic Footer */}
             <motion.footer
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="py-12 border-t border-slate-200 dark:border-slate-800"
+              className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700"
             >
-              <div className={`text-center text-sm ${
-                isClient && isDark ? 'text-slate-500' : 'text-slate-400'
-              }`}>
-                © 2025 Jasil Meledath. Built with Next.js
+              <div className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12">
+                {/* Main Footer Content */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                  {/* Brand & Social - Mobile Optimized */}
+                  <div className="sm:col-span-2 lg:col-span-2">
+                    <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+                      <FiCode className="text-slate-700 dark:text-slate-300 w-5 h-5 sm:w-6 sm:h-6" />
+                      <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                        jasilmeledath.me
+                      </span>
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-300 mb-4 sm:mb-6 max-w-md text-sm sm:text-base leading-relaxed">
+                      Full-stack developer crafting modern web experiences and sharing insights through technical content.
+                    </p>
+                    <div className="flex space-x-3 sm:space-x-4">
+                      <a 
+                        href="https://github.com/jasilmeledath" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                        aria-label="GitHub Profile"
+                      >
+                        <FiGithub className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </a>
+                      <a 
+                        href="https://linkedin.com/in/jasilmeledath" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                        aria-label="LinkedIn Profile"
+                      >
+                        <FiLinkedin className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </a>
+                      <a 
+                        href="https://twitter.com/jasilmeledath" 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                        aria-label="Twitter Profile"
+                      >
+                        <FiTwitter className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Quick Links - Mobile Optimized */}
+                  <div className="hidden sm:block">
+                    <h3 className="font-semibold text-slate-900 dark:text-white mb-3 sm:mb-4 text-sm sm:text-base">
+                      Navigation
+                    </h3>
+                    <ul className="space-y-2">
+                      <li>
+                        <Link href="/" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                          Home
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/portfolio" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                          Portfolio
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                          Blog
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/terminal" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm sm:text-base">
+                          Terminal
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Services - Desktop Only */}
+                  <div className="hidden lg:block">
+                    <h3 className="font-semibold text-slate-900 dark:text-white mb-4 text-sm sm:text-base">
+                      Services
+                    </h3>
+                    <ul className="space-y-2">
+                      <li>
+                        <span className="text-slate-600 dark:text-slate-300 text-sm">
+                          Web Development
+                        </span>
+                      </li>
+                      <li>
+                        <span className="text-slate-600 dark:text-slate-300 text-sm">
+                          Full-Stack Solutions
+                        </span>
+                      </li>
+                      <li>
+                        <span className="text-slate-600 dark:text-slate-300 text-sm">
+                          Technical Consulting
+                        </span>
+                      </li>
+                      <li>
+                        <span className="text-slate-600 dark:text-slate-300 text-sm">
+                          Code Review
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Mobile Quick Links */}
+                <div className="sm:hidden mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex justify-center space-x-6">
+                    <Link href="/portfolio" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium">
+                      Portfolio
+                    </Link>
+                    <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium">
+                      Blog
+                    </Link>
+                    <Link href="/terminal" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium">
+                      Terminal
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Bottom Section - Minimalistic */}
+                <div className="border-t border-slate-200 dark:border-slate-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
+                  <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
+                      © 2025 jasilmeledath.me • Made with ❤️ using Next.js
+                    </p>
+                    <div className="flex items-center space-x-4 sm:space-x-6">
+                      <a 
+                        href="mailto:jasilmeledath@gmail.com" 
+                        className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-xs sm:text-sm transition-colors"
+                      >
+                        Contact
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.footer>
           </div>

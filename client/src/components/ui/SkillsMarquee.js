@@ -63,7 +63,7 @@ const DefaultIcon = ({ className }) => (
 const SkillsMarquee = ({ 
   skills = {}, 
   isDark = true, 
-  speed = 8, // Much slower speed for better readability
+  speed = 3, // Very slow and smooth speed for better readability
   pauseOnHover = true,
   direction = 'left',
   rows = 2, // Number of marquee rows
@@ -205,18 +205,19 @@ const SkillsMarquee = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative w-full overflow-hidden rounded-lg ${sizing.containerHeight}`}
+      className={`relative w-full overflow-hidden ${sizing.containerHeight}`}
+      style={{ margin: 0, padding: 0 }}
     >
-      {/* Subtle gradient overlays for smooth edges */}
-      <div className={`absolute left-0 top-0 bottom-0 ${isMobile ? 'w-4' : 'w-8'} z-10 pointer-events-none ${
+      {/* Natural fade-out gradients - perfectly aligned to edges */}
+      <div className={`absolute left-0 top-0 bottom-0 ${isMobile ? 'w-8' : 'w-12'} z-10 pointer-events-none ${
         isDark 
-          ? 'bg-gradient-to-r from-gray-900/80 to-transparent' 
-          : 'bg-gradient-to-r from-white/80 to-transparent'
+          ? 'bg-gradient-to-r from-gray-900 via-gray-900/60 via-gray-900/20 to-transparent' 
+          : 'bg-gradient-to-r from-white via-white/70 via-white/30 to-transparent'
       }`} />
-      <div className={`absolute right-0 top-0 bottom-0 ${isMobile ? 'w-4' : 'w-8'} z-10 pointer-events-none ${
+      <div className={`absolute right-0 top-0 bottom-0 ${isMobile ? 'w-8' : 'w-12'} z-10 pointer-events-none ${
         isDark 
-          ? 'bg-gradient-to-l from-gray-900/80 to-transparent' 
-          : 'bg-gradient-to-l from-white/80 to-transparent'
+          ? 'bg-gradient-to-l from-gray-900 via-gray-900/60 via-gray-900/20 to-transparent' 
+          : 'bg-gradient-to-l from-white via-white/70 via-white/30 to-transparent'
       }`} />
 
       {/* Multi-row Marquee Container - One row per category */}
@@ -242,28 +243,7 @@ const SkillsMarquee = ({
         ))}
       </div>
 
-      {/* Mobile touch indicator */}
-      {isMobile && enableTouch && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          animate={{ opacity: isDragging ? 0 : 0.6 }}
-          className="absolute bottom-1 left-1/2 transform -translate-x-1/2 pointer-events-none"
-        >
-          <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
-            isDark 
-              ? 'bg-white/10 text-white/60' 
-              : 'bg-black/10 text-black/60'
-          }`}>
-            <motion.span
-              animate={{ x: [-2, 2, -2] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            >
-              👆
-            </motion.span>
-            <span>Drag to explore • Infinite scroll</span>
-          </div>
-        </motion.div>
-      )}
+
     </div>
   );
 };
@@ -303,8 +283,8 @@ const MarqueeRow = ({
   const skillWidth = sizing.iconSize.includes('w-6') ? 80 : sizing.iconSize.includes('w-8') ? 100 : 120;
   const singleSetWidth = skills.length * skillWidth;
   
-  // Animation duration for one complete set (seamless loop) - Much slower
-  const animationDuration = singleSetWidth / (speed * 5); // Reduced multiplier for slower animation
+  // Animation duration for one complete set (seamless loop) - Very slow and smooth
+  const animationDuration = singleSetWidth / (speed * 3); // Increased duration for ultra-smooth slow animation
 
   // Touch interaction handlers
   const handleTouchDragStart = (event, info) => {
@@ -348,7 +328,7 @@ const MarqueeRow = ({
         }}
         drag={enableTouch ? "x" : false}
         dragConstraints={{ left: -singleSetWidth * 0.5, right: singleSetWidth * 0.5 }}
-        dragElastic={0.05}
+        dragElastic={0.02}
         dragMomentum={false}
         onDragStart={handleTouchDragStart}
         onDrag={handleTouchDrag}

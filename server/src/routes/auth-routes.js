@@ -30,8 +30,17 @@ const authRateLimit = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting for successful requests
-  skip: (req, res) => res.statusCode < 400,
+  // Skip rate limiting for successful requests and development environment
+  skip: (req, res) => {
+    // Skip rate limiting in development or for localhost
+    if (process.env.NODE_ENV === 'development' || 
+        req.ip === '127.0.0.1' || 
+        req.ip === '::1' || 
+        req.ip === '::ffff:127.0.0.1') {
+      return true;
+    }
+    return res.statusCode < 400;
+  },
   keyGenerator: (req) => {
     // Use IP + User-Agent for better rate limiting
     return `${req.ip}-${req.get('User-Agent')}`;
@@ -54,7 +63,14 @@ const passwordChangeRateLimit = rateLimit({
     }
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  // Skip rate limiting for development environment
+  skip: (req) => {
+    return process.env.NODE_ENV === 'development' || 
+           req.ip === '127.0.0.1' || 
+           req.ip === '::1' || 
+           req.ip === '::ffff:127.0.0.1';
+  }
 });
 
 /**

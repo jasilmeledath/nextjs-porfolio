@@ -32,6 +32,7 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import ProjectForm from '../../components/admin/ProjectForm';
+import CommentModeration from '../../components/admin/CommentModeration';
 
 /**
  * Admin Dashboard Main Page Component
@@ -590,7 +591,18 @@ export default function AdminDashboardPage() {
               </motion.div>
             )}
 
-            {activeSection !== 'dashboard' && activeSection !== 'projects' && (
+            {/* Comments Moderation Section */}
+            {activeSection === 'comments' && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="max-w-7xl mx-auto"
+              >
+                <CommentModeration />
+              </motion.div>
+            )}
+
+            {activeSection !== 'dashboard' && activeSection !== 'projects' && activeSection !== 'comments' && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

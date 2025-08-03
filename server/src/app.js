@@ -25,8 +25,10 @@ const notFoundHandler = require('./middleware/not-found-handler');
 // Import routes
 const authRoutes = require('./routes/auth-routes');
 const blogRoutes = require('./routes/blog-routes');
+const commentsRoutes = require('./routes/comments-routes');
 const portfolioRoutes = require('./routes/portfolio-routes');
 const portfolioManagementRoutes = require('./routes/portfolio-management-routes');
+const subscriptionRoutes = require('./routes/subscription-routes');
 // const adminRoutes = require('./routes/admin-routes');
 
 /**
@@ -124,7 +126,14 @@ const createApp = () => {
             }
         },
         standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-        legacyHeaders: false // Disable the `X-RateLimit-*` headers
+        legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+        // Skip rate limiting for localhost/development
+        skip: (req) => {
+            return process.env.NODE_ENV === 'development' || 
+                   req.ip === '127.0.0.1' || 
+                   req.ip === '::1' || 
+                   req.ip === '::ffff:127.0.0.1';
+        }
     });
     app.use('/api/', limiter);
 
@@ -174,8 +183,10 @@ const createApp = () => {
     // Mount routes
     app.use('/api/v1/auth', authRoutes);
     app.use('/api/v1/blogs', blogRoutes);
+    app.use('/api/v1/comments', commentsRoutes);
     app.use('/api/v1/portfolio', portfolioRoutes);
     app.use('/api/v1/portfolio-management', portfolioManagementRoutes);
+    app.use('/api/v1/subscriptions', subscriptionRoutes);
     // app.use('/api/v1/admin', adminRoutes);
 
     // Static file serving for uploads with CORS headers
@@ -264,7 +275,8 @@ const createApp = () => {
                 endpoints: {
                     auth: '/api/v1/auth',
                     portfolio: '/api/v1/portfolio',
-                    blog: '/api/v1/blog',
+                    blog: '/api/v1/blogs',
+                    comments: '/api/v1/comments',
                     admin: '/api/v1/admin'
                 },
                 documentation: '/api/docs',
