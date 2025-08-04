@@ -197,27 +197,23 @@ class EmailService {
           unsubscribeToken: subscriber.unsubscribeToken || 'temp-token' // fallback for existing subscribers
         };
 
-          subscriber: subscriberData.email,
-          blogTitle: blog?.title,
-          blogSlug: blog?.slug,
-          blogExists: !!blog
-        });
+        // Sending blog notification
 
         const result = await emailService.sendSingleBlogNotification(subscriberData, blog);
-        results.push({ email: subscriber.email, success: true, result });
+        results.push({ success: true, result });
         
         // Small delay to avoid overwhelming the email server
         if (subscribers.length > 10) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
       } catch (error) {
-        console.error(`[EmailService] Failed to send to ${subscriber.email}:`, error);
-        results.push({ email: subscriber.email, success: false, error: error.message });
+        console.error(`[EmailService] Failed to send to subscriber:`, error?.message || 'Unknown error');
+        results.push({ success: false, error: error?.message || 'Send failed' });
       }
     }
 
     const successCount = results.filter(r => r.success).length;
-    console.log(`[EmailService] Blog notification sent successfully to ${successCount}/${subscribers.length} subscribers`);
+    // Blog notification sent to subscribers
     
     return results;
   }

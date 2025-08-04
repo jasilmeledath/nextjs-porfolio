@@ -232,10 +232,6 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
    * Handle editing a project
    */
   const handleEditProject = (project) => {
-      _id: project._id,
-      id: project.id,
-      keys: Object.keys(project)
-    });
     setEditingProject(project);
     setShowForm(true);
     resetForm();
@@ -579,10 +575,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       if (editingProject) {
         // Handle different possible ID field names
         const projectId = editingProject._id || editingProject.id;
-          id: projectId,
-          editingProject: editingProject,
-          formData: formData
-        });
+        // Project update in progress
         
         if (!projectId) {
           throw new Error('Project ID is missing');

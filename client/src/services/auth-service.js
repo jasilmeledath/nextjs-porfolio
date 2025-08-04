@@ -156,7 +156,7 @@ class AuthService {
       
       return response.data.data.user;
     } catch (error) {
-      console.error('Token verification error:', error);
+      console.error('Token verification error:', error?.message || 'Token validation failed');
       throw new Error('Token verification failed');
     }
   }
@@ -178,7 +178,7 @@ class AuthService {
         user: response.data.data.user,
       };
     } catch (error) {
-      console.error('Token refresh error:', error);
+      console.error('Token refresh error:', error?.message || 'Token refresh failed');
       throw new Error('Token refresh failed');
     }
   }

@@ -1,47 +1,56 @@
-# Multi-stage Docker build for production
+# Simple Dockerfile for Railway deployment
+FROM node:18-alpine
 
-# Stage 1: Build client
-FROM node:18-alpine AS client-builder
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm ci --only=production
-COPY client/ ./
-RUN npm run build
-
-# Stage 2: Setup server
-FROM node:18-alpine AS server-builder
-WORKDIR /app/server
-COPY server/package*.json ./
-RUN npm ci --only=production
-COPY server/ ./
-
-# Stage 3: Production image
-FROM node:18-alpine AS production
+# Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nodejs -u 1001
 
+# Set working directory
 WORKDIR /app
 
-# Copy server files
-COPY --from=server-builder --chown=nodejs:nodejs /app/server ./server
-COPY --from=client-builder --chown=nodejs:nodejs /app/client/.next ./client/.next
-COPY --from=client-builder --chown=nodejs:nodejs /app/client/public ./client/public
+# Copy package files
+COPY package*.json ./
+COPY client/package*.json ./client/
+COPY server/package*.json ./server/
 
-# Create directories
+# Install server dependencies
+WORKDIR /app/server
+RUN npm ci --only=production
+
+# Install client dependencies and build
+WORKDIR /app/client
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm ci
+COPY client/ ./
+RUN npm run build
+
+# Copy server files
+WORKDIR /app/server
+COPY server/ ./
+
+# Create required directories
 RUN mkdir -p /app/server/uploads /app/server/logs
+
+# Set proper ownership
 RUN chown -R nodejs:nodejs /app
 
-USER nodejs
-
+# Expose port
 EXPOSE 8000
 
+# Set environment
 ENV NODE_ENV=production
 ENV PORT=8000
 
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node /app/server/healthcheck.js
 
+# Switch to non-root user
+USER nodejs
+
+# Start the server
 CMD ["dumb-init", "node", "/app/server/server.js"]

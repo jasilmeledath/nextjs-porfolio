@@ -549,11 +549,7 @@ class PortfolioService {
       }
       
       // Debug: Log each skill being processed
-        icon: skill.icon,
-        logoIdentifier: skill.logoIdentifier,
-        logoLibrary: skill.logoLibrary,
-        color: skill.color
-      });
+      // Processing skill data
       
       const processedSkill = {
         name: skill.name,

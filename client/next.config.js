@@ -164,8 +164,15 @@ const nextConfig = {
   
   // Enable experimental features for better performance
   experimental: {
-    optimizeCss: true,
+    // Disable optimizeCss temporarily to fix build issues
+    // optimizeCss: true,
     scrollRestoration: true,
+  },
+  
+  // Build configuration
+  generateBuildId: async () => {
+    // Use a consistent build ID for Railway deployments
+    return 'railway-build'
   },
 };
 

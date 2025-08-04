@@ -397,7 +397,7 @@ class SubscriptionController {
             }
             sentCount++;
           } catch (error) {
-            console.error(`Failed to send email to ${subscriber.email}:`, error);
+            console.error(`Failed to send email to subscriber:`, error?.message || 'Unknown error');
             errorCount++;
           }
         });

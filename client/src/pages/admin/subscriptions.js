@@ -22,9 +22,9 @@ import {
     FiXCircle,
     FiClock
 } from 'react-icons/fi';
-import { useTheme } from '../../../context/ThemeContext';
-import AdminProtectedRoute from '../../../components/admin/AdminProtectedRoute';
-import SubscriptionService from '../../../services/subscription-service';
+import { useTheme } from '../../context/ThemeContext';
+import AdminProtectedRoute from '../../components/admin/AdminProtectedRoute';
+import SubscriptionService from '../../services/subscription-service';
 
 const SubscriptionManagement = () => {
     const { isDark } = useTheme();

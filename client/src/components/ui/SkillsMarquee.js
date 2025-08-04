@@ -112,11 +112,7 @@ const SkillsMarquee = ({
       
       const processedSkillList = skillList.map((skill, index) => {
         // Debug: Log each skill's icon fields
-          icon: skill.icon,
-          logoIdentifier: skill.logoIdentifier,
-          logoLibrary: skill.logoLibrary,
-          color: skill.color
-        });
+        // Processing skill data
         
         return {
           ...skill,
@@ -358,13 +354,7 @@ const MarqueeRow = ({
 
           // Debug: Log icon resolution for each skill
           if (index < 3) { // Only log first few to avoid spam
-              logoIdentifier: logoIdentifier,
-              logoLibrary: logoLibrary,
-              icon: skill.icon,
-              IconComponent: IconComponent ? 'Found' : 'Not found',
-              willUseReactIcon: !!IconComponent,
-              autoFixed: logoIdentifier !== skill.logoIdentifier
-            });
+            // Processing icon resolution
           }
 
           return (

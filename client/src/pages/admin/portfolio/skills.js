@@ -116,10 +116,7 @@ export default function SkillsPage() {
         
         // Log icon fields for each skill
         skillsData.forEach((skill, index) => {
-            icon: skill.icon,
-            logoIdentifier: skill.logoIdentifier,
-            logoLibrary: skill.logoLibrary
-          });
+          // Processing skill data
         });
         
         setSkills(skillsData);
@@ -192,10 +189,7 @@ export default function SkillsPage() {
       setIsLoading(true);
       
       // Log the form data being submitted
-        icon: formData.icon,
-        logoIdentifier: formData.logoIdentifier,
-        logoLibrary: formData.logoLibrary
-      });
+      // Submitting form data
       
       let response;
       if (editingSkill) {

@@ -382,10 +382,7 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Created skill
    */
   static async createSkill(skill) {
-      icon: skill.icon,
-      logoIdentifier: skill.logoIdentifier,
-      logoLibrary: skill.logoLibrary
-    });
+    // Creating skill
     
     return this.makeRequest('/skills', {
       method: 'POST',
@@ -400,10 +397,7 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Updated skill
    */
   static async updateSkill(id, skill) {
-      icon: skill.icon,
-      logoIdentifier: skill.logoIdentifier,
-      logoLibrary: skill.logoLibrary
-    });
+    // Updating skill
     
     return this.makeRequest(`/skills/${id}`, {
       method: 'PUT',
