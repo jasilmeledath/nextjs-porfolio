@@ -522,6 +522,7 @@ class PortfolioController {
 
       // Debug skills data
       skills?.forEach((skill, index) => {
+        console.log(`[Portfolio] Skill ${index}:`, {
           icon: skill.icon,
           logoIdentifier: skill.logoIdentifier,
           logoLibrary: skill.logoLibrary
