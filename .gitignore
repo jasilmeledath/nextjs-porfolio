@@ -298,11 +298,12 @@ dist
 .pnp.*
 
 # ===== AI/ML & DATA =====
-# Machine learning models
+# Machine learning models (but NOT database models)
 *.h5
 *.pkl
 *.model
-models/
+ml-models/
+ai-models/
 training-data/
 datasets/
 
