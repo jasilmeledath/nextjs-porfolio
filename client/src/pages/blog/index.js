@@ -920,7 +920,7 @@ export default function BlogPage() {
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
                   <FiCode className="text-slate-700 dark:text-slate-300 w-5 h-5 sm:w-6 sm:h-6" />
                   <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                    jasilmeledath.me
+                    jasilmeledath.dev
                   </span>
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 mb-4 sm:mb-6 max-w-md text-sm sm:text-base leading-relaxed">

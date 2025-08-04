@@ -96,7 +96,6 @@ const SkillsMarquee = ({
     if (!skills || typeof skills !== 'object') return [];
     
     // Debug: Log the raw skills data received
-    console.log('[SkillsMarquee] Raw skills data received:', skills);
     
     const categoryRows = [];
     const categories = Object.entries(skills);
@@ -110,11 +109,9 @@ const SkillsMarquee = ({
     
     // Show ALL categories, not limited by rows prop
     validCategories.forEach(([category, skillList]) => {
-      console.log(`[SkillsMarquee] Processing category "${category}":`, skillList);
       
       const processedSkillList = skillList.map((skill, index) => {
         // Debug: Log each skill's icon fields
-        console.log(`[SkillsMarquee] Skill "${skill.name}":`, {
           icon: skill.icon,
           logoIdentifier: skill.logoIdentifier,
           logoLibrary: skill.logoLibrary,
@@ -352,7 +349,6 @@ const MarqueeRow = ({
           if (!logoIdentifier && skill.name) {
             logoIdentifier = getAutoFixedIconIdentifier(skill.name);
             if (logoIdentifier) {
-              console.log(`[SkillsMarquee] Auto-fixing "${skill.name}" with logoIdentifier: ${logoIdentifier}`);
             }
           }
           
@@ -362,7 +358,6 @@ const MarqueeRow = ({
 
           // Debug: Log icon resolution for each skill
           if (index < 3) { // Only log first few to avoid spam
-            console.log(`[SkillsMarquee] Skill "${skill.name}" icon resolution:`, {
               logoIdentifier: logoIdentifier,
               logoLibrary: logoLibrary,
               icon: skill.icon,

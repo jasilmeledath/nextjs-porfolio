@@ -1695,17 +1695,14 @@ const HangingIDCard = ({ personalInfo = {}, isDark = true, className = "", physi
                         className="w-full h-full object-cover"
                         referrerPolicy="no-referrer"
                         onLoad={(e) => {
-                          console.log('Image loaded successfully');
                           setImageLoaded(true);
                           setImageError(false);
                         }}
                         onError={(e) => {
-                          console.log('Image failed to load');
                           setImageError(true);
                           setImageLoaded(false);
                         }}
                         onLoadStart={() => {
-                          console.log('Image loading started');
                           setImageLoaded(false);
                         }}
                         style={{

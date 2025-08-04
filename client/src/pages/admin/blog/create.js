@@ -45,7 +45,6 @@ Here's how you can include code in your posts:
 
 \`\`\`javascript
 function greetReader(name) {
-  console.log(\`Hello, \${name}! Welcome to the blog.\`);
 }
 
 greetReader('Developer');

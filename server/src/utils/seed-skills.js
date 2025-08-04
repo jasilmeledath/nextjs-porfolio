@@ -165,11 +165,9 @@ const sampleSkills = [
 
 async function seedSkills() {
   try {
-    console.log('🌱 Starting skills data seeding...');
     
     // Connect to MongoDB
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/portfolio-dev');
-    console.log('✅ Connected to MongoDB');
 
     // Find the admin user
     const adminUser = await User.findOne({ role: 'admin' });
@@ -178,11 +176,9 @@ async function seedSkills() {
       return;
     }
 
-    console.log(`👤 Found admin user: ${adminUser.email}`);
 
     // Clear existing skills for this user
     await Skill.deleteMany({ userId: adminUser._id });
-    console.log('🧹 Cleared existing skills');
 
     // Add userId to each skill
     const skillsWithUser = sampleSkills.map(skill => ({
@@ -192,7 +188,6 @@ async function seedSkills() {
 
     // Insert new skills
     const insertedSkills = await Skill.insertMany(skillsWithUser);
-    console.log(`✅ Successfully inserted ${insertedSkills.length} skills`);
 
     // Display summary
     const summary = {};
@@ -203,20 +198,14 @@ async function seedSkills() {
       summary[skill.category]++;
     });
 
-    console.log('\n📊 Skills Summary by Category:');
     Object.entries(summary).forEach(([category, count]) => {
-      console.log(`   ${category}: ${count} skills`);
     });
 
-    console.log('\n🎉 Skills seeding completed successfully!');
-    console.log('💡 You can now test the marquee on the portfolio page');
-    console.log('🔧 Use the admin panel to manage skills with the new icon picker');
 
   } catch (error) {
     console.error('❌ Error seeding skills:', error);
   } finally {
     await mongoose.connection.close();
-    console.log('🔌 Database connection closed');
   }
 }
 

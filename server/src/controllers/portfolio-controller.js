@@ -521,9 +521,7 @@ class PortfolioController {
       ]);
 
       // Debug skills data
-      console.log('[PortfolioController] Skills found for visitor portfolio:', skills?.length || 0);
       skills?.forEach((skill, index) => {
-        console.log(`[PortfolioController] Skill ${index + 1} (${skill.name}):`, {
           icon: skill.icon,
           logoIdentifier: skill.logoIdentifier,
           logoLibrary: skill.logoLibrary

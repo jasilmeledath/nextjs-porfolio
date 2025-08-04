@@ -88,7 +88,6 @@ class AuthController {
       };
       
       // Log successful login (you can save this to a separate collection for analytics)
-      console.log('Successful login:', loginInfo);
       
       res.status(HTTP_STATUS.SUCCESS).json({
         status: API_RESPONSE_STATUS.SUCCESS,
@@ -156,7 +155,6 @@ class AuthController {
         timestamp: new Date()
       };
       
-      console.log('User logout:', logoutInfo);
       
       // In a more complex setup, you might want to:
       // 1. Add token to a blacklist
@@ -411,7 +409,6 @@ class AuthController {
       await user.save();
       
       // Log password change
-      console.log('Password changed:', {
         userId: user._id,
         email: user.email,
         ip: req.ip,

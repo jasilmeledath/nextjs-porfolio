@@ -23,6 +23,7 @@ const errorHandler = require('./middleware/error-handler');
 const notFoundHandler = require('./middleware/not-found-handler');
 
 // Import routes
+const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth-routes');
 const blogRoutes = require('./routes/blog-routes');
 const commentsRoutes = require('./routes/comments-routes');
@@ -71,7 +72,8 @@ const createApp = () => {
             const allowedOrigins = [
                 'http://localhost:3000', // Next.js development
                 'http://localhost:3001', // Alternative development port
-                'https://yourportfolio.vercel.app', // Production domain
+                'https://jasilmeledath.dev', // Production domain
+                'https://api.jasilmeledath.dev', // API domain
                 process.env.FRONTEND_URL
             ].filter(Boolean);
 
@@ -89,6 +91,10 @@ const createApp = () => {
                     /^https:\/\/.*\.vercel\.app$/,        // Vercel deployments
                     /^https:\/\/.*\.netlify\.app$/,       // Netlify deployments
                     /^https:\/\/.*\.herokuapp\.com$/,     // Heroku deployments
+                    /^https:\/\/.*\.railway\.app$/,       // Railway deployments
+                    /^https:\/\/.*\.render\.com$/,        // Render deployments
+                    /^https:\/\/jasilmeledath\.dev$/,     // Production domain
+                    /^https:\/\/.*\.jasilmeledath\.dev$/, // Production subdomains
                     /^https:\/\/.*\.trycloudflare\.com$/, // Cloudflare tunnels
                     /^https:\/\/.*\.ngrok\.io$/,          // Ngrok tunnels
                     /^https:\/\/.*\.loca\.lt$/            // Localtunnel
@@ -103,7 +109,6 @@ const createApp = () => {
             if (allowedOrigins.indexOf(origin) !== -1) {
                 callback(null, true);
             } else {
-                console.log(`CORS: Blocked origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
@@ -181,6 +186,7 @@ const createApp = () => {
     });
 
     // Mount routes
+    app.use('/api/v1/health', healthRoutes);
     app.use('/api/v1/auth', authRoutes);
     app.use('/api/v1/blogs', blogRoutes);
     app.use('/api/v1/comments', commentsRoutes);
@@ -207,7 +213,8 @@ const createApp = () => {
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:3001', 
-            'https://yourportfolio.vercel.app',
+            'https://jasilmeledath.dev',
+            'https://api.jasilmeledath.dev',
             process.env.FRONTEND_URL
         ].filter(Boolean);
         
@@ -225,6 +232,10 @@ const createApp = () => {
                 /^https:\/\/.*\.vercel\.app$/,
                 /^https:\/\/.*\.netlify\.app$/,
                 /^https:\/\/.*\.herokuapp\.com$/,
+                /^https:\/\/.*\.railway\.app$/,
+                /^https:\/\/.*\.render\.com$/,
+                /^https:\/\/jasilmeledath\.dev$/,
+                /^https:\/\/.*\.jasilmeledath\.dev$/,
                 /^https:\/\/.*\.trycloudflare\.com$/,
                 /^https:\/\/.*\.ngrok\.io$/,
                 /^https:\/\/.*\.loca\.lt$/

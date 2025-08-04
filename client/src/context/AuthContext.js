@@ -61,7 +61,6 @@ export function AuthProvider({ children }) {
         });
         
         token = devToken;
-        console.log('[Auth] Development mode: Set admin token for verification');
       }
 
       // Verify token with backend

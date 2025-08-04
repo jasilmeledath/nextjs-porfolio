@@ -2,7 +2,14 @@
 const nextConfig = {
   reactStrictMode: true,
   
-  // Add rewrites for API proxy when using tunnels
+  // Production optimizations
+  poweredByHeader: false,
+  compress: true,
+  
+  // Performance optimizations
+  swcMinify: true,
+  
+  // Add rewrites for API proxy when using tunnels (development only)
   async rewrites() {
     return [
       // Only apply these rewrites when not in localhost
@@ -17,7 +24,12 @@ const nextConfig = {
   
   images: {
     domains: [
+      // Production domains
+      'jasilmeledath.dev',
+      'api.jasilmeledath.dev',
+      // Development domains
       'localhost', 
+      // External image services
       'postimg.cc', 
       'i.postimg.cc',
       'images.unsplash.com',
@@ -30,7 +42,16 @@ const nextConfig = {
       'www.azoai.com'
     ],
     formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
+      // Production patterns
+      {
+        protocol: 'https',
+        hostname: 'api.jasilmeledath.dev',
+        pathname: '/uploads/**',
+      },
+      // Development patterns
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -43,6 +64,7 @@ const nextConfig = {
         port: '8000',
         pathname: '/uploads/avatars/**',
       },
+      // External services
       {
         protocol: 'https',
         hostname: 'postimg.cc',
@@ -84,13 +106,66 @@ const nextConfig = {
         hostname: '**',
         pathname: '/**',
       },
-      // Allow any HTTP domain - use with caution  
-      {
+      // Allow any HTTP domain for development only
+      ...(process.env.NODE_ENV === 'development' ? [{
         protocol: 'http',
         hostname: '**',
         pathname: '/**',
-      },
+      }] : []),
     ],
+  },
+
+  // Headers for security and performance (production only)
+  async headers() {
+    if (process.env.NODE_ENV !== 'production') return [];
+    
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+        ],
+      },
+      {
+        source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+  
+  // Enable experimental features for better performance
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
   },
 };
 

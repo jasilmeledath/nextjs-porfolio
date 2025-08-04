@@ -24,7 +24,6 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
     
-    console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
     process.exit(1);
@@ -38,13 +37,11 @@ const connectDB = async () => {
  */
 const createAdminUser = async () => {
   try {
-    console.log('🔄 Checking for existing admin user...');
     
     // Check if admin user already exists
     const existingAdmin = await User.findOne({ role: 'admin' });
     
     if (existingAdmin) {
-      console.log('ℹ️  Admin user already exists:', {
         email: existingAdmin.email,
         firstName: existingAdmin.firstName,
         lastName: existingAdmin.lastName,
@@ -76,12 +73,10 @@ const createAdminUser = async () => {
       ]
     };
     
-    console.log('🔄 Creating admin user...');
     
     const adminUser = new User(adminData);
     await adminUser.save();
     
-    console.log('✅ Admin user created successfully:', {
       email: adminUser.email,
       firstName: adminUser.firstName,
       lastName: adminUser.lastName,
@@ -89,16 +84,11 @@ const createAdminUser = async () => {
       permissions: adminUser.permissions
     });
     
-    console.log('\n📋 Login Credentials:');
-    console.log(`   Email: ${adminUser.email}`);
-    console.log(`   Password: ${adminData.password}`);
-    console.log('\n⚠️  IMPORTANT: Change the default password after first login!\n');
     
   } catch (error) {
     console.error('❌ Error creating admin user:', error);
     
     if (error.code === 11000) {
-      console.log('ℹ️  Admin user with this email already exists');
     } else if (error.name === 'ValidationError') {
       console.error('❌ Validation error:', error.message);
     } else {
@@ -114,7 +104,6 @@ const createAdminUser = async () => {
  */
 const updateAdminPermissions = async () => {
   try {
-    console.log('🔄 Updating admin user permissions...');
     
     const allPermissions = [
       'portfolio:read',
@@ -135,7 +124,6 @@ const updateAdminPermissions = async () => {
       { $set: { permissions: allPermissions } }
     );
     
-    console.log(`✅ Updated ${result.modifiedCount} admin user(s) with full permissions`);
     
   } catch (error) {
     console.error('❌ Error updating admin permissions:', error);
@@ -153,19 +141,10 @@ const showAdminInfo = async () => {
     const adminUsers = await User.find({ role: 'admin' }).select('-password');
     
     if (adminUsers.length === 0) {
-      console.log('ℹ️  No admin users found');
       return;
     }
     
-    console.log('\n📋 Current Admin Users:');
     adminUsers.forEach((user, index) => {
-      console.log(`\n${index + 1}. ${user.firstName} ${user.lastName}`);
-      console.log(`   Email: ${user.email}`);
-      console.log(`   Role: ${user.role}`);
-      console.log(`   Active: ${user.isActive ? '✅' : '❌'}`);
-      console.log(`   Created: ${user.createdAt.toLocaleDateString()}`);
-      console.log(`   Last Login: ${user.lastLogin ? user.lastLogin.toLocaleDateString() : 'Never'}`);
-      console.log(`   Permissions: ${user.permissions.length} permissions`);
     });
     
   } catch (error) {
@@ -199,19 +178,6 @@ const main = async () => {
         break;
         
       default:
-        console.log('\n🔧 Admin User Management Tool\n');
-        console.log('Available commands:');
-        console.log('  create              - Create a new admin user');
-        console.log('  update-permissions  - Update admin user permissions');
-        console.log('  info               - Show admin user information');
-        console.log('\nUsage:');
-        console.log('  node src/utils/seed-admin.js create');
-        console.log('  node src/utils/seed-admin.js info');
-        console.log('\nEnvironment Variables (optional):');
-        console.log('  ADMIN_EMAIL        - Admin email (default: admin@portfolio.com)');
-        console.log('  ADMIN_PASSWORD     - Admin password (default: Admin123!@#)');
-        console.log('  ADMIN_FIRST_NAME   - Admin first name (default: Admin)');
-        console.log('  ADMIN_LAST_NAME    - Admin last name (default: User)');
         break;
     }
     
@@ -220,7 +186,6 @@ const main = async () => {
     process.exit(1);
   } finally {
     await mongoose.connection.close();
-    console.log('🔌 Database connection closed');
   }
 };
 

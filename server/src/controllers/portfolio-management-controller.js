@@ -136,14 +136,11 @@ class PortfolioManagementController {
    */
   static async getPersonalInfo(req, res, next) {
     try {
-      console.log('[PortfolioController] Getting personal info for user:', req.user.id);
       const userId = req.user.id;
       
       // In development mode, just get the first personal info record
       if (process.env.NODE_ENV === 'development') {
-        console.log('[PortfolioController] Development mode: Getting first personal info record');
         const personalInfo = await PersonalInfo.findOne();
-        console.log('[PortfolioController] Personal info found:', personalInfo ? 'Yes' : 'No');
         
         return res.status(HTTP_STATUS.SUCCESS).json(
           ApiResponse.success(
@@ -154,7 +151,6 @@ class PortfolioManagementController {
       } else {
         // Production mode - find by user ID
         const personalInfo = await PersonalInfo.findOne({ userId });
-        console.log('[PortfolioController] Personal info found:', personalInfo ? 'Yes' : 'No');
         
         return res.status(HTTP_STATUS.SUCCESS).json(
           ApiResponse.success(
@@ -179,30 +175,24 @@ class PortfolioManagementController {
    */
   static async upsertPersonalInfo(req, res, next) {
     try {
-      console.log('[PortfolioController] Starting upsertPersonalInfo...');
       
       // Get user ID from authenticated user
       const userId = req.user.id;
-      console.log(`[PortfolioController] User ID: ${userId}`);
       
       // Extract form data
       const { name, title, location, email, phone, description } = req.body;
-      console.log('[PortfolioController] Received form data:', { name, title, location, email, phone });
       
       // Handle file uploads
       let avatar = null;
       let resumeUrl = null;
       
-      console.log('[PortfolioController] Files received:', req.files ? Object.keys(req.files) : 'none');
       
       if (req.files) {
         if (req.files.avatar && req.files.avatar[0]) {
           avatar = getFileUrl(req, req.files.avatar[0].filename, 'avatars');
-          console.log(`[PortfolioController] Avatar uploaded: ${avatar}`);
         }
         if (req.files.resume && req.files.resume[0]) {
           resumeUrl = getFileUrl(req, req.files.resume[0].filename, 'resumes');
-          console.log(`[PortfolioController] Resume uploaded: ${resumeUrl}`);
         }
       }
       
@@ -220,30 +210,22 @@ class PortfolioManagementController {
       if (avatar) updateData.avatar = avatar;
       if (resumeUrl) updateData.resumeUrl = resumeUrl;
       
-      console.log('[PortfolioController] Update data prepared:', updateData);
       
       // Check if MongoDB is connected
       const mongoose = require('mongoose');
-      console.log(`[PortfolioController] MongoDB connection state: ${mongoose.connection.readyState}`);
-      console.log(`[PortfolioController] MongoDB database: ${mongoose.connection.name}`);
       
       // Find existing personal info
-      console.log(`[PortfolioController] Looking for existing personal info for user: ${userId}`);
       const existingPersonalInfo = await PersonalInfo.findOne({ userId });
-      console.log(`[PortfolioController] Existing personal info found: ${existingPersonalInfo ? 'Yes' : 'No'}`);
       
       let result;
       
       if (existingPersonalInfo) {
-        console.log(`[PortfolioController] Updating existing record: ${existingPersonalInfo._id}`);
         
         // Delete old files if new ones are uploaded
         if (avatar && existingPersonalInfo.avatar) {
-          console.log(`[PortfolioController] Deleting old avatar: ${existingPersonalInfo.avatar}`);
           deleteOldFiles([existingPersonalInfo.avatar], 'avatars');
         }
         if (resumeUrl && existingPersonalInfo.resumeUrl) {
-          console.log(`[PortfolioController] Deleting old resume: ${existingPersonalInfo.resumeUrl}`);
           deleteOldFiles([existingPersonalInfo.resumeUrl], 'resumes');
         }
         
@@ -254,20 +236,17 @@ class PortfolioManagementController {
           { new: true, runValidators: true }
         );
         
-        console.log('[PortfolioController] Update successful:', result);
         
         return res.status(HTTP_STATUS.SUCCESS).json(
           ApiResponse.success('Personal information updated successfully', result)
         );
       } else {
         // Create new
-        console.log('[PortfolioController] Creating new personal info record');
         const newPersonalInfo = new PersonalInfo(updateData);
         
         // Save with explicit error handling
         try {
           result = await newPersonalInfo.save();
-          console.log('[PortfolioController] New record created:', result);
         } catch (saveError) {
           console.error('[PortfolioController] Error saving new record:', saveError);
           throw saveError;
@@ -463,7 +442,6 @@ class PortfolioManagementController {
       const userId = req.user.id;
       const { name, level, icon, logoIdentifier, logoLibrary, category, yearsOfExperience, isActive, order } = req.body;
       
-      console.log('[PortfolioController] Creating skill with data:', { name, level, icon, logoIdentifier, logoLibrary, category });
       
       const newSkill = new Skill({
         userId,
@@ -480,7 +458,6 @@ class PortfolioManagementController {
       
       await newSkill.save();
       
-      console.log('[PortfolioController] Skill created successfully:', newSkill);
       
       return res.status(HTTP_STATUS.CREATED).json(
         ApiResponse.success('Skill created successfully', newSkill)
@@ -515,7 +492,6 @@ class PortfolioManagementController {
       const { id } = req.params;
       const { name, level, icon, logoIdentifier, logoLibrary, category, yearsOfExperience, isActive, order } = req.body;
       
-      console.log('[PortfolioController] Updating skill with data:', { name, level, icon, logoIdentifier, logoLibrary, category });
       
       const updatedSkill = await Skill.findOneAndUpdate(
         { _id: id, userId },
@@ -527,7 +503,6 @@ class PortfolioManagementController {
         return next(new CustomError('Skill not found', HTTP_STATUS.NOT_FOUND));
       }
 
-      console.log('[PortfolioController] Skill updated successfully:', updatedSkill);
       
       return res.status(HTTP_STATUS.SUCCESS).json(
         ApiResponse.success('Skill updated successfully', updatedSkill)
@@ -738,7 +713,6 @@ class PortfolioManagementController {
         demoUrl, caseStudyUrl, isFeatured, status, stats, startDate, endDate,
         teamSize, myRole, challenges, learnings, order
       } = req.body;
-      console.log(challenges, learnings);
       
       // Find existing project
       const existingProject = await Project.findOne({ _id: id, userId });
@@ -1141,7 +1115,6 @@ class PortfolioManagementController {
     try {
       const userId = req.user.id;
       
-      console.log(`[PortfolioController] Downloading resume for user: ${userId}`);
       
       // Get personal info with resume URL
       const personalInfo = await PersonalInfo.findOne({ userId });
@@ -1177,7 +1150,6 @@ class PortfolioManagementController {
         next(new CustomError('Error reading resume file', HTTP_STATUS.INTERNAL_SERVER_ERROR));
       });
       
-      console.log(`[PortfolioController] Resume download started: ${resumeFileName}`);
       
     } catch (error) {
       console.error('[PortfolioController] Download resume error:', error);
@@ -1195,7 +1167,6 @@ class PortfolioManagementController {
     try {
       const userId = req.user.id;
       
-      console.log(`[PortfolioController] Viewing resume for user: ${userId}`);
       
       // Get personal info with resume URL
       const personalInfo = await PersonalInfo.findOne({ userId });
@@ -1231,7 +1202,6 @@ class PortfolioManagementController {
         next(new CustomError('Error reading resume file', HTTP_STATUS.INTERNAL_SERVER_ERROR));
       });
       
-      console.log(`[PortfolioController] Resume view started: ${resumeFileName}`);
       
     } catch (error) {
       console.error('[PortfolioController] View resume error:', error);

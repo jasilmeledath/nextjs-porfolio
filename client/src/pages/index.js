@@ -356,7 +356,7 @@ export default function LandingPage() {
 
                 {/* Copyright */}
                 <p className={`text-sm ${isClient && isDark ? "text-slate-500" : "text-slate-500"}`}>
-                  © 2025 jasilmeledath.me • Crafted with NextJS & Passion ❤
+                  © 2025 jasilmeledath.dev • Crafted with NextJS & Passion ❤
                 </p>
               </div>
             </motion.footer>

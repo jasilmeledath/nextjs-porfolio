@@ -84,16 +84,13 @@ export default function PersonalInfoForm() {
   const loadPersonalInfo = async () => {
     try {
       setLoading(true);
-      console.log('[PersonalInfoForm] Loading personal information...');
       
       const response = await PortfolioManagementService.getPersonalInfo();
-      console.log('[PersonalInfoForm] Personal info response:', response);
       
       if (response.success) {
         // Check if we have actual data (not just a success message)
         if (response.data && typeof response.data === 'object') {
           const data = response.data;
-          console.log('[PersonalInfoForm] Setting form data from response:', data);
           
           // Update form data with existing values
           setFormData({
@@ -107,20 +104,17 @@ export default function PersonalInfoForm() {
           
           // Set avatar if available
           if (data.avatar) {
-            console.log('[PersonalInfoForm] Setting existing avatar:', data.avatar);
             setExistingAvatar(data.avatar);
             setAvatarPreview(data.avatar);
           }
           
           // Set resume if available
           if (data.resumeUrl) {
-            console.log('[PersonalInfoForm] Setting existing resume:', data.resumeUrl);
             setExistingResume(data.resumeUrl);
           }
           
           showMessage('success', 'Personal information loaded successfully');
         } else {
-          console.log('[PersonalInfoForm] No existing personal information found');
           showMessage('info', 'No existing personal information found. Please fill in your details.');
         }
       } else {
@@ -254,11 +248,9 @@ export default function PersonalInfoForm() {
    * Handle form submission - Called from FormFooter component
    */
   const handleSubmit = async () => {
-    console.log('[PersonalInfoForm] Save function called from FormFooter');
     
     // Safety check - prevent multiple submissions
     if (saving) {
-      console.log('[PersonalInfoForm] Submission already in progress, ignoring');
       return;
     }
     
@@ -267,7 +259,6 @@ export default function PersonalInfoForm() {
     
     // Validate form
     const isValid = validateForm();
-    console.log('[PersonalInfoForm] Validation result:', { isValid, errors });
     
     if (!isValid) {
       showMessage('error', 'Please fill in all required fields and fix any errors');
@@ -282,7 +273,6 @@ export default function PersonalInfoForm() {
     }
 
     try {
-      console.log('[PersonalInfoForm] Processing submission...');
       
       // Always simulate a delay in development mode for better UX testing
       if (process.env.NODE_ENV === 'development') {
@@ -290,14 +280,12 @@ export default function PersonalInfoForm() {
       }
       
       // Make the API call
-      console.log('[PersonalInfoForm] Making API call to save personal information');
       const response = await PortfolioManagementService.upsertPersonalInfo(
         formData,
         avatar,
         resume
       );
 
-      console.log('[PersonalInfoForm] Response received:', response);
 
       // Process successful response
       if (response && response.success) {
@@ -683,8 +671,6 @@ export default function PersonalInfoForm() {
         {/* Form Footer with Save Button */}
         <FormFooter 
           onSave={() => {
-            console.log('[PersonalInfoForm] FormFooter onSave prop called');
-            console.log('[PersonalInfoForm] handleSubmit function:', typeof handleSubmit, handleSubmit);
             handleSubmit();
           }} 
           saving={saving} 

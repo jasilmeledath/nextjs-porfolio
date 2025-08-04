@@ -98,10 +98,8 @@ export default function ExperiencePage() {
   const loadExperiences = async () => {
     try {
       setIsLoading(true);
-      console.log('[ExperiencePage] Loading experiences...');
       
       const response = await PortfolioManagementService.getExperience();
-      console.log('[ExperiencePage] Experiences response:', response);
       
       if (response.success) {
         setExperiences(response.message || []);
@@ -268,14 +266,12 @@ export default function ExperiencePage() {
       
       let response;
       if (editingExperience) {
-        console.log('[ExperiencePage] Updating experience:', editingExperience.id, formData);
         response = await PortfolioManagementService.updateExperience(
           editingExperience.id, 
           formData, 
           companyLogo
         );
       } else {
-        console.log('[ExperiencePage] Creating experience:', formData);
         response = await PortfolioManagementService.createExperience(formData, companyLogo);
       }
       
@@ -299,7 +295,6 @@ export default function ExperiencePage() {
    * Handle editing an experience
    */
   const handleEditExperience = (experience) => {
-    console.log('[ExperiencePage] Edit experience button clicked', experience);
     setEditingExperience(experience);
     setFormData({
       company: experience.company || '',
@@ -328,7 +323,6 @@ export default function ExperiencePage() {
    * Handle creating a new experience
    */
   const handleNewExperience = () => {
-    console.log('[ExperiencePage] New experience button clicked');
     setEditingExperience(null);
     resetForm();
     setShowForm(true);

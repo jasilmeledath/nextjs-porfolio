@@ -28,7 +28,6 @@ class PortfolioManagementService {
     
     // In development mode, if no token is found, use the real admin token for testing
     if (!token && process.env.NODE_ENV === 'development') {
-      console.log('[PortfolioManagementService] Using real admin token for development testing');
       return {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM4MGY5MzE0ZTk4YTJjOWI5NWFhNyIsImVtYWlsIjoiamFzaWxtZWxlZGF0aEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJwb3J0Zm9saW86cmVhZCIsInBvcnRmb2xpbzp3cml0ZSIsImJsb2c6cmVhZCIsImJsb2c6d3JpdGUiLCJibG9nOmRlbGV0ZSIsImNvbW1lbnRzOm1vZGVyYXRlIiwibWVkaWE6dXBsb2FkIiwibWVkaWE6ZGVsZXRlIiwiYW5hbHl0aWNzOnZpZXciLCJzZXR0aW5nczptYW5hZ2UiLCJ1c2VyczptYW5hZ2UiXSwiaWF0IjoxNzUzNTM3NjA3LCJleHAiOjE3NTQxNDI0MDcsImF1ZCI6InBvcnRmb2xpby1mcm9udGVuZCIsImlzcyI6InBvcnRmb2xpby1hcGkifQ.7Kn2AtQR4MvkOVKNpyXOjH9vX3F6onCfKWRcZVQ_z4Y'
@@ -49,26 +48,22 @@ class PortfolioManagementService {
    */
   static async makeRequest(endpoint, options = {}) {
     try {
-      console.log(`[PortfolioManagementService] Making request to: ${endpoint}`, options);
       
       const defaultHeaders = this.getAuthHeaders();
 
       // Don't set Content-Type for FormData, let browser handle it
       if (options.body instanceof FormData) {
         delete defaultHeaders['Content-Type'];
-        console.log('[PortfolioManagementService] FormData detected, removing Content-Type header');
       }
 
       // Special handling for development mode with mock authentication
       if (process.env.NODE_ENV === 'development' && defaultHeaders['Authorization'] === 'Bearer mock-admin-token') {
-        console.log('[PortfolioManagementService] Using mock admin authentication in development mode');
         
         // For development mode, we need to modify the server.js file to accept mock tokens
         // This is just a client-side workaround
       }
 
       const requestUrl = `${PORTFOLIO_MANAGEMENT_URL}${endpoint}`;
-      console.log(`[PortfolioManagementService] Request URL: ${requestUrl}`);
       
       const response = await fetch(requestUrl, {
         ...options,
@@ -78,7 +73,6 @@ class PortfolioManagementService {
         }
       });
 
-      console.log(`[PortfolioManagementService] Response status: ${response.status}`);
       
       let data;
       const contentType = response.headers.get('content-type');
@@ -142,7 +136,6 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Updated personal information
    */
   static async upsertPersonalInfo(personalInfo, avatar = null, resume = null) {
-    console.log('[PortfolioManagementService] Saving personal information:', personalInfo);
     
     // Create FormData object for file uploads
     const formData = new FormData();
@@ -151,29 +144,24 @@ class PortfolioManagementService {
     Object.keys(personalInfo).forEach(key => {
       if (personalInfo[key] !== null && personalInfo[key] !== undefined) {
         formData.append(key, personalInfo[key]);
-        console.log(`[PortfolioManagementService] Adding form field: ${key}=${personalInfo[key]}`);
       }
     });
     
     // Add files
     if (avatar) {
       formData.append('avatar', avatar);
-      console.log(`[PortfolioManagementService] Adding avatar: ${avatar.name}`);
     }
     if (resume) {
       formData.append('resume', resume);
-      console.log(`[PortfolioManagementService] Adding resume: ${resume.name}`);
     }
 
     // Make the actual API request
     try {
-      console.log('[PortfolioManagementService] Sending API request to /personal-info');
       const response = await this.makeRequest('/personal-info', {
         method: 'POST',
         body: formData
       });
       
-      console.log('[PortfolioManagementService] API response:', response);
       return response;
     } catch (error) {
       console.error('[PortfolioManagementService] API error:', error);
@@ -250,7 +238,6 @@ class PortfolioManagementService {
    */
   static async getResumeUrl() {
     try {
-      console.log('[PortfolioManagementService] Getting resume URL...');
       
       const personalInfo = await this.getPersonalInfo();
       if (!personalInfo.success || !personalInfo.data?.resumeUrl) {
@@ -282,7 +269,6 @@ class PortfolioManagementService {
    */
   static async downloadResume() {
     try {
-      console.log('[PortfolioManagementService] Downloading resume...');
       
       // Download the resume file
       const response = await fetch(`${API_BASE_URL}/portfolio/resume/download`, {
@@ -335,7 +321,6 @@ class PortfolioManagementService {
    */
   static async viewResume() {
     try {
-      console.log('[PortfolioManagementService] Getting resume view URL...');
       
       const resumeData = await this.getResumeUrl();
       if (!resumeData.success) {
@@ -397,8 +382,6 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Created skill
    */
   static async createSkill(skill) {
-    console.log('[PortfolioManagementService] Creating skill with data:', skill);
-    console.log('[PortfolioManagementService] Icon fields being sent:', {
       icon: skill.icon,
       logoIdentifier: skill.logoIdentifier,
       logoLibrary: skill.logoLibrary
@@ -417,8 +400,6 @@ class PortfolioManagementService {
    * @returns {Promise<Object>} Updated skill
    */
   static async updateSkill(id, skill) {
-    console.log('[PortfolioManagementService] Updating skill with data:', skill);
-    console.log('[PortfolioManagementService] Icon fields being sent:', {
       icon: skill.icon,
       logoIdentifier: skill.logoIdentifier,
       logoLibrary: skill.logoLibrary

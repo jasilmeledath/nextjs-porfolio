@@ -58,7 +58,6 @@ class EmailService {
       const result = await this.transporter.sendMail(mailOptions);
       
       console.log(`[EmailService] Email sent successfully to ${options.to}`);
-      console.log(`[EmailService] Message ID: ${result.messageId}`);
       
       return {
         success: true,
@@ -115,7 +114,6 @@ class EmailService {
    * @returns {Promise<Object>} Email result
    */
   async sendSingleBlogNotification(subscriber, blog) {
-    console.log("[EmailService] sendSingleBlogNotification called with:", {
       subscriberEmail: subscriber?.email,
       blogTitle: blog?.title,
       blogSlug: blog?.slug,
@@ -139,7 +137,6 @@ class EmailService {
     const blogUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/blog/${blog.slug}`;
     const unsubscribeUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscription/unsubscribe/${subscriber.unsubscribeToken}`;
     
-    console.log('[EmailService] Generating email templates for:', {
       blogUrl,
       unsubscribeUrl: unsubscribeUrl.substring(0, 50) + '...'
     });
@@ -163,7 +160,6 @@ class EmailService {
    * @returns {Promise<Array>} Array of email results
    */
   static async sendBlogNotification(data) {
-    console.log('[EmailService] Received data:', JSON.stringify(data, null, 2));
     
     if (!data) {
       console.error('[EmailService] Data parameter is missing');
@@ -173,8 +169,6 @@ class EmailService {
     const { blog, subscribers } = data;
     const results = [];
     
-    console.log('[EmailService] Blog data:', JSON.stringify(blog, null, 2));
-    console.log('[EmailService] Subscribers data:', JSON.stringify(subscribers, null, 2));
     
     if (!blog) {
       console.error('[EmailService] Blog data is missing or undefined');
@@ -187,11 +181,9 @@ class EmailService {
     }
     
     if (!subscribers || subscribers.length === 0) {
-      console.log('[EmailService] No subscribers to notify');
       return results;
     }
 
-    console.log(`[EmailService] Sending blog notification to ${subscribers.length} subscribers`);
 
     // Create an instance of EmailService for sending emails
     const emailService = new EmailService();
@@ -205,7 +197,6 @@ class EmailService {
           unsubscribeToken: subscriber.unsubscribeToken || 'temp-token' // fallback for existing subscribers
         };
 
-        console.log('[EmailService] About to call instance method with:', {
           subscriber: subscriberData.email,
           blogTitle: blog?.title,
           blogSlug: blog?.slug,
@@ -486,7 +477,6 @@ Unsubscribe: ${unsubscribeUrl}
   async testConnection() {
     try {
       await this.transporter.verify();
-      console.log('[EmailService] Email configuration is valid');
       return true;
     } catch (error) {
       console.error('[EmailService] Email configuration error:', error);

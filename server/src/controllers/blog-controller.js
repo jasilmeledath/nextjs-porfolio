@@ -223,7 +223,6 @@ class BlogController {
    */
   static async createBlog(req, res, next) {
     try {
-      console.log("njan aan createBlogil");
       
       const blogData = {
         ...req.body,
@@ -234,7 +233,6 @@ class BlogController {
       await blog.save();
 
       await blog.populate('author', 'firstName lastName email');
-      console.log("blogaksjdhflkashfdjlaksdhfklajshdfl",blog);
       
 
       // Send newsletter email if blog is published
@@ -244,7 +242,6 @@ class BlogController {
           const subscribers = await Subscriber.find({ 
             status: 'active'
           }).select('email firstName unsubscribeToken');
-              console.log('subscribers', subscribers);
               
           if (subscribers.length > 0) {
             // Capture blog data before setImmediate to avoid scope issues
@@ -260,7 +257,6 @@ class BlogController {
               }
             };
 
-            console.log('ALKSDFLAKSDFNLAKSDNF',blogData);
             
 
             const subscriberData = subscribers.map(sub => ({
@@ -283,7 +279,6 @@ class BlogController {
                 console.error('Failed to send newsletter emails:', emailError);
                 // Don't fail the blog creation if email fails
               }
-              console.log(`Newsletter sent to ${subscriberData.length} subscribers for new blog: ${blogData.title}`);
             });
           }
         } catch (emailError) {
@@ -386,7 +381,6 @@ class BlogController {
                   blog: blogData,
                   subscribers: subscriberData
                 });
-                console.log(`Newsletter sent to ${subscriberData.length} subscribers for updated blog: ${blogData.title}`);
               } catch (emailError) {
                 console.error('Failed to send newsletter emails:', emailError);
                 // Don't fail the blog update if email fails
@@ -533,7 +527,6 @@ class BlogController {
                   blog: blogData,
                   subscribers: subscriberData
                 });
-                console.log(`Newsletter sent to ${subscriberData.length} subscribers for toggled blog: ${blogData.title}`);
               } catch (emailError) {
                 console.error('Failed to send newsletter emails on status toggle:', emailError);
                 // Don't fail the blog status toggle if email fails

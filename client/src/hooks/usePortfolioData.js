@@ -42,13 +42,10 @@ export const usePortfolioData = () => {
         // Try to load data from API
         const response = await PortfolioService.getVisitorPortfolio();
         
-        console.log('[usePortfolioData] API Response:', response);
         
         if (response.success && response.data) {
           const data = response.data;
           
-          console.log('[usePortfolioData] Raw personalInfo from API:', data.personalInfo);
-          console.log('[usePortfolioData] Avatar URL from API:', data.personalInfo?.avatar);
         
           // Process the data
           const processedSkills = data.skills && Array.isArray(data.skills) && data.skills.length > 0
@@ -76,18 +73,13 @@ export const usePortfolioData = () => {
             experience: processedExperience || []
           };
           
-          console.log('[usePortfolioData] Final personalInfo to be set:', finalData.personalInfo);
-          console.log('[usePortfolioData] Final avatar URL to be set:', finalData.personalInfo?.avatar);
           
           setPortfolioData(finalData);
           
-          console.log('[usePortfolioData] Successfully loaded data from API');
         } else {
-          console.log('[usePortfolioData] API response unsuccessful');
           setError('Failed to load portfolio data');
         }
       } catch (err) {
-        console.log('[usePortfolioData] API failed:', err.message);
         setError('Failed to connect to portfolio service');
       } finally {
         setLoading(false);

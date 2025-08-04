@@ -211,10 +211,8 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
   const loadProjects = async () => {
     try {
       setLoading(true);
-      console.log('[ProjectForm] Loading projects...');
       
       const response = await PortfolioManagementService.getProjects();
-      console.log('[ProjectForm] Projects response:', response);
       
       if (response.success) {
         setProjects(response.data?.projects || []);
@@ -234,8 +232,6 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
    * Handle editing a project
    */
   const handleEditProject = (project) => {
-    console.log('[ProjectForm] Edit project button clicked', project);
-    console.log('[ProjectForm] Project ID check:', {
       _id: project._id,
       id: project.id,
       keys: Object.keys(project)
@@ -249,7 +245,6 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
    * Handle creating a new project
    */
   const handleNewProject = () => {
-    console.log('[ProjectForm] New project button clicked');
     setEditingProject(null);
     setShowForm(true);
     resetForm();
@@ -584,7 +579,6 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       if (editingProject) {
         // Handle different possible ID field names
         const projectId = editingProject._id || editingProject.id;
-        console.log('[ProjectForm] Updating project with:', {
           id: projectId,
           editingProject: editingProject,
           formData: formData

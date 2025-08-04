@@ -38,7 +38,6 @@ const authenticate = async (req, res, next) => {
     try {
       // Special handling for development mode with mock token
       if (process.env.NODE_ENV === 'development' && token === 'mock-admin-token') {
-        console.log('[AuthMiddleware] Using mock admin token in development mode');
         
         // Create a mock admin user for development
         // Use the real user ID from the database for the mock admin

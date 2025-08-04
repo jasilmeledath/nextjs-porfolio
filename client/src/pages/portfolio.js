@@ -54,15 +54,11 @@ export default function PortfolioPage() {
 
   // Debug log for avatar
   useEffect(() => {
-    console.log('[PortfolioPage] personalInfo:', personalInfo);
-    console.log('[PortfolioPage] personalInfo.avatar:', personalInfo?.avatar);
   }, [personalInfo]);
 
   // Debug log for projects
   useEffect(() => {
     if (projects.length > 0) {
-      console.log('Projects loaded:', projects.length);
-      console.log('First project image:', projects[0]?.image);
     }
   }, [projects]);
 
@@ -936,7 +932,6 @@ export default function PortfolioPage() {
                           e.target.src = "/placeholder.svg";
                         }}
                         onLoad={() => {
-                          console.log('Image loaded successfully:', project.image);
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -1204,7 +1199,7 @@ export default function PortfolioPage() {
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
                   <FiCode className="text-slate-700 dark:text-slate-300 w-5 h-5 sm:w-6 sm:h-6" />
                   <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                    jasilmeledath.me
+                    jasilmeledath.dev
                   </span>
                 </div>
                 <p className="text-slate-600 dark:text-slate-300 mb-4 sm:mb-6 max-w-md text-sm sm:text-base leading-relaxed">
@@ -1319,7 +1314,7 @@ export default function PortfolioPage() {
             <div className="border-t border-slate-200 dark:border-slate-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
                 <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
-                 © 2025 jasilmeledath.me • Crafted with NextJS, Framer Motion & Passion ❤
+                 © 2025 jasilmeledath.dev • Crafted with NextJS, Framer Motion & Passion ❤
                 </p>
                 <div className="flex items-center space-x-4 sm:space-x-6">
                   <a 

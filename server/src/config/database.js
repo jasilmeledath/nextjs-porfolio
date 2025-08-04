@@ -49,35 +49,24 @@ const connectToDatabase = async (connectionString = process.env.MONGODB_URI) => 
     try {
         // Use default connection string if not provided
         if (!connectionString) {
-            console.log('⚠️ No MongoDB connection string provided, using default: mongodb://localhost:27017/portfolio-dev');
             connectionString = 'mongodb://localhost:27017/portfolio-dev';
         }
 
         // If already connected, return existing connection
         if (dbConnection && mongoose.connection.readyState === 1) {
-            console.log('📊 Using existing database connection');
             return dbConnection;
         }
 
         // Connect to MongoDB with detailed logging
-        console.log(`📊 Connecting to MongoDB at: ${connectionString.split('@').pop()}`);
-        console.log('📊 Connection options:', JSON.stringify(DB_CONFIG, null, 2));
         
         await mongoose.connect(connectionString, DB_CONFIG);
         
         dbConnection = mongoose.connection;
         
-        console.log(`📊 Connected to MongoDB database: ${dbConnection.name}`);
-        console.log(`📊 MongoDB version: ${await mongoose.connection.db.admin().serverInfo().then(info => info.version)}`);
-        console.log('📊 Available collections:');
         const collections = await mongoose.connection.db.listCollections().toArray();
-        collections.forEach(collection => console.log(`   - ${collection.name}`));
         
         // Connection event listeners
         dbConnection.on('connected', () => {
-            console.log('✅ MongoDB connected successfully');
-            console.log(`📊 Database: ${dbConnection.name}`);
-            console.log(`🌐 Host: ${dbConnection.host}:${dbConnection.port}`);
         });
 
         dbConnection.on('error', (error) => {
@@ -90,11 +79,9 @@ const connectToDatabase = async (connectionString = process.env.MONGODB_URI) => 
         });
 
         dbConnection.on('disconnected', () => {
-            console.log('⚠️ MongoDB disconnected');
         });
 
         dbConnection.on('reconnected', () => {
-            console.log('🔄 MongoDB reconnected');
         });
 
         // Graceful shutdown handling
@@ -135,10 +122,8 @@ const connectToDatabase = async (connectionString = process.env.MONGODB_URI) => 
 const disconnectFromDatabase = async () => {
     try {
         if (dbConnection && mongoose.connection.readyState !== 0) {
-            console.log('📊 Closing database connection...');
             await mongoose.connection.close();
             dbConnection = null;
-            console.log('✅ Database connection closed successfully');
         }
     } catch (error) {
         console.error('❌ Error closing database connection:', error);
@@ -198,12 +183,10 @@ const createDatabaseIndexes = async () => {
             );
         }
 
-        console.log('📊 Creating database indexes...');
         
         // Note: Specific indexes will be created in individual model files
         // This function can be used for any global indexes if needed
         
-        console.log('✅ Database indexes created successfully');
         
     } catch (error) {
         console.error('❌ Error creating database indexes:', error);

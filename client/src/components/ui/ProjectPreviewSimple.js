@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, ExternalLink, Github } from "lucide-react"
 
 export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
-  console.log('[ProjectPreview] Rendered with:', { project, isOpen, isDark });
 
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -24,11 +23,9 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
   }, [isOpen, onClose])
 
   if (!project) {
-    console.log('[ProjectPreview] No project provided');
     return null;
   }
 
-  console.log('[ProjectPreview] Rendering modal for project:', project.title);
 
   const modalVariants = {
     hidden: {

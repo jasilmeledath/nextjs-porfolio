@@ -14,11 +14,15 @@
     "server:test": "cd server && npm test",
     "client:test": "cd client && npm test",
     "build": "npm run client:build",
+    "build:production": "node scripts/build-production.js",
     "start": "npm run server:start",
+    "start:production": "NODE_ENV=production npm run server:start",
+    "deploy:build": "npm run build:production",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
     "lint": "concurrently \"npm run server:lint\" \"npm run client:lint\"",
     "server:lint": "cd server && npm run lint",
-    "client:lint": "cd client && npm run lint"
+    "client:lint": "cd client && npm run lint",
+    "clean": "cd client && rm -rf .next && cd ../server && rm -rf node_modules/.cache"
   },
   "keywords": [
     "portfolio",

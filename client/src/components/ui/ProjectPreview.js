@@ -63,11 +63,6 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
   // Debug logging to check project data
   useEffect(() => {
     if (project && isOpen) {
-      console.log('[ProjectPreview] Project data:', project);
-      console.log('[ProjectPreview] Project longDescription:', project.longDescription);
-      console.log('[ProjectPreview] Project images:', project.images);
-      console.log('[ProjectPreview] Project challenges:', project.challenges);
-      console.log('[ProjectPreview] Project learnings:', project.learnings);
     }
   }, [project, isOpen]);
 

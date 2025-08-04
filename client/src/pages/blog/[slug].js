@@ -357,7 +357,6 @@ export default function BlogDetailPage() {
               <CommentForm 
                 blogId={blog._id}
                 onSuccess={(message) => {
-                  console.log('Comment submitted:', message);
                   // You can add a toast notification here
                   // Refresh the comments list
                   window.location.reload(); // Simple refresh for now

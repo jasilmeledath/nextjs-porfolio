@@ -108,18 +108,14 @@ export default function SkillsPage() {
   const loadSkills = async () => {
     try {
       setIsLoading(true);
-      console.log('[SkillsPage] Loading skills...');
       
       const response = await PortfolioManagementService.getSkills();
-      console.log('[SkillsPage] Skills response:', response);
       
       if (response.success) {
         const skillsData = response.message || [];
-        console.log('[SkillsPage] Skills data received:', skillsData);
         
         // Log icon fields for each skill
         skillsData.forEach((skill, index) => {
-          console.log(`[SkillsPage] Skill ${index + 1} (${skill.name}):`, {
             icon: skill.icon,
             logoIdentifier: skill.logoIdentifier,
             logoLibrary: skill.logoLibrary
@@ -196,8 +192,6 @@ export default function SkillsPage() {
       setIsLoading(true);
       
       // Log the form data being submitted
-      console.log('[SkillsPage] Form data being submitted:', formData);
-      console.log('[SkillsPage] Icon fields:', {
         icon: formData.icon,
         logoIdentifier: formData.logoIdentifier,
         logoLibrary: formData.logoLibrary
@@ -205,14 +199,11 @@ export default function SkillsPage() {
       
       let response;
       if (editingSkill) {
-        console.log('[SkillsPage] Updating skill:', editingSkill.id, formData);
         response = await PortfolioManagementService.updateSkill(editingSkill.id, formData);
       } else {
-        console.log('[SkillsPage] Creating skill:', formData);
         response = await PortfolioManagementService.createSkill(formData);
       }
       
-      console.log('[SkillsPage] Server response:', response);
       
       if (response.success) {
         showMessage('success', editingSkill ? 'Skill updated successfully!' : 'Skill created successfully!');
@@ -234,7 +225,6 @@ export default function SkillsPage() {
    * Handle editing a skill
    */
   const handleEditSkill = (skill) => {
-    console.log('[SkillsPage] Edit skill button clicked', skill);
     setEditingSkill(skill);
     setFormData({
       name: skill.name || '',
@@ -255,7 +245,6 @@ export default function SkillsPage() {
    * Handle creating a new skill
    */
   const handleNewSkill = () => {
-    console.log('[SkillsPage] New skill button clicked');
     setEditingSkill(null);
     resetForm();
     setShowForm(true);
@@ -286,7 +275,6 @@ export default function SkillsPage() {
    * Handle icon selection from icon picker
    */
   const handleIconSelect = (iconData) => {
-    console.log('[SkillsPage] Icon selected:', iconData);
     setFormData(prev => ({
       ...prev,
       logoIdentifier: iconData.logoIdentifier,

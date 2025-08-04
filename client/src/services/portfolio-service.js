@@ -542,7 +542,6 @@ class PortfolioService {
   static processSkillsData(skills) {
     if (!Array.isArray(skills)) return {};
     
-    console.log('[PortfolioService] Processing skills data:', skills);
     
     return skills.reduce((acc, skill) => {
       if (!acc[skill.category]) {
@@ -550,7 +549,6 @@ class PortfolioService {
       }
       
       // Debug: Log each skill being processed
-      console.log(`[PortfolioService] Processing skill "${skill.name}":`, {
         icon: skill.icon,
         logoIdentifier: skill.logoIdentifier,
         logoLibrary: skill.logoLibrary,
@@ -566,7 +564,6 @@ class PortfolioService {
         color: skill.color || null
       };
       
-      console.log(`[PortfolioService] Processed skill "${skill.name}":`, processedSkill);
       
       acc[skill.category].push(processedSkill);
       return acc;
@@ -669,8 +666,6 @@ class PortfolioService {
       }
     };
     
-    console.log('Processed single project challenges:', processedProject.challenges);
-    console.log('Processed single project learnings:', processedProject.learnings);
     
     return processedProject;
   }

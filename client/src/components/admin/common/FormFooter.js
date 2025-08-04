@@ -24,10 +24,6 @@ export default function FormFooter({ onSave, saving = false, buttonText = 'Save 
    * Uses setTimeout to avoid event propagation issues
    */
   const handleSaveClick = (e) => {
-    console.log('==================== FORM FOOTER BUTTON CLICK ====================');
-    console.log('[FormFooter] Save button clicked - event:', e);
-    console.log('[FormFooter] onSave function:', typeof onSave, onSave);
-    console.log('[FormFooter] saving state:', saving);
     
     if (!saving && onSave && typeof onSave === 'function') {
       // Prevent any default behavior
@@ -36,7 +32,6 @@ export default function FormFooter({ onSave, saving = false, buttonText = 'Save 
       
       // Use setTimeout to ensure the function is called outside the current event loop
       setTimeout(() => {
-        console.log('[FormFooter] Calling onSave function now...');
         try {
           onSave();
         } catch (error) {
@@ -44,7 +39,6 @@ export default function FormFooter({ onSave, saving = false, buttonText = 'Save 
         }
       }, 0);
     } else {
-      console.log('[FormFooter] Not calling onSave - conditions not met');
     }
   };
 
@@ -56,10 +50,6 @@ export default function FormFooter({ onSave, saving = false, buttonText = 'Save 
       <button
         type="button"
         onClick={handleSaveClick}
-        onMouseDown={() => console.log('[FormFooter] Button mouse down event')}
-        onMouseUp={() => console.log('[FormFooter] Button mouse up event')}
-        onPointerDown={() => console.log('[FormFooter] Button pointer down event')}
-        onPointerUp={() => console.log('[FormFooter] Button pointer up event')}
         disabled={saving}
         className="flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-600 disabled:to-gray-700 text-black font-mono font-bold rounded-lg transition-all duration-300 shadow-lg shadow-green-500/20 disabled:shadow-none cursor-pointer disabled:cursor-not-allowed relative z-50"
         style={{ pointerEvents: 'auto' }}
