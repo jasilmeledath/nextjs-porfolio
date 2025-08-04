@@ -1,57 +1,27 @@
 {
-  "name": "professional-portfolio",
+  "name": "nextjs-portfolio",
   "version": "1.0.0",
-  "description": "Enterprise-level personal portfolio with terminal interface, blog system, and admin panel",
-  "main": "server.js",
+  "description": "Full-stack Next.js portfolio application",
   "scripts": {
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
-    "server:dev": "cd server && npm run dev",
-    "client:dev": "cd client && npm run dev",
-    "server:start": "cd server && npm start",
-    "client:build": "cd client && npm run build",
-    "client:start": "cd client && npm start",
-    "test": "concurrently \"npm run server:test\" \"npm run client:test\"",
-    "server:test": "cd server && npm test",
-    "client:test": "cd client && npm test",
-    "build": "npm run client:build",
-    "build:production": "node scripts/build-production.js",
-    "start": "npm run server:start",
-    "start:production": "NODE_ENV=production npm run server:start",
-    "deploy:build": "npm run build:production",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "lint": "concurrently \"npm run server:lint\" \"npm run client:lint\"",
-    "server:lint": "cd server && npm run lint",
-    "client:lint": "cd client && npm run lint",
-    "clean": "cd client && rm -rf .next && cd ../server && rm -rf node_modules/.cache"
-  },
-  "keywords": [
-    "portfolio",
-    "terminal",
-    "blog",
-    "nextjs",
-    "express",
-    "mongodb",
-    "professional"
-  ],
-  "author": "Professional Developer",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "build": "cd client && npm ci && npm run build && cd ../server && npm ci --only=production",
+    "start": "cd server && node server.js",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "health": "cd server && node healthcheck.js"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/professional-portfolio.git"
-  },
-  "dependencies": {
-    "@react-three/drei": "^10.6.0",
-    "@react-three/fiber": "^9.2.0",
-    "framer-motion": "^12.23.9",
-    "lucide-react": "^0.525.0",
-    "react-spring": "^10.0.1",
-    "three": "^0.178.0"
-  }
+  "keywords": [
+    "nextjs",
+    "portfolio",
+    "react",
+    "node",
+    "express",
+    "mongodb"
+  ],
+  "author": "Jasil Meledath",
+  "license": "MIT"
 }
