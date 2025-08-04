@@ -169,6 +169,17 @@ const nextConfig = {
     scrollRestoration: true,
   },
   
+  // Webpack configuration for build optimization
+  webpack: (config, { isServer }) => {
+    // Optimize for Railway's resource constraints
+    config.optimization = {
+      ...config.optimization,
+      minimize: process.env.NODE_ENV === 'production',
+    };
+    
+    return config;
+  },
+  
   // Build configuration
   generateBuildId: async () => {
     // Use a consistent build ID for Railway deployments
