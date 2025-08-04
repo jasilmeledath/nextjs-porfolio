@@ -12,11 +12,10 @@ COPY server/package*.json ./server/
 WORKDIR /app/server
 RUN npm ci --only=production
 
-# Copy and install client dependencies
+# Copy and install client dependencies (including dev deps for build)
 WORKDIR /app
 COPY client/package*.json ./client/
 WORKDIR /app/client
-ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm ci
