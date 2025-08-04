@@ -114,6 +114,7 @@ class EmailService {
    * @returns {Promise<Object>} Email result
    */
   async sendSingleBlogNotification(subscriber, blog) {
+    console.log('[EmailService] Sending notification:', {
       subscriberEmail: subscriber?.email,
       blogTitle: blog?.title,
       blogSlug: blog?.slug,
