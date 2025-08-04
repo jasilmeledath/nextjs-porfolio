@@ -408,12 +408,7 @@ class AuthController {
       user.password = newPassword;
       await user.save();
       
-      // Log password change
-        userId: user._id,
-        email: user.email,
-        ip: req.ip,
-        timestamp: new Date()
-      });
+      // Password changed successfully (log removed for production security)
       
       res.status(HTTP_STATUS.SUCCESS).json({
         status: API_RESPONSE_STATUS.SUCCESS,
