@@ -25,6 +25,14 @@ WORKDIR /app
 COPY client/ ./client/
 COPY server/ ./server/
 
+# Debug: Check what files were copied
+RUN echo "=== CHECKING COPIED FILES ===" && \
+    ls -la server/ && \
+    echo "=== MODELS DIRECTORY ===" && \
+    ls -la server/src/models/ && \
+    echo "=== USER.JS EXISTS? ===" && \
+    test -f server/src/models/User.js && echo "✅ User.js found" || echo "❌ User.js missing"
+
 # Build Next.js app
 WORKDIR /app/client
 RUN npm run build
@@ -49,6 +57,9 @@ USER nodejs
 
 # Expose port
 EXPOSE 8000
+
+# Set working directory for server startup
+WORKDIR /app
 
 # Start command
 CMD ["dumb-init", "node", "server/server.js"]
