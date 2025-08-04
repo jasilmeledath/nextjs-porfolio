@@ -138,6 +138,7 @@ class EmailService {
     const blogUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/blog/${blog.slug}`;
     const unsubscribeUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscription/unsubscribe/${subscriber.unsubscribeToken}`;
     
+    console.log('[EmailService] URLs:', {
       blogUrl,
       unsubscribeUrl: unsubscribeUrl.substring(0, 50) + '...'
     });
