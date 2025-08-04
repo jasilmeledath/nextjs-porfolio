@@ -25,14 +25,15 @@ WORKDIR /app
 COPY client/ ./client/
 COPY server/ ./server/
 
-# Debug: Check what files were copied
+# Explicitly copy models directory (fixing missing models issue)
+COPY server/src/models/ ./server/src/models/
+
+# Debug: Check what files were copied after explicit models copy
 RUN echo "=== CHECKING COPIED FILES ===" && \
     ls -la server/ && \
     echo "=== SRC DIRECTORY ===" && \
     ls -la server/src/ && \
-    echo "=== TRYING TO FIND MODELS ===" && \
-    find server/src -name "*model*" -o -name "*Model*" && \
-    echo "=== MODELS DIRECTORY ===" && \
+    echo "=== MODELS DIRECTORY (AFTER EXPLICIT COPY) ===" && \
     ls -la server/src/models/ && \
     echo "=== USER.JS EXISTS? ===" && \
     test -f server/src/models/User.js && echo "✅ User.js found" || echo "❌ User.js missing"
