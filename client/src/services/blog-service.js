@@ -110,13 +110,7 @@ class BlogService {
       body: JSON.stringify(blogData)
     });
     
-    const result = await this.handleResponse(response);
-    
-    if (result.status === 'success') {
-      toast.success('Blog post created successfully!');
-    }
-    
-    return result;
+    return this.handleResponse(response, false); // Don't show automatic toasts
   }
 
   /**
@@ -132,13 +126,7 @@ class BlogService {
       body: JSON.stringify(blogData)
     });
     
-    const result = await this.handleResponse(response);
-    
-    if (result.status === 'success') {
-      toast.success('Blog post updated successfully!');
-    }
-    
-    return result;
+    return this.handleResponse(response, false); // Don't show automatic toasts
   }
 
   /**
@@ -152,7 +140,7 @@ class BlogService {
       headers: this.getAuthHeaders()
     });
     
-    const result = await this.handleResponse(response);
+    const result = await this.handleResponse(response, false); // Don't show automatic toasts
     
     if (result.status === 'success') {
       toast.success('Blog post deleted successfully!');

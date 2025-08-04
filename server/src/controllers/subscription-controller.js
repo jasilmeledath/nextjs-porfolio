@@ -6,7 +6,7 @@
  */
 
 const Subscriber = require('../models/Subscriber');
-const emailService = require('../services/email-service');
+const EmailService = require('../services/email-service');
 const { HTTP_STATUS } = require('../constants/http-status');
 const { 
   API_RESPONSE_STATUS, 
@@ -57,7 +57,8 @@ class SubscriptionController {
           const confirmationToken = subscriber.generateConfirmationToken();
           await subscriber.save();
           
-          await emailService.sendSubscriptionConfirmation(subscriber, confirmationToken);
+          const emailServiceInstance = new EmailService();
+          await emailServiceInstance.sendSubscriptionConfirmation(subscriber, confirmationToken);
           
           const response = ApiResponse.success(
             { message: 'Confirmation email resent!' },
@@ -93,7 +94,8 @@ class SubscriptionController {
 
       // Send confirmation email
       try {
-        await emailService.sendSubscriptionConfirmation(subscriber, confirmationToken);
+        const emailServiceInstance = new EmailService();
+        await emailServiceInstance.sendSubscriptionConfirmation(subscriber, confirmationToken);
       } catch (emailError) {
         console.error('[Subscription] Email sending failed:', emailError);
         // Don't fail the subscription if email fails
@@ -149,7 +151,8 @@ class SubscriptionController {
 
       // Send welcome email
       try {
-        await emailService.sendWelcomeEmail(subscriber);
+        const emailServiceInstance = new EmailService();
+        await emailServiceInstance.sendWelcomeEmail(subscriber);
       } catch (emailError) {
         console.error('[Subscription] Welcome email failed:', emailError);
       }
@@ -386,7 +389,8 @@ class SubscriptionController {
         const batch = recipients.slice(i, i + batchSize);
         const emailPromises = batch.map(async (subscriber) => {
           try {
-            await emailService.sendBlogNotification(subscriber, blog);
+            const emailServiceInstance = new EmailService();
+            await emailServiceInstance.sendBlogNotification(subscriber, blog);
             if (!testEmail) {
               subscriber.recordEmailSent();
               await subscriber.save();

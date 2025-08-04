@@ -166,23 +166,77 @@ module.exports = {
         '3xl': '1600px',
       },
       
-      // Typography plugin extensions
-      typography: {
+      // Typography plugin extensions for blog markdown
+      typography: ({ theme }) => ({
         DEFAULT: {
           css: {
             maxWidth: 'none',
-            color: '#374151',
+            color: theme('colors.gray.700'),
+            lineHeight: '1.75',
+            
+            // Headings
+            h1: {
+              color: theme('colors.gray.900'),
+              fontWeight: '800',
+              fontSize: theme('fontSize.3xl'),
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            h2: {
+              color: theme('colors.gray.900'),
+              fontWeight: '700',
+              fontSize: theme('fontSize.2xl'),
+              marginTop: '1.75rem',
+              marginBottom: '0.75rem',
+            },
+            h3: {
+              color: theme('colors.gray.900'),
+              fontWeight: '600',
+              fontSize: theme('fontSize.xl'),
+              marginTop: '1.5rem',
+              marginBottom: '0.5rem',
+            },
+            
+            // Links
             a: {
-              color: '#3b82f6',
+              color: theme('colors.blue.600'),
+              textDecoration: 'underline',
+              textDecorationColor: theme('colors.blue.200'),
+              textUnderlineOffset: '2px',
               '&:hover': {
-                color: '#1d4ed8',
+                color: theme('colors.blue.700'),
+                textDecorationColor: theme('colors.blue.400'),
               },
             },
+            
+            // Paragraphs
+            p: {
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            
+            // Lists
+            ul: {
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            ol: {
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            li: {
+              marginTop: '0.5rem',
+              marginBottom: '0.5rem',
+            },
+            
+            // Code
             code: {
-              backgroundColor: '#f3f4f6',
-              padding: '0.2em 0.4em',
+              color: theme('colors.pink.500'),
+              backgroundColor: theme('colors.gray.100'),
+              padding: '0.25rem 0.375rem',
               borderRadius: '0.25rem',
-              fontWeight: '400',
+              fontSize: '0.875em',
+              fontWeight: '500',
             },
             'code::before': {
               content: '""',
@@ -190,24 +244,207 @@ module.exports = {
             'code::after': {
               content: '""',
             },
+            
+            // Code blocks
+            pre: {
+              backgroundColor: theme('colors.gray.900'),
+              color: theme('colors.gray.100'),
+              borderRadius: '0.5rem',
+              padding: '1rem 1.25rem',
+              overflow: 'auto',
+              fontSize: '0.875rem',
+              lineHeight: '1.7142857',
+              marginTop: '1.7142857em',
+              marginBottom: '1.7142857em',
+            },
+            'pre code': {
+              backgroundColor: 'transparent',
+              color: 'inherit',
+              padding: '0',
+              borderRadius: '0',
+              fontSize: 'inherit',
+              fontWeight: 'inherit',
+            },
+            
+            // Blockquotes
+            blockquote: {
+              borderLeftColor: theme('colors.gray.300'),
+              borderLeftWidth: '4px',
+              paddingLeft: '1rem',
+              fontStyle: 'italic',
+              color: theme('colors.gray.600'),
+              marginTop: '1.6rem',
+              marginBottom: '1.6rem',
+            },
+            
+            // Tables
+            table: {
+              width: '100%',
+              tableLayout: 'auto',
+              textAlign: 'left',
+              marginTop: '2rem',
+              marginBottom: '2rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.7142857',
+            },
+            thead: {
+              borderBottomColor: theme('colors.gray.300'),
+              borderBottomWidth: '1px',
+            },
+            'thead th': {
+              color: theme('colors.gray.900'),
+              fontWeight: '600',
+              verticalAlign: 'bottom',
+              paddingBottom: '0.5714286em',
+              paddingLeft: '0.5714286em',
+              paddingRight: '0.5714286em',
+            },
+            'tbody tr': {
+              borderBottomColor: theme('colors.gray.200'),
+              borderBottomWidth: '1px',
+            },
+            'tbody td': {
+              verticalAlign: 'baseline',
+              paddingTop: '0.5714286em',
+              paddingBottom: '0.5714286em',
+              paddingLeft: '0.5714286em',
+              paddingRight: '0.5714286em',
+            },
+            
+            // Images
+            img: {
+              borderRadius: '0.5rem',
+              marginTop: '2rem',
+              marginBottom: '2rem',
+            },
+            
+            // Horizontal rules
+            hr: {
+              borderColor: theme('colors.gray.200'),
+              borderTopWidth: '1px',
+              marginTop: '3rem',
+              marginBottom: '3rem',
+            },
           },
         },
+        
+        // Dark mode styles
         dark: {
           css: {
-            color: '#d1d5db',
+            color: theme('colors.gray.300'),
+            
+            // Headings
+            h1: {
+              color: theme('colors.white'),
+            },
+            h2: {
+              color: theme('colors.white'),
+            },
+            h3: {
+              color: theme('colors.white'),
+            },
+            h4: {
+              color: theme('colors.white'),
+            },
+            
+            // Links
             a: {
-              color: '#60a5fa',
+              color: theme('colors.blue.400'),
+              textDecorationColor: theme('colors.blue.600'),
               '&:hover': {
-                color: '#93c5fd',
+                color: theme('colors.blue.300'),
+                textDecorationColor: theme('colors.blue.500'),
               },
             },
+            
+            // Code
             code: {
-              backgroundColor: '#374151',
-              color: '#e5e7eb',
+              color: theme('colors.pink.400'),
+              backgroundColor: theme('colors.gray.800'),
+            },
+            
+            // Pre/code blocks
+            pre: {
+              backgroundColor: theme('colors.gray.800'),
+              color: theme('colors.gray.200'),
+            },
+            
+            // Blockquotes
+            blockquote: {
+              borderLeftColor: theme('colors.gray.600'),
+              color: theme('colors.gray.400'),
+            },
+            
+            // Tables
+            'thead th': {
+              color: theme('colors.white'),
+            },
+            'tbody tr': {
+              borderBottomColor: theme('colors.gray.700'),
+            },
+            
+            // Horizontal rules
+            hr: {
+              borderColor: theme('colors.gray.700'),
+            },
+            
+            // Strong/bold text
+            strong: {
+              color: theme('colors.white'),
             },
           },
         },
-      },
+        
+        // Blog-specific variant
+        blog: {
+          css: {
+            fontSize: '1.125rem',
+            lineHeight: '1.8',
+            maxWidth: 'none',
+            
+            h1: {
+              fontSize: '2.25rem',
+              lineHeight: '1.2',
+              marginBottom: '1.5rem',
+            },
+            h2: {
+              fontSize: '1.875rem',
+              lineHeight: '1.3',
+              marginTop: '2.5rem',
+              marginBottom: '1rem',
+            },
+            h3: {
+              fontSize: '1.5rem',
+              lineHeight: '1.4',
+              marginTop: '2rem',
+              marginBottom: '0.75rem',
+            },
+            
+            p: {
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            
+            'ul, ol': {
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            
+            li: {
+              marginTop: '0.75rem',
+              marginBottom: '0.75rem',
+            },
+            
+            blockquote: {
+              fontSize: '1.25rem',
+              lineHeight: '1.6',
+              paddingLeft: '1.5rem',
+              marginTop: '2rem',
+              marginBottom: '2rem',
+            },
+          },
+        },
+      }),
     },
   },
   plugins: [

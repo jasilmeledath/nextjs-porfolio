@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   FiCalendar, 
@@ -27,6 +28,7 @@ import {
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import BlogService from '../../services/blog-service';
+import BlogPost from '../../components/blog/BlogPost';
 import CommentList from '../../components/blog/CommentList';
 import CommentForm from '../../components/blog/CommentForm';
 import SubscriptionForm from '../../components/SubscriptionForm';
@@ -246,11 +248,16 @@ export default function BlogDetailPage() {
               transition={{ delay: 0.2 }}
               className="mb-8"
             >
-              <img
-                src={blog.featuredImage.url}
-                alt={blog.featuredImage.alt || blog.title}
-                className="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg shadow-lg"
-              />
+              <div className="relative w-full h-64 sm:h-80 lg:h-96 rounded-lg overflow-hidden shadow-lg">
+                <Image
+                  src={blog.featuredImage.url}
+                  alt={blog.featuredImage.alt || blog.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+                  priority
+                />
+              </div>
               {blog.featuredImage.caption && (
                 <p className={`text-sm italic mt-2 text-center ${
                   isDark ? 'text-gray-400' : 'text-gray-600'
@@ -262,18 +269,17 @@ export default function BlogDetailPage() {
           )}
 
           {/* Article Content */}
-          <motion.article
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className={`prose prose-lg max-w-none mb-12 ${
-              isDark 
-                ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-code:text-green-400' 
-                : 'prose-gray'
-            }`}
+            className="mb-12"
           >
-            <div dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, '<br />') }} />
-          </motion.article>
+            <BlogPost 
+              content={blog.content}
+              className="blog-detail-content"
+            />
+          </motion.div>
 
           {/* Tags */}
           {blog.tags && blog.tags.length > 0 && (

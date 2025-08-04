@@ -109,14 +109,40 @@ class EmailService {
   }
 
   /**
-   * Send new blog notification
+   * Send new blog notification to a single subscriber
    * @param {Object} subscriber - Subscriber object
    * @param {Object} blog - Blog object
    * @returns {Promise<Object>} Email result
    */
-  async sendBlogNotification(subscriber, blog) {
+  async sendSingleBlogNotification(subscriber, blog) {
+    console.log("[EmailService] sendSingleBlogNotification called with:", {
+      subscriberEmail: subscriber?.email,
+      blogTitle: blog?.title,
+      blogSlug: blog?.slug,
+      blogExists: !!blog,
+      subscriberExists: !!subscriber
+    });
+    
+    if (!subscriber || !blog) {
+      console.error('[EmailService] Missing data:', { subscriber: !!subscriber, blog: !!blog });
+      throw new Error('Subscriber or blog data is missing or invalid');
+    }
+
+    if (!subscriber.email) {
+      throw new Error('Subscriber email is required');
+    }
+
+    if (!blog.title || !blog.slug) {
+      throw new Error('Blog title and slug are required');
+    }
+    
     const blogUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/blog/${blog.slug}`;
     const unsubscribeUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscription/unsubscribe/${subscriber.unsubscribeToken}`;
+    
+    console.log('[EmailService] Generating email templates for:', {
+      blogUrl,
+      unsubscribeUrl: unsubscribeUrl.substring(0, 50) + '...'
+    });
     
     const html = this.generateBlogNotificationTemplate(subscriber, blog, blogUrl, unsubscribeUrl);
     const text = this.generateBlogNotificationText(subscriber, blog, blogUrl, unsubscribeUrl);
@@ -127,6 +153,82 @@ class EmailService {
       html,
       text
     });
+  }
+
+  /**
+   * Send blog notification to multiple subscribers
+   * @param {Object} data - Notification data
+   * @param {Object} data.blog - Blog object with title, excerpt, slug, etc.
+   * @param {Array} data.subscribers - Array of subscriber objects with email, firstName
+   * @returns {Promise<Array>} Array of email results
+   */
+  static async sendBlogNotification(data) {
+    console.log('[EmailService] Received data:', JSON.stringify(data, null, 2));
+    
+    if (!data) {
+      console.error('[EmailService] Data parameter is missing');
+      return [];
+    }
+    
+    const { blog, subscribers } = data;
+    const results = [];
+    
+    console.log('[EmailService] Blog data:', JSON.stringify(blog, null, 2));
+    console.log('[EmailService] Subscribers data:', JSON.stringify(subscribers, null, 2));
+    
+    if (!blog) {
+      console.error('[EmailService] Blog data is missing or undefined');
+      return results;
+    }
+    
+    if (!blog.slug) {
+      console.error('[EmailService] Blog slug is missing:', blog);
+      return results;
+    }
+    
+    if (!subscribers || subscribers.length === 0) {
+      console.log('[EmailService] No subscribers to notify');
+      return results;
+    }
+
+    console.log(`[EmailService] Sending blog notification to ${subscribers.length} subscribers`);
+
+    // Create an instance of EmailService for sending emails
+    const emailService = new EmailService();
+
+    // Send emails to subscribers (with rate limiting to avoid spam detection)
+    for (const subscriber of subscribers) {
+      try {
+        // Create subscriber object with unsubscribe token if needed
+        const subscriberData = {
+          ...subscriber,
+          unsubscribeToken: subscriber.unsubscribeToken || 'temp-token' // fallback for existing subscribers
+        };
+
+        console.log('[EmailService] About to call instance method with:', {
+          subscriber: subscriberData.email,
+          blogTitle: blog?.title,
+          blogSlug: blog?.slug,
+          blogExists: !!blog
+        });
+
+        const result = await emailService.sendSingleBlogNotification(subscriberData, blog);
+        results.push({ email: subscriber.email, success: true, result });
+        
+        // Small delay to avoid overwhelming the email server
+        if (subscribers.length > 10) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        console.error(`[EmailService] Failed to send to ${subscriber.email}:`, error);
+        results.push({ email: subscriber.email, success: false, error: error.message });
+      }
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    console.log(`[EmailService] Blog notification sent successfully to ${successCount}/${subscribers.length} subscribers`);
+    
+    return results;
   }
 
   /**
@@ -393,7 +495,4 @@ Unsubscribe: ${unsubscribeUrl}
   }
 }
 
-// Create singleton instance
-const emailService = new EmailService();
-
-module.exports = emailService;
+module.exports = EmailService;

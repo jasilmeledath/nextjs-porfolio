@@ -23,10 +23,46 @@ import {
   FiEdit3,
   FiBookOpen,
   FiGlobe,
-  FiLock
+  FiLock,
+  FiCode,
+  FiInfo,
+  FiHelpCircle
 } from 'react-icons/fi';
 import { useAuth } from '../../../context/AuthContext';
 import BlogService from '../../../services/blog-service';
+import BlogPost from '../../../components/blog/BlogPost';
+
+// Markdown template for new posts
+const MARKDOWN_TEMPLATE = `# Your Post Title
+
+## Introduction
+
+Welcome to your new blog post! This is a markdown template to help you get started.
+
+## Code Example
+
+Here's how you can include code in your posts:
+
+\`\`\`javascript
+function greetReader(name) {
+  console.log(\`Hello, \${name}! Welcome to the blog.\`);
+}
+
+greetReader('Developer');
+\`\`\`
+
+## Features
+
+- **Bold text** and *italic text*
+- [Links to external resources](https://example.com)
+- Lists and bullet points
+- Code blocks with syntax highlighting
+- And much more!
+
+## Conclusion
+
+Happy writing! Use the preview mode to see how your markdown will render.
+`;
 
 /**
  * Admin Blog Create Page Component
@@ -62,6 +98,7 @@ export default function AdminBlogCreatePage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [showMarkdownHelp, setShowMarkdownHelp] = useState(false);
   const [errors, setErrors] = useState({});
 
   // Available categories and tags
@@ -125,6 +162,16 @@ export default function AdminBlogCreatePage() {
       }));
     }
   }, [formData.excerpt]);
+
+  /**
+   * Load markdown template into content field
+   */
+  const loadMarkdownTemplate = () => {
+    setFormData(prev => ({
+      ...prev,
+      content: MARKDOWN_TEMPLATE
+    }));
+  };
 
   /**
    * Handle form input changes
@@ -207,30 +254,67 @@ export default function AdminBlogCreatePage() {
   const validateForm = () => {
     const newErrors = {};
 
+    // Title validation (Blog model: required, 5-200 characters)
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = 'Blog title is required';
     } else if (formData.title.length < 5) {
-      newErrors.title = 'Title must be at least 5 characters';
+      newErrors.title = 'Title must be at least 5 characters long';
+    } else if (formData.title.length > 200) {
+      newErrors.title = 'Title cannot exceed 200 characters';
     }
 
+    // Slug validation (Blog model: required, lowercase, hyphens only)
     if (!formData.slug.trim()) {
-      newErrors.slug = 'Slug is required';
+      newErrors.slug = 'Blog slug is required';
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug)) {
+      newErrors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens';
     }
 
+    // Content validation (Blog model: required, min 50 characters)
     if (!formData.content.trim()) {
-      newErrors.content = 'Content is required';
+      newErrors.content = 'Blog content is required';
     } else if (formData.content.length < 50) {
-      newErrors.content = 'Content must be at least 50 characters';
+      newErrors.content = 'Content must be at least 50 characters long';
     }
 
+    // Excerpt validation (Blog model: required, 20-300 characters)
     if (!formData.excerpt.trim()) {
-      newErrors.excerpt = 'Excerpt is required';
+      newErrors.excerpt = 'Blog excerpt is required';
     } else if (formData.excerpt.length < 20) {
-      newErrors.excerpt = 'Excerpt must be at least 20 characters';
+      newErrors.excerpt = 'Excerpt must be at least 20 characters long';
+    } else if (formData.excerpt.length > 300) {
+      newErrors.excerpt = 'Excerpt cannot exceed 300 characters';
     }
 
+    // Categories validation (at least one required)
     if (formData.categories.length === 0) {
       newErrors.categories = 'At least one category is required';
+    }
+
+    // Tags validation (Blog model: max 30 characters each)
+    for (const tag of formData.tags) {
+      if (tag.length > 30) {
+        newErrors.tags = 'Tags cannot exceed 30 characters each';
+        break;
+      }
+    }
+
+    // SEO validation (Blog model: metaTitle max 60, metaDescription max 160)
+    if (formData.seo.metaTitle && formData.seo.metaTitle.length > 60) {
+      newErrors.metaTitle = 'Meta title cannot exceed 60 characters';
+    }
+
+    if (formData.seo.metaDescription && formData.seo.metaDescription.length > 160) {
+      newErrors.metaDescription = 'Meta description cannot exceed 160 characters';
+    }
+
+    // Featured image URL validation (basic URL format)
+    if (formData.featuredImage.url && formData.featuredImage.url !== '/placeholder.svg') {
+      try {
+        new URL(formData.featuredImage.url);
+      } catch {
+        newErrors.featuredImageUrl = 'Please enter a valid URL for the featured image';
+      }
     }
 
     setErrors(newErrors);
@@ -397,17 +481,91 @@ export default function AdminBlogCreatePage() {
                   transition={{ delay: 0.2 }}
                   className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 p-6"
                 >
-                  <label className="block text-green-400 font-mono text-sm font-medium mb-3">
-                    CONTENT *
-                  </label>
-                  <textarea
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    placeholder="Write your blog content here..."
-                    rows={15}
-                    className="w-full p-3 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono focus:outline-none focus:border-green-500/40 transition-colors resize-vertical"
-                  />
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="block text-green-400 font-mono text-sm font-medium">
+                      CONTENT *
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={loadMarkdownTemplate}
+                        className="flex items-center space-x-1 px-2 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded text-blue-400 hover:text-blue-300 font-mono text-xs transition-all duration-300"
+                      >
+                        <FiCode className="w-3 h-3" />
+                        <span>Template</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowMarkdownHelp(!showMarkdownHelp)}
+                        className="flex items-center space-x-1 px-2 py-1 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 rounded text-purple-400 hover:text-purple-300 font-mono text-xs transition-all duration-300"
+                      >
+                        <FiHelpCircle className="w-3 h-3" />
+                        <span>Help</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Markdown Help */}
+                  {showMarkdownHelp && (
+                    <div className="mb-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <FiInfo className="w-4 h-4 text-blue-400" />
+                        <span className="text-blue-400 font-mono text-sm font-medium">Markdown Syntax</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
+                        <div className="text-green-300">
+                          <div className="text-blue-300 mb-1">Headers:</div>
+                          <div># H1</div>
+                          <div>## H2</div>
+                          <div>### H3</div>
+                        </div>
+                        <div className="text-green-300">
+                          <div className="text-blue-300 mb-1">Text:</div>
+                          <div>**bold**</div>
+                          <div>*italic*</div>
+                          <div>`code`</div>
+                        </div>
+                        <div className="text-green-300">
+                          <div className="text-blue-300 mb-1">Lists:</div>
+                          <div>- Item 1</div>
+                          <div>- Item 2</div>
+                          <div>1. Numbered</div>
+                        </div>
+                        <div className="text-green-300">
+                          <div className="text-blue-300 mb-1">Links:</div>
+                          <div>[text](url)</div>
+                          <div>```code```</div>
+                          <div>&gt; quote</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {previewMode ? (
+                    <div className="border border-green-500/20 rounded-lg">
+                      <div className="p-3 bg-green-500/5 border-b border-green-500/20">
+                        <div className="flex items-center space-x-2">
+                          <FiEye className="w-4 h-4 text-green-400" />
+                          <span className="text-green-400 font-mono text-sm font-medium">Preview Mode</span>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-black/20">
+                        <BlogPost 
+                          content={formData.content || 'No content to preview...'}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <textarea
+                      name="content"
+                      value={formData.content}
+                      onChange={handleInputChange}
+                      placeholder="Write your blog content here... (Supports Markdown)"
+                      rows={15}
+                      className="w-full p-3 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono focus:outline-none focus:border-green-500/40 transition-colors resize-vertical"
+                    />
+                  )}
+                  
                   {errors.content && (
                     <p className="text-red-400 font-mono text-xs mt-2">{errors.content}</p>
                   )}
@@ -579,6 +737,9 @@ export default function AdminBlogCreatePage() {
                       </span>
                     ))}
                   </div>
+                  {errors.tags && (
+                    <p className="text-red-400 font-mono text-xs mt-2">{errors.tags}</p>
+                  )}
                 </motion.div>
 
                 {/* Featured Image */}
@@ -606,6 +767,70 @@ export default function AdminBlogCreatePage() {
                     placeholder="Alt text..."
                     className="w-full p-2 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono text-sm focus:outline-none focus:border-green-500/40 transition-colors"
                   />
+                  {errors.featuredImageUrl && (
+                    <p className="text-red-400 font-mono text-xs mt-2">{errors.featuredImageUrl}</p>
+                  )}
+                </motion.div>
+
+                {/* SEO Section */}
+                <motion.div
+                  variants={fadeInUp}
+                  initial="hidden"
+                  animate="visible"
+                  transition={{ delay: 0.8 }}
+                  className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 p-6"
+                >
+                  <h3 className="text-green-400 font-mono text-sm font-medium mb-4">SEO_OPTIMIZATION</h3>
+                  
+                  <div className="space-y-4">
+                    {/* Meta Title */}
+                    <div>
+                      <label className="block text-green-300 font-mono text-xs mb-2">
+                        META_TITLE
+                      </label>
+                      <input
+                        type="text"
+                        name="seo.metaTitle"
+                        value={formData.seo.metaTitle}
+                        onChange={handleInputChange}
+                        placeholder="SEO optimized title (auto-generated)..."
+                        maxLength={60}
+                        className="w-full p-2 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono text-sm focus:outline-none focus:border-green-500/40 transition-colors"
+                      />
+                      <div className="flex justify-between items-center mt-1">
+                        {errors.metaTitle && (
+                          <p className="text-red-400 font-mono text-xs">{errors.metaTitle}</p>
+                        )}
+                        <span className="text-green-600 font-mono text-xs ml-auto">
+                          {formData.seo.metaTitle.length}/60
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Meta Description */}
+                    <div>
+                      <label className="block text-green-300 font-mono text-xs mb-2">
+                        META_DESCRIPTION
+                      </label>
+                      <textarea
+                        name="seo.metaDescription"
+                        value={formData.seo.metaDescription}
+                        onChange={handleInputChange}
+                        placeholder="SEO description (auto-generated)..."
+                        rows={3}
+                        maxLength={160}
+                        className="w-full p-2 bg-black/40 border border-green-500/20 rounded-lg text-green-300 placeholder-green-600 font-mono text-sm focus:outline-none focus:border-green-500/40 transition-colors resize-vertical"
+                      />
+                      <div className="flex justify-between items-center mt-1">
+                        {errors.metaDescription && (
+                          <p className="text-red-400 font-mono text-xs">{errors.metaDescription}</p>
+                        )}
+                        <span className="text-green-600 font-mono text-xs ml-auto">
+                          {formData.seo.metaDescription.length}/160
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               </div>
             </div>

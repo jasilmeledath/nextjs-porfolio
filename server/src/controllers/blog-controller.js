@@ -223,6 +223,8 @@ class BlogController {
    */
   static async createBlog(req, res, next) {
     try {
+      console.log("njan aan createBlogil");
+      
       const blogData = {
         ...req.body,
         author: req.user._id  // Use _id from the authenticated user
@@ -232,42 +234,56 @@ class BlogController {
       await blog.save();
 
       await blog.populate('author', 'firstName lastName email');
+      console.log("blogaksjdhflkashfdjlaksdhfklajshdfl",blog);
+      
 
       // Send newsletter email if blog is published
       if (blog.status === 'published') {
         try {
           // Get all active subscribers
           const subscribers = await Subscriber.find({ 
-            status: 'active',
-            emailConfirmed: true 
-          }).select('email firstName');
-
+            status: 'active'
+          }).select('email firstName unsubscribeToken');
+              console.log('subscribers', subscribers);
+              
           if (subscribers.length > 0) {
+            // Capture blog data before setImmediate to avoid scope issues
+            const blogData = {
+              title: blog.title,
+              excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
+              slug: blog.slug,
+              featuredImage: blog.featuredImage?.url || null,
+              publishedAt: blog.publishedAt || blog.createdAt,
+              author: {
+                name: `${blog.author.firstName} ${blog.author.lastName}`,
+                email: blog.author.email
+              }
+            };
+
+            console.log('ALKSDFLAKSDFNLAKSDNF',blogData);
+            
+
+            const subscriberData = subscribers.map(sub => ({
+              email: sub.email,
+              firstName: sub?.firstName || 'Subscriber',
+              unsubscribeToken: sub.unsubscribeToken
+            }));
+
             // Send blog notification emails in the background
             setImmediate(async () => {
               try {
-                await EmailService.sendBlogNotification({
-                  blog: {
-                    title: blog.title,
-                    excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
-                    slug: blog.slug,
-                    featuredImage: blog.featuredImage?.url || null,
-                    publishedAt: blog.publishedAt || blog.createdAt,
-                    author: {
-                      name: `${blog.author.firstName} ${blog.author.lastName}`,
-                      email: blog.author.email
-                    }
-                  },
-                  subscribers: subscribers.map(sub => ({
-                    email: sub.email,
-                    firstName: sub.firstName
-                  }))
+                const emailPromise = await EmailService.sendBlogNotification({
+                  blog: blogData,
+                  subscribers: subscriberData
                 });
-                console.log(`Newsletter sent to ${subscribers.length} subscribers for blog: ${blog.title}`);
+                if(!emailPromise){
+                  console.error(`Failed to send newsletter for blog (response received undefined): ${blogData.title}`);
+                }
               } catch (emailError) {
                 console.error('Failed to send newsletter emails:', emailError);
                 // Don't fail the blog creation if email fails
               }
+              console.log(`Newsletter sent to ${subscriberData.length} subscribers for new blog: ${blogData.title}`);
             });
           }
         } catch (emailError) {
@@ -340,32 +356,37 @@ class BlogController {
         try {
           // Get all active subscribers
           const subscribers = await Subscriber.find({ 
-            status: 'active',
-            emailConfirmed: true 
-          }).select('email firstName');
+            status: 'active'
+          }).select('email firstName unsubscribeToken');
 
           if (subscribers.length > 0) {
+            // Capture blog data before setImmediate to avoid scope issues
+            const blogData = {
+              title: blog.title,
+              excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
+              slug: blog.slug,
+              featuredImage: blog.featuredImage?.url || null,
+              publishedAt: blog.publishedAt || blog.updatedAt,
+              author: {
+                name: `${blog.author.firstName} ${blog.author.lastName}`,
+                email: blog.author.email
+              }
+            };
+
+            const subscriberData = subscribers.map(sub => ({
+              email: sub.email,
+              firstName: sub.firstName || 'Subscriber',
+              unsubscribeToken: sub.unsubscribeToken
+            }));
+
             // Send blog notification emails in the background
             setImmediate(async () => {
               try {
                 await EmailService.sendBlogNotification({
-                  blog: {
-                    title: blog.title,
-                    excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
-                    slug: blog.slug,
-                    featuredImage: blog.featuredImage?.url || null,
-                    publishedAt: blog.publishedAt || blog.updatedAt,
-                    author: {
-                      name: `${blog.author.firstName} ${blog.author.lastName}`,
-                      email: blog.author.email
-                    }
-                  },
-                  subscribers: subscribers.map(sub => ({
-                    email: sub.email,
-                    firstName: sub.firstName
-                  }))
+                  blog: blogData,
+                  subscribers: subscriberData
                 });
-                console.log(`Newsletter sent to ${subscribers.length} subscribers for updated blog: ${blog.title}`);
+                console.log(`Newsletter sent to ${subscriberData.length} subscribers for updated blog: ${blogData.title}`);
               } catch (emailError) {
                 console.error('Failed to send newsletter emails:', emailError);
                 // Don't fail the blog update if email fails
@@ -462,8 +483,12 @@ class BlogController {
 
       // Check if user is the author or admin
       if (blog.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-        throw new CustomError('Unauthorized to change blog status', HTTP_STATUS.FORBIDDEN);
+        throw new AuthorizationError('Unauthorized to change blog status');
       }
+
+      // Check if blog is being published for the first time
+      const wasUnpublished = blog.status !== 'published';
+      const willBePublished = status === 'published';
 
       blog.status = status;
       if (status === 'published' && !blog.publishedAt) {
@@ -472,6 +497,54 @@ class BlogController {
 
       await blog.save();
       await blog.populate('author', 'firstName lastName email');
+
+      // Send newsletter email if blog was just published for the first time
+      if (wasUnpublished && willBePublished) {
+        try {
+          // Get all active subscribers
+          const subscribers = await Subscriber.find({ 
+            status: 'active'
+          }).select('email firstName unsubscribeToken');
+
+          if (subscribers.length > 0) {
+            // Capture blog data before setImmediate to avoid scope issues
+            const blogData = {
+              title: blog.title,
+              excerpt: blog.excerpt || blog.content.substring(0, 200) + '...',
+              slug: blog.slug,
+              featuredImage: blog.featuredImage?.url || null,
+              publishedAt: blog.publishedAt || blog.updatedAt,
+              author: {
+                name: `${blog.author.firstName} ${blog.author.lastName}`,
+                email: blog.author.email
+              }
+            };
+
+            const subscriberData = subscribers.map(sub => ({
+              email: sub.email,
+              firstName: sub.firstName || 'Subscriber',
+              unsubscribeToken: sub.unsubscribeToken
+            }));
+
+            // Send blog notification emails in the background
+            setImmediate(async () => {
+              try {
+                await EmailService.sendBlogNotification({
+                  blog: blogData,
+                  subscribers: subscriberData
+                });
+                console.log(`Newsletter sent to ${subscriberData.length} subscribers for toggled blog: ${blogData.title}`);
+              } catch (emailError) {
+                console.error('Failed to send newsletter emails on status toggle:', emailError);
+                // Don't fail the blog status toggle if email fails
+              }
+            });
+          }
+        } catch (emailError) {
+          console.error('Error preparing newsletter emails for status toggle:', emailError);
+          // Don't fail the blog status toggle if email preparation fails
+        }
+      }
 
       const response = ApiResponse.success(blog, `Blog ${status} successfully`);
       res.status(response.statusCode).json(response);

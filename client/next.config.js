@@ -16,7 +16,20 @@ const nextConfig = {
   },
   
   images: {
-    domains: ['localhost'],
+    domains: [
+      'localhost', 
+      'postimg.cc', 
+      'i.postimg.cc',
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'picsum.photos',
+      'cloudinary.com',
+      'imgur.com',
+      'i.imgur.com',
+      'www.verbolabs.com',
+      'www.azoai.com'
+    ],
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'http',
@@ -29,6 +42,53 @@ const nextConfig = {
         hostname: 'localhost',
         port: '8000',
         pathname: '/uploads/avatars/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'postimg.cc',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.postimg.cc',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.verbolabs.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.azoai.com',
+        pathname: '/**',
+      },
+      // Allow any HTTPS domain - use with caution
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/**',
+      },
+      // Allow any HTTP domain - use with caution  
+      {
+        protocol: 'http',
+        hostname: '**',
+        pathname: '/**',
       },
     ],
   },

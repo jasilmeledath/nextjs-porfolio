@@ -9,6 +9,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { 
   FiSearch, 
@@ -720,23 +721,32 @@ export default function BlogPage() {
                         {/* Featured Image */}
                         <div className="relative aspect-video overflow-hidden">
                           {blog.featuredImage?.url ? (
-                            <img
+                            <Image
                               src={blog.featuredImage.url}
-                              alt={blog.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              loading="lazy"
+                              alt={blog.featuredImage.alt || blog.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              onError={(e) => {
+                                console.error(`Image failed to load for blog "${blog.title}":`, {
+                                  src: blog.featuredImage.url,
+                                  error: e.target.error || 'Unknown error'
+                                });
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
                             />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                          ) : null}
+                          {/* Fallback placeholder */}
+                          <div className={`w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ${blog.featuredImage?.url ? 'hidden' : 'flex'}`}>
                               <div className="text-white text-4xl opacity-80">
                                 {blog.categories?.includes('react') ? '⚛️' : 
                                  blog.categories?.includes('nodejs') ? '🟢' :
                                  blog.categories?.includes('mongodb') ? '🗄️' : 
-                                 blog.categories?.includes('javascript') ? '�' :
-                                 blog.categories?.includes('typescript') ? '🔷' : '�💻'}
+                                 blog.categories?.includes('javascript') ? '📄' :
+                                 blog.categories?.includes('typescript') ? '🔷' : '💻'}
                               </div>
                             </div>
-                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                           
                           {/* Category Badge */}
@@ -1015,7 +1025,7 @@ export default function BlogPage() {
             <div className="border-t border-slate-200 dark:border-slate-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
                 <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
-                  © 2025 jasilmeledath.me • Made with ❤️ using Next.js
+                  © 2025 jasilmeledath.me • Crafted with NextJS & Passion ❤
                 </p>
                 <div className="flex items-center space-x-4 sm:space-x-6">
                   <a 
