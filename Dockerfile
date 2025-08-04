@@ -28,6 +28,10 @@ COPY server/ ./server/
 # Debug: Check what files were copied
 RUN echo "=== CHECKING COPIED FILES ===" && \
     ls -la server/ && \
+    echo "=== SRC DIRECTORY ===" && \
+    ls -la server/src/ && \
+    echo "=== TRYING TO FIND MODELS ===" && \
+    find server/src -name "*model*" -o -name "*Model*" && \
     echo "=== MODELS DIRECTORY ===" && \
     ls -la server/src/models/ && \
     echo "=== USER.JS EXISTS? ===" && \
