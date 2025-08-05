@@ -29,7 +29,8 @@ export const getApiBaseUrl = () => {
   }
   
   // Default to environment variable or localhost
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return baseUrl.includes('/api/v1') ? baseUrl : `${baseUrl}/api/v1`;
 };
 
 /**
