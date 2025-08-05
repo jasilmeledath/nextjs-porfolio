@@ -90,17 +90,14 @@ class PortfolioService {
    * Make a generic API request with timeout and better error handling
    * @param {string} endpoint - API endpoint
    * @param {Object} options - Fetch options
-   * @returns {Promise<Object>} API response
    */
   static async makeRequest(endpoint, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     try {
       const url = `${API_BASE_URL}${endpoint}`;
       
-      // Add timeout to prevent hanging requests
-      const timeoutMs = options.timeout || 10000; // 10 second default timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -114,10 +111,17 @@ class PortfolioService {
       clearTimeout(timeoutId);
       return await this.handleResponse(response, false);
     } catch (error) {
+      clearTimeout(timeoutId);
+      
+      // Enhanced error handling
       if (error.name === 'AbortError') {
-        console.error('[PortfolioService] Request timeout:', endpoint);
-        throw new Error('Request timeout - please check your connection');
+        throw new Error('Request timed out. Please check your connection and try again.');
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error('Network connection failed. Please check your internet connection.');
+      } else if (error.message.includes('ECONNREFUSED')) {
+        throw new Error('Server is not available. Please try again later.');
       }
+      
       console.error('[PortfolioService] API request error:', error);
       throw error;
     }
@@ -456,6 +460,10 @@ class PortfolioService {
    * Get complete portfolio data for visitor mode
    * @returns {Promise<Object>} Complete portfolio data
    */
+  /**
+   * Get visitor portfolio data with connection health check
+   * @returns {Promise<Object>} API response with portfolio data
+   */
   static async getVisitorPortfolio() {
     try {
       const response = await this.makeRequest('/portfolio/visitor');
@@ -463,6 +471,28 @@ class PortfolioService {
     } catch (error) {
       console.error('[PortfolioService] Error fetching visitor portfolio:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Health check for API connection
+   * @returns {Promise<boolean>} True if API is reachable
+   */
+  static async healthCheck() {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout for health check
+
+      const response = await fetch(`${API_BASE_URL}/health`, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return response.ok;
+    } catch (error) {
+      console.warn('[PortfolioService] Health check failed:', error.message);
+      return false;
     }
   }
 
@@ -644,6 +674,20 @@ class PortfolioService {
   static processSingleProject(project) {
     if (!project) return null;
     
+    // Handle both object and string thumbnail image formats
+    let thumbnailUrl = project.thumbnailImage;
+    if (typeof thumbnailUrl === 'object' && thumbnailUrl?.url) {
+      thumbnailUrl = thumbnailUrl.url;
+    }
+    
+    // Process project images - handle both object and string formats
+    const processedImages = project.images && project.images.length > 0 ? 
+      project.images.map(img => {
+        const imgUrl = typeof img === 'object' && img?.url ? img.url : img;
+        return this.processImageUrl(imgUrl);
+      }) : 
+      [this.processImageUrl(thumbnailUrl) || "/placeholder.svg"];
+    
     const processedProject = {
       id: project._id || project.id,
       title: project.title,
@@ -651,11 +695,9 @@ class PortfolioService {
       longDescription: project.longDescription,
       tech: (project.technologies || []).map(tech => typeof tech === 'string' ? tech : tech.name),
       technologies: project.technologies || [],
-      image: this.processImageUrl(project.thumbnailImage) || "/placeholder.svg",
-      images: project.images && project.images.length > 0 ? 
-        project.images.map(img => this.processImageUrl(img)) : 
-        [this.processImageUrl(project.thumbnailImage) || "/placeholder.svg"],
-      thumbnailImage: this.processImageUrl(project.thumbnailImage) || "/placeholder.svg",
+      image: this.processImageUrl(thumbnailUrl) || "/placeholder.svg",
+      images: processedImages,
+      thumbnailImage: this.processImageUrl(thumbnailUrl) || "/placeholder.svg",
       liveUrl: project.liveUrl,
       githubUrl: project.githubUrl,
       demoUrl: project.demoUrl,

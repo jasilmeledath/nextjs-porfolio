@@ -33,6 +33,7 @@ import {
   FiTrello
 } from 'react-icons/fi';
 import PortfolioManagementService from '../../services/portfolio-management-service';
+import PortfolioService from '../../services/portfolio-service';
 import MarkdownEditor from '../ui/MarkdownEditor';
 
 /**
@@ -224,7 +225,24 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
       const response = await PortfolioManagementService.getProjects();
       
       if (response.success) {
-        setProjects(response.data?.projects || []);
+        // Process image URLs for proper display
+        const processedProjects = (response.data?.projects || []).map(project => {
+          // Handle both object and string thumbnail image formats
+          let thumbnailUrl = project.thumbnailImage;
+          
+          if (typeof thumbnailUrl === 'object' && thumbnailUrl?.url) {
+            thumbnailUrl = thumbnailUrl.url;
+          }
+          
+          // If we have a thumbnail URL, process it
+          const processedUrl = thumbnailUrl ? PortfolioService.processImageUrl(thumbnailUrl) : null;
+          
+          return {
+            ...project,
+            thumbnailImage: processedUrl
+          };
+        });
+        setProjects(processedProjects);
       } else {
         console.error('[ProjectForm] Failed to load projects:', response.message);
         showMessage('error', 'Failed to load projects');
@@ -728,9 +746,9 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
                     className="bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl rounded-xl border border-green-500/20 p-6 hover:border-green-500/40 transition-all duration-300"
                   >
                     {/* Project Thumbnail */}
-                    {proj.thumbnailImage && (
-                      <div className="mb-4 relative h-32">
-                        <div className="w-full h-full rounded-lg overflow-hidden bg-gray-800 relative">
+                    <div className="mb-4 relative h-32">
+                      <div className="w-full h-full rounded-lg overflow-hidden bg-gray-800 relative">
+                        {proj.thumbnailImage ? (
                           <Image
                             src={proj.thumbnailImage}
                             alt={proj.title}
@@ -738,11 +756,16 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             priority={false}
                             style={{ objectFit: 'cover' }}
-                            unoptimized={proj.thumbnailImage.startsWith('blob:')}
+                            unoptimized={proj.thumbnailImage && typeof proj.thumbnailImage === 'string' && proj.thumbnailImage.startsWith('blob:')}
                           />
-                        </div>
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-green-600">
+                            <FiImage className="w-8 h-8 mb-2" />
+                            <span className="font-mono text-xs">No thumbnail</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                     
                     {/* Project Info */}
                     <div className="mb-4">
@@ -1325,7 +1348,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         style={{ objectFit: 'cover' }}
-                        unoptimized={thumbnailPreview.startsWith('blob:')}
+                        unoptimized={thumbnailPreview && typeof thumbnailPreview === 'string' && thumbnailPreview.startsWith('blob:')}
                       />
                     </div>
                     <button
@@ -1383,7 +1406,7 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
                             fill
                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                             style={{ objectFit: 'cover' }}
-                            unoptimized={preview.startsWith('blob:')}
+                            unoptimized={preview && typeof preview === 'string' && preview.startsWith('blob:')}
                           />
                         </div>
                         <button

@@ -400,7 +400,7 @@ export default function PersonalInfoForm() {
                       fill
                       sizes="96px"
                       style={{ objectFit: 'cover' }}
-                      unoptimized={avatarPreview.startsWith('blob:')}
+                      unoptimized={avatarPreview && typeof avatarPreview === 'string' && avatarPreview.startsWith('blob:')}
                     />
                   </div>
                 ) : (

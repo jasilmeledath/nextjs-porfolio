@@ -544,7 +544,7 @@ export default function ExperiencePage() {
                                   width={48}
                                   height={48}
                                   className="w-full h-full object-cover"
-                                  unoptimized={experience.companyLogo.startsWith('blob:')}
+                                  unoptimized={experience.companyLogo && typeof experience.companyLogo === 'string' && experience.companyLogo.startsWith('blob:')}
                                 />
                               </div>
                             )}
@@ -870,7 +870,7 @@ export default function ExperiencePage() {
                             width={40}
                             height={40}
                             className="w-full h-full object-cover"
-                            unoptimized={logoPreview.startsWith('blob:')}
+                            unoptimized={logoPreview && typeof logoPreview === 'string' && logoPreview.startsWith('blob:')}
                           />
                         </div>
                         <button
