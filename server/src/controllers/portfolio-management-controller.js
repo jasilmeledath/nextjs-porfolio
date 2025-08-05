@@ -183,20 +183,17 @@ class PortfolioManagementController {
       // Extract form data
       const { name, title, location, email, phone, description } = req.body;
       
-      // Handle file uploads from Cloudinary processing
+      // Handle file uploads
       let avatar = null;
-      let avatarPublicId = null;
-      let avatarThumbnail = null;
       let resumeUrl = null;
       
-      if (req.uploadResults) {
-        if (req.uploadResults.avatar) {
-          avatar = req.uploadResults.avatar.url;
-          avatarPublicId = req.uploadResults.avatar.publicId;
-          avatarThumbnail = req.uploadResults.avatar.thumbnailUrl;
+      
+      if (req.files) {
+        if (req.files.avatar && req.files.avatar[0]) {
+          avatar = getFileUrl(req, req.files.avatar[0].filename, 'avatars');
         }
-        if (req.uploadResults.resume) {
-          resumeUrl = req.uploadResults.resume.url;
+        if (req.files.resume && req.files.resume[0]) {
+          resumeUrl = getFileUrl(req, req.files.resume[0].filename, 'resumes');
         }
       }
       
@@ -211,13 +208,12 @@ class PortfolioManagementController {
         description
       };
       
-      if (avatar) {
-        updateData.avatar = avatar;
-        updateData.avatarPublicId = avatarPublicId;
-        updateData.avatarThumbnail = avatarThumbnail;
-      }
+      if (avatar) updateData.avatar = avatar;
       if (resumeUrl) updateData.resumeUrl = resumeUrl;
       
+      
+      // Check if MongoDB is connected
+      const mongoose = require('mongoose');
       
       // Find existing personal info
       const existingPersonalInfo = await PersonalInfo.findOne({ userId });
@@ -226,17 +222,10 @@ class PortfolioManagementController {
       
       if (existingPersonalInfo) {
         
-        // Delete old Cloudinary image if new one is uploaded
-        if (avatar && existingPersonalInfo.avatarPublicId) {
-          try {
-            await deleteImage(existingPersonalInfo.avatarPublicId);
-            console.log('✅ Deleted old avatar from Cloudinary');
-          } catch (error) {
-            console.error('⚠️ Failed to delete old avatar:', error.message);
-          }
+        // Delete old files if new ones are uploaded
+        if (avatar && existingPersonalInfo.avatar) {
+          deleteOldFiles([existingPersonalInfo.avatar], 'avatars');
         }
-        
-        // Delete old resume file if new one is uploaded
         if (resumeUrl && existingPersonalInfo.resumeUrl) {
           deleteOldFiles([existingPersonalInfo.resumeUrl], 'resumes');
         }
@@ -628,19 +617,52 @@ class PortfolioManagementController {
         teamSize, myRole, challenges, learnings, order
       } = req.body;
       
-      // Handle file uploads
+      // Handle file uploads with Cloudinary integration
       let images = [];
       let thumbnailImage = null;
       
-      if (req.files) {
-        if (req.files.projectImages) {
-          images = req.files.projectImages.map(file => 
-            getFileUrl(req, file.filename, 'projects')
-          );
+      if (req.uploadResults) {
+        // Use Cloudinary upload results
+        if (req.uploadResults.projectImages && req.uploadResults.projectImages.length > 0) {
+          images = req.uploadResults.projectImages.map(img => ({
+            url: img.url,
+            publicId: img.publicId,
+            thumbnailUrl: img.thumbnailUrl,
+            responsiveUrls: img.responsiveUrls,
+            originalName: img.originalName
+          }));
         }
-        if (req.files.thumbnailImage && req.files.thumbnailImage[0]) {
-          thumbnailImage = getFileUrl(req, req.files.thumbnailImage[0].filename, 'projects');
+        
+        if (req.uploadResults.thumbnailImage) {
+          thumbnailImage = {
+            url: req.uploadResults.thumbnailImage.url,
+            publicId: req.uploadResults.thumbnailImage.publicId,
+            thumbnailUrl: req.uploadResults.thumbnailImage.thumbnailUrl,
+            responsiveUrls: req.uploadResults.thumbnailImage.responsiveUrls,
+            originalName: req.uploadResults.thumbnailImage.originalName
+          };
         }
+      }
+      
+      // Fallback to placeholder if no images uploaded
+      if (images.length === 0) {
+        images = [{
+          url: '/placeholder.svg',
+          publicId: null,
+          thumbnailUrl: '/placeholder.svg',
+          responsiveUrls: null,
+          originalName: 'placeholder.svg'
+        }];
+      }
+      
+      if (!thumbnailImage) {
+        thumbnailImage = {
+          url: '/placeholder.svg',  
+          publicId: null,
+          thumbnailUrl: '/placeholder.svg',
+          responsiveUrls: null,
+          originalName: 'placeholder.svg'
+        };
       }
       
       // Parse technologies if it's a string
@@ -669,8 +691,8 @@ class PortfolioManagementController {
         description,
         longDescription,
         technologies: parsedTechnologies || [],
-        images: images.length > 0 ? images : ['/placeholder.svg'],
-        thumbnailImage: thumbnailImage || '/placeholder.svg',
+        images: images,
+        thumbnailImage: thumbnailImage,
         liveUrl,
         githubUrl,
         demoUrl,
@@ -732,28 +754,67 @@ class PortfolioManagementController {
         return next(new CustomError('Project not found', HTTP_STATUS.NOT_FOUND));
       }
       
-      // Handle file uploads
-      let images = existingProject.images || ['/placeholder.svg'];
-      let thumbnailImage = existingProject.thumbnailImage || '/placeholder.svg';
+      // Handle file uploads with Cloudinary integration
+      let images = existingProject.images || [{
+        url: '/placeholder.svg',
+        publicId: null,
+        thumbnailUrl: '/placeholder.svg',
+        responsiveUrls: null,
+        originalName: 'placeholder.svg'
+      }];
+      let thumbnailImage = existingProject.thumbnailImage || {
+        url: '/placeholder.svg',
+        publicId: null,
+        thumbnailUrl: '/placeholder.svg',
+        responsiveUrls: null,
+        originalName: 'placeholder.svg'
+      };
       
-      if (req.files) {
-        if (req.files.projectImages) {
-          // Delete old images (but not placeholder)
-          if (existingProject.images && existingProject.images.length > 0 && 
-              !existingProject.images.includes('/placeholder.svg')) {
-            deleteOldFiles(existingProject.images, 'projects');
+      if (req.uploadResults) {
+        if (req.uploadResults.projectImages && req.uploadResults.projectImages.length > 0) {
+          // Delete old Cloudinary images (but not placeholder)
+          if (existingProject.images && existingProject.images.length > 0) {
+            for (const oldImage of existingProject.images) {
+              if (oldImage.publicId && oldImage.url !== '/placeholder.svg') {
+                try {
+                  await deleteImage(oldImage.publicId);
+                  console.log('✅ Deleted old project image from Cloudinary');
+                } catch (error) {
+                  console.error('⚠️ Failed to delete old project image:', error.message);
+                }
+              }
+            }
           }
-          images = req.files.projectImages.map(file => 
-            getFileUrl(req, file.filename, 'projects')
-          );
+          
+          images = req.uploadResults.projectImages.map(img => ({
+            url: img.url,
+            publicId: img.publicId,
+            thumbnailUrl: img.thumbnailUrl,
+            responsiveUrls: img.responsiveUrls,
+            originalName: img.originalName
+          }));
         }
-        if (req.files.thumbnailImage && req.files.thumbnailImage[0]) {
-          // Delete old thumbnail (but not placeholder)
+        
+        if (req.uploadResults.thumbnailImage) {
+          // Delete old Cloudinary thumbnail (but not placeholder)
           if (existingProject.thumbnailImage && 
-              existingProject.thumbnailImage !== '/placeholder.svg') {
-            deleteOldFiles([existingProject.thumbnailImage], 'projects');
+              existingProject.thumbnailImage.publicId &&
+              existingProject.thumbnailImage.url !== '/placeholder.svg') {
+            try {
+              await deleteImage(existingProject.thumbnailImage.publicId);
+              console.log('✅ Deleted old thumbnail from Cloudinary');
+            } catch (error) {
+              console.error('⚠️ Failed to delete old thumbnail:', error.message);
+            }
           }
-          thumbnailImage = getFileUrl(req, req.files.thumbnailImage[0].filename, 'projects');
+          
+          thumbnailImage = {
+            url: req.uploadResults.thumbnailImage.url,
+            publicId: req.uploadResults.thumbnailImage.publicId,
+            thumbnailUrl: req.uploadResults.thumbnailImage.thumbnailUrl,
+            responsiveUrls: req.uploadResults.thumbnailImage.responsiveUrls,
+            originalName: req.uploadResults.thumbnailImage.originalName
+          };
         }
       }
       
@@ -816,8 +877,8 @@ class PortfolioManagementController {
         description,
         longDescription,
         technologies: parsedTechnologies,
-        images: images && images.length > 0 ? images : ['/placeholder.svg'],
-        thumbnailImage: thumbnailImage || '/placeholder.svg',
+        images: images,
+        thumbnailImage: thumbnailImage,
         liveUrl,
         githubUrl,
         demoUrl,
@@ -874,12 +935,29 @@ class PortfolioManagementController {
         return next(new CustomError('Project not found', HTTP_STATUS.NOT_FOUND));
       }
       
-      // Delete associated files
+      // Delete associated Cloudinary images
       if (deletedProject.images && deletedProject.images.length > 0) {
-        deleteOldFiles(deletedProject.images, 'projects');
+        for (const image of deletedProject.images) {
+          if (image.publicId && image.url !== '/placeholder.svg') {
+            try {
+              await deleteImage(image.publicId);
+              console.log('✅ Deleted project image from Cloudinary');
+            } catch (error) {
+              console.error('⚠️ Failed to delete project image:', error.message);
+            }
+          }
+        }
       }
-      if (deletedProject.thumbnailImage) {
-        deleteOldFiles([deletedProject.thumbnailImage], 'projects');
+      
+      if (deletedProject.thumbnailImage && 
+          deletedProject.thumbnailImage.publicId &&
+          deletedProject.thumbnailImage.url !== '/placeholder.svg') {
+        try {
+          await deleteImage(deletedProject.thumbnailImage.publicId);
+          console.log('✅ Deleted thumbnail from Cloudinary');
+        } catch (error) {
+          console.error('⚠️ Failed to delete thumbnail:', error.message);
+        }
       }
       
       return res.status(HTTP_STATUS.SUCCESS).json(

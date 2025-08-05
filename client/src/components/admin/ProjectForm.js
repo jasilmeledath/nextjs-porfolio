@@ -196,12 +196,20 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
         order: editingProject.order || 0
       });
 
-      // Set existing images
+      // Set existing images - handle both old and new formats
       if (editingProject.images && editingProject.images.length > 0) {
-        setImagePreviews(editingProject.images);
+        const imageUrls = editingProject.images.map(img => {
+          // Handle new Cloudinary format (object) or old format (string)
+          return typeof img === 'object' ? img.url : img;
+        });
+        setImagePreviews(imageUrls);
       }
       if (editingProject.thumbnailImage) {
-        setThumbnailPreview(editingProject.thumbnailImage);
+        // Handle new Cloudinary format (object) or old format (string)
+        const thumbnailUrl = typeof editingProject.thumbnailImage === 'object' 
+          ? editingProject.thumbnailImage.url 
+          : editingProject.thumbnailImage;
+        setThumbnailPreview(thumbnailUrl);
       }
     }
   }, [editingProject]);
@@ -411,7 +419,9 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
    */
   const removeThumbnail = () => {
     setThumbnailImage(null);
-    setThumbnailPreview(project?.thumbnailImage || null);
+    setThumbnailPreview(project?.thumbnailImage ? 
+      (typeof project.thumbnailImage === 'object' ? project.thumbnailImage.url : project.thumbnailImage) 
+      : null);
     if (thumbnailInputRef.current) {
       thumbnailInputRef.current.value = '';
     }
@@ -906,57 +916,51 @@ export default function ProjectForm({ project = null, onSuccess, onCancel }) {
               </div>
             </div>
 
-            {/* Short Description with Markdown */}
-            <MarkdownEditor
-              value={formData.description}
-              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
-              placeholder="Brief description of your project... 
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-mono font-medium text-green-300 mb-2">
+                Short Description *
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={3}
+                className={`w-full px-4 py-3 bg-black/40 border rounded-lg text-green-100 font-mono placeholder-green-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all duration-300 resize-none ${
+                  errors.description ? 'border-red-500' : 'border-green-500/30 focus:border-green-500'
+                }`}
+                placeholder="Brief description of your project..."
+              />
+              <div className="flex justify-between items-center mt-2">
+                {errors.description && (
+                  <p className="text-red-400 text-xs font-mono">{errors.description}</p>
+                )}
+                <div className="text-green-700 font-mono text-xs ml-auto">
+                  {formData.description.length}/500
+                </div>
+              </div>
+            </div>
 
-**Example:**
-A modern **eCommerce platform** for musicians featuring:
-- Secure payment processing
-- Real-time chat support  
-- Built-in guitar tuner
+            {/* Long Description */}
+            <div>
+              <MarkdownEditor
+                label="Detailed Description (Markdown Supported)"
+                value={formData.longDescription}
+                onChange={(value) => handleInputChange({ target: { name: 'longDescription', value } })}
+                placeholder="Detailed description of your project, including features, architecture, and implementation details...
 
-[Visit Live Demo](https://example.com)"
-              rows={4}
-              maxLength={500}
-              label="Short Description"
-              error={errors.description}
-              required={true}
-            />
-
-            {/* Detailed Description with Markdown */}
-            <MarkdownEditor
-              value={formData.longDescription}
-              onChange={(value) => setFormData(prev => ({ ...prev, longDescription: value }))}
-              placeholder="## Project Overview
-Detailed description of your project with full markdown support.
-
-### Key Features
-- **Feature 1**: Description with *emphasis*
-- **Feature 2**: More details
-- **Feature 3**: [External link](https://example.com)
-
-### Technical Stack
-```javascript
-const techStack = {
-  frontend: ['React', 'Next.js', 'Tailwind CSS'],
-  backend: ['Node.js', 'Express.js', 'MongoDB'],
-  deployment: ['Vercel', 'Railway']
-};
-```
-
-### Architecture & Implementation
-Describe your implementation approach, challenges overcome, and key learnings.
-
-> **Pro Tip**: Use markdown to create professional, readable project descriptions that showcase your technical writing skills!"
-              rows={12}
-              maxLength={5000}
-              label="Detailed Description"
-              error={errors.longDescription}
-              required={false}
-            />
+**Markdown is supported!** You can use:
+- **Bold text** and *italic text*
+- # Headers and ## Subheaders  
+- [Links](https://example.com)
+- \`code snippets\`
+- Lists and much more!"
+                rows={8}
+                maxLength={5000}
+                error={errors.longDescription}
+                className="font-mono"
+              />
+            </div>
 
             {/* Featured & Order */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

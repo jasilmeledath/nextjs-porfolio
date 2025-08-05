@@ -1,157 +1,126 @@
 /**
- * @fileoverview Enhanced File Upload Middleware with Cloudinary Integration
- * @author jasilmeledath@gmail.com
- * @created 2025-08-05
- * @version 2.0.0
+ * @fileoverview Enhanced Upload Middleware with Cloudinary Integration
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
+ * @created 2025-01-27
+ * @lastModified 2025-01-27
+ * @version 1.0.0
  */
 
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
-const { uploadAvatar, uploadProjectImage, uploadImage, cleanupLocalFiles } = require('../config/cloudinary');
+const { uploadAvatarImage, uploadProjectImage, uploadCompanyLogo, cleanupLocalFiles } = require('../config/cloudinary');
 
-// Ensure upload directories exist for temporary storage
-const uploadDirs = [
-  'uploads/temp',
-  'uploads/avatars',
-  'uploads/resumes',
-  'uploads/projects',
-  'uploads/company-logos'
-];
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, '../../uploads');
+const tempDir = path.join(uploadsDir, 'temp');
 
-uploadDirs.forEach(dir => {
-  const fullPath = path.join(__dirname, '../../', dir);
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
+[uploadsDir, tempDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 });
 
-// Storage configuration for temporary files (before Cloudinary upload)
+// Configure multer for temporary file storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let uploadPath = 'uploads/temp/';
-    
-    const fullPath = path.join(__dirname, '../../', uploadPath);
-    if (!fs.existsSync(fullPath)) {
-      fs.mkdirSync(fullPath, { recursive: true });
-    }
-    
-    cb(null, fullPath);
+    cb(null, tempDir);
   },
   filename: function (req, file, cb) {
-    // Generate unique filename with original extension
-    const uniqueId = uuidv4();
+    const uniqueSuffix = Date.now() + '_' + Math.round(Math.random() * 1E9);
     const extension = path.extname(file.originalname);
-    const timestamp = Date.now();
-    cb(null, `${file.fieldname}_${timestamp}_${uniqueId}${extension}`);
+    cb(null, file.fieldname + '_' + uniqueSuffix + extension);
   }
 });
 
-// File filter for different file types
+// File filter for images
 const fileFilter = (req, file, cb) => {
-  // Define allowed file types for each field
-  const allowedTypes = {
-    avatar: /jpeg|jpg|png|gif|webp/,
-    projectImages: /jpeg|jpg|png|gif|webp/,
-    thumbnailImage: /jpeg|jpg|png|gif|webp/,
-    companyLogo: /jpeg|jpg|png|gif|webp|svg/,
-    resume: /pdf|doc|docx/
-  };
-  
-  const fieldType = allowedTypes[file.fieldname];
-  if (!fieldType) {
-    return cb(new Error(`Unsupported field: ${file.fieldname}`), false);
-  }
-  
-  const fileExtension = path.extname(file.originalname).toLowerCase().slice(1);
-  
-  if (fieldType.test(fileExtension)) {
-    cb(null, true);
+  const allowedTypes = /jpeg|jpg|png|gif|webp/;
+  const extension = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extension) {
+    return cb(null, true);
   } else {
-    cb(new Error(`Invalid file type for ${file.fieldname}. Allowed: ${fieldType.source}`), false);
+    cb(new Error('Only image files are allowed (jpeg, jpg, png, gif, webp)'));
   }
 };
 
-// Multer configuration
+// Base multer configuration
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
-    files: 10 // Maximum 10 files per request
-  }
+  },
+  fileFilter: fileFilter
 });
 
-// Different upload configurations for different endpoints
+// Upload configurations for different endpoints
 const uploadConfigs = {
-  // Personal info uploads (avatar + resume)
   personalInfo: upload.fields([
-    { name: 'avatar', maxCount: 1 },
-    { name: 'resume', maxCount: 1 }
+    { name: 'avatar', maxCount: 1 }
   ]),
   
-  // Project uploads (multiple images + thumbnail)
   project: upload.fields([
-    { name: 'projectImages', maxCount: 5 },
+    { name: 'projectImages', maxCount: 10 },
     { name: 'thumbnailImage', maxCount: 1 }
   ]),
   
-  // Experience uploads (company logo)
   experience: upload.fields([
     { name: 'companyLogo', maxCount: 1 }
-  ]),
-  
-  // Single file uploads
-  single: (fieldName) => upload.single(fieldName),
-  
-  // Multiple files with same field name
-  array: (fieldName, maxCount = 5) => upload.array(fieldName, maxCount)
+  ])
 };
 
 /**
- * Process uploaded files with Cloudinary
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
+ * Process uploaded files and upload to Cloudinary
  */
 const processUploads = async (req, res, next) => {
-  if (!req.files) {
-    return next();
-  }
-
-  const filesToCleanup = [];
-  
   try {
-    const uploadResults = {};
+    console.log('🚀 Processing uploads...');
+    
+    if (!req.files || Object.keys(req.files).length === 0) {
+      console.log('ℹ️ No files to process');
+      return next();
+    }
+
+    const uploadResults = {
+      avatar: null,
+      projectImages: [],
+      thumbnailImage: null,
+      companyLogo: null
+    };
+
+    const filesToCleanup = [];
 
     // Process avatar upload
     if (req.files.avatar && req.files.avatar[0]) {
       const avatarFile = req.files.avatar[0];
       filesToCleanup.push(avatarFile.path);
       
-      console.log('📸 Uploading avatar to Cloudinary...');
-      const result = await uploadAvatar(avatarFile.path, 'portfolio/avatars');
+      console.log('👤 Uploading avatar to Cloudinary...');
+      const result = await uploadAvatarImage(avatarFile.path, 'portfolio/avatars');
       
       uploadResults.avatar = {
-        url: result.avatarUrl,
+        url: result.optimizedUrl,
         publicId: result.publicId,
         thumbnailUrl: result.thumbnailUrl,
+        responsiveUrls: result.responsiveUrls,
         originalName: avatarFile.originalname
       };
       
-      console.log('✅ Avatar uploaded successfully:', result.avatarUrl);
+      console.log('✅ Avatar uploaded successfully:', result.optimizedUrl);
     }
 
     // Process project images upload
     if (req.files.projectImages && req.files.projectImages.length > 0) {
-      console.log('🖼️ Uploading project images to Cloudinary...');
-      uploadResults.projectImages = [];
+      console.log(`🖼️ Uploading ${req.files.projectImages.length} project images to Cloudinary...`);
       
       for (const imageFile of req.files.projectImages) {
         filesToCleanup.push(imageFile.path);
         
+        console.log('📸 Processing project image:', imageFile.originalname);
         const result = await uploadProjectImage(imageFile.path, 'portfolio/projects', false);
+        
         uploadResults.projectImages.push({
           url: result.optimizedUrl,
           publicId: result.publicId,
@@ -189,146 +158,123 @@ const processUploads = async (req, res, next) => {
       filesToCleanup.push(logoFile.path);
       
       console.log('🏢 Uploading company logo to Cloudinary...');
-      const result = await uploadImage(logoFile.path, {
-        folder: 'portfolio/company-logos',
-        width: 200,
-        height: 200,
-        crop: 'fit',
-        quality: 'auto:good'
-      });
+      const result = await uploadCompanyLogo(logoFile.path, 'portfolio/companies');
       
       uploadResults.companyLogo = {
-        url: result.url,
+        url: result.optimizedUrl,
         publicId: result.publicId,
+        thumbnailUrl: result.thumbnailUrl,
+        responsiveUrls: result.responsiveUrls,
         originalName: logoFile.originalname
       };
       
-      console.log('✅ Company logo uploaded successfully:', result.url);
+      console.log('✅ Company logo uploaded successfully:', result.optimizedUrl);
     }
 
-    // Handle resume files (keep local for PDFs)
-    if (req.files.resume && req.files.resume[0]) {
-      const resumeFile = req.files.resume[0];
-      
-      // For resumes, we'll keep them local but move to proper directory
-      const resumeDir = path.join(__dirname, '../../uploads/resumes');
-      const newPath = path.join(resumeDir, resumeFile.filename);
-      
-      fs.renameSync(resumeFile.path, newPath);
-      
-      uploadResults.resume = {
-        url: getFileUrl(req, resumeFile.filename, 'resumes'),
-        filename: resumeFile.filename,
-        originalName: resumeFile.originalname
-      };
-      
-      console.log('✅ Resume saved locally:', uploadResults.resume.url);
-    }
-
-    // Attach upload results to request
-    req.uploadResults = uploadResults;
-    
     // Clean up temporary files
     cleanupLocalFiles(filesToCleanup);
     
+    // Attach results to request for use in controllers
+    req.uploadResults = uploadResults;
+    
+    console.log('✅ Upload processing completed successfully');
     next();
 
   } catch (error) {
-    console.error('❌ Upload processing error:', error);
+    console.error('❌ Upload processing failed:', error);
     
-    // Clean up temporary files on error
-    cleanupLocalFiles(filesToCleanup);
-    
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to process file uploads',
-      details: error.message
-    });
-  }
-};
-
-// Helper function to get file URL for local files (resumes)
-const getFileUrl = (req, filename, folder = '') => {
-  if (!filename) return null;
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
-  return `${baseUrl}/uploads/${folder ? folder + '/' : ''}${filename}`;
-};
-
-// Helper function to delete file
-const deleteFile = (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      return true;
+    // Clean up any uploaded files on error
+    if (req.files) {
+      const allFiles = Object.values(req.files).flat();
+      const filePaths = allFiles.map(file => file.path);
+      cleanupLocalFiles(filePaths);
     }
-    return false;
-  } catch (error) {
-    console.error('Error deleting file:', error);
-    return false;
+    
+    next(error);
   }
 };
 
-// Helper function to delete old files when updating
-const deleteOldFiles = (oldUrls, baseUploadPath) => {
-  if (!oldUrls || !Array.isArray(oldUrls)) {
-    oldUrls = [oldUrls];
+/**
+ * Handle upload errors
+ */
+const handleUploadError = (error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        message: 'File too large. Maximum size is 10MB.',
+        error: 'FILE_TOO_LARGE'
+      });
+    }
+    
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        success: false,
+        message: 'Too many files uploaded.',
+        error: 'TOO_MANY_FILES'
+      });
+    }
+    
+    if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+      return res.status(400).json({
+        success: false,
+        message: 'Unexpected field in file upload.',
+        error: 'UNEXPECTED_FIELD'
+      });
+    }
   }
   
-  oldUrls.forEach(url => {
-    if (url && !url.includes('cloudinary.com')) {
-      // Only delete local files, not Cloudinary URLs
-      const filename = url.split('/').pop();
-      const filePath = path.join(__dirname, '../../uploads', baseUploadPath, filename);
-      deleteFile(filePath);
+  if (error.message && error.message.includes('Only image files are allowed')) {
+    return res.status(400).json({
+      success: false,
+      message: 'Only image files are allowed (jpeg, jpg, png, gif, webp).',
+      error: 'INVALID_FILE_TYPE'
+    });
+  }
+  
+  console.error('Upload error:', error);
+  res.status(500).json({
+    success: false,
+    message: 'File upload failed.',
+    error: 'UPLOAD_FAILED'
+  });
+};
+
+/**
+ * Get file URL for serving uploaded files
+ * @param {string} filename - File name
+ * @param {string} type - File type (avatars, projects, companies)
+ * @returns {string} File URL
+ */
+const getFileUrl = (filename, type = 'projects') => {
+  return `/uploads/${type}/${filename}`;
+};
+
+/**
+ * Delete old uploaded files
+ * @param {Array<string>} filePaths - Array of file paths to delete
+ */
+const deleteOldFiles = (filePaths) => {
+  if (!Array.isArray(filePaths)) {
+    filePaths = [filePaths];
+  }
+  
+  filePaths.forEach(filePath => {
+    if (filePath && fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+        console.log('🗑️ Deleted old file:', filePath);
+      } catch (error) {
+        console.error('❌ Failed to delete file:', filePath, error.message);
+      }
     }
   });
 };
 
-// Error handling middleware
-const handleUploadError = (error, req, res, next) => {
-  console.error('Upload error:', error);
-  
-  if (error instanceof multer.MulterError) {
-    switch (error.code) {
-      case 'LIMIT_FILE_SIZE':
-        return res.status(400).json({
-          success: false,
-          error: 'File too large. Maximum size is 10MB.'
-        });
-      case 'LIMIT_FILE_COUNT':
-        return res.status(400).json({
-          success: false,
-          error: 'Too many files. Maximum is 10 files per request.'
-        });
-      case 'LIMIT_UNEXPECTED_FILE':
-        return res.status(400).json({
-          success: false,
-          error: 'Unexpected file field.'
-        });
-      default:
-        return res.status(400).json({
-          success: false,
-          error: `Upload error: ${error.message}`
-        });
-    }
-  }
-  
-  if (error.message.includes('Invalid file type')) {
-    return res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-  
-  next(error);
-};
-
 module.exports = {
-  upload,
   uploadConfigs,
   processUploads,
+  handleUploadError,
   getFileUrl,
-  deleteFile,
-  deleteOldFiles,
-  handleUploadError
+  deleteOldFiles
 };

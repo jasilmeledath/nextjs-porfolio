@@ -58,6 +58,9 @@ import {
   HardDrive,
   Network,
 } from "lucide-react"
+import { getProjectImages, getProjectMainImage, hasMultipleImages } from '../../utils/image-utils'
+import MarkdownRenderer from './MarkdownRenderer'
+import EnhancedImage from './EnhancedImage'
 
 export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
   // Debug logging to check project data
@@ -82,8 +85,7 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
       setIsFullscreen(false)
       setCopiedText('')
       // Show thumbnails by default if there are multiple images
-      const images = project.images || [project.image || project.thumbnailImage || "/placeholder.svg"]
-      setShowImageThumbnails(images.length > 1)
+      setShowImageThumbnails(hasMultipleImages(project))
     }
   }, [project])
 
@@ -98,13 +100,15 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
         } else {
           onClose()
         }
-      } else if (e.key === 'ArrowLeft' && project?.images?.length > 1) {
+      } else if (e.key === 'ArrowLeft' && hasMultipleImages(project)) {
+        const images = getProjectImages(project)
         setCurrentImageIndex((prev) => 
-          prev === 0 ? project.images.length - 1 : prev - 1
+          prev === 0 ? images.length - 1 : prev - 1
         )
-      } else if (e.key === 'ArrowRight' && project?.images?.length > 1) {
+      } else if (e.key === 'ArrowRight' && hasMultipleImages(project)) {
+        const images = getProjectImages(project)
         setCurrentImageIndex((prev) => 
-          prev === project.images.length - 1 ? 0 : prev + 1
+          prev === images.length - 1 ? 0 : prev + 1
         )
       } else if (e.key === 'f' || e.key === 'F') {
         // Press 'f' to toggle fullscreen
@@ -248,17 +252,19 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
 
   // Handle image navigation
   const nextImage = useCallback(() => {
-    if (project?.images?.length > 1) {
+    const images = getProjectImages(project)
+    if (images.length > 1) {
       setCurrentImageIndex((prev) => 
-        prev === project.images.length - 1 ? 0 : prev + 1
+        prev === images.length - 1 ? 0 : prev + 1
       )
     }
   }, [project])
 
   const prevImage = useCallback(() => {
-    if (project?.images?.length > 1) {
+    const images = getProjectImages(project)
+    if (images.length > 1) {
       setCurrentImageIndex((prev) => 
-        prev === 0 ? project.images.length - 1 : prev - 1
+        prev === 0 ? images.length - 1 : prev - 1
       )
     }
   }, [project])
@@ -322,8 +328,8 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
 
   if (!project) return null
 
-  // Prepare images array (fallback to single image if images array doesn't exist)
-  const images = project.images || [project.image || project.thumbnailImage || "/placeholder.svg"]
+  // Prepare images array using utility functions
+  const images = getProjectImages(project)
   const currentImage = images[currentImageIndex] || "/placeholder.svg"
 
   // Get current status configuration
@@ -460,16 +466,13 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                       {/* Enhanced Image Gallery */}
                       <div className="relative">
                         <div className="relative h-48 sm:h-64 md:h-72 lg:h-80 rounded-lg sm:rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 group">
-                          <img
+                          <EnhancedImage
                             src={currentImage}
                             alt={`${project.title} - Image ${currentImageIndex + 1}`}
                             className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                             onLoad={() => setIsImageLoading(false)}
-                            onError={(e) => {
-                              e.target.src = "/placeholder.svg"
-                              setIsImageLoading(false)
-                            }}
                             onClick={toggleFullscreen}
+                            showErrorState={false}
                           />
                           
                           {isImageLoading && (
@@ -587,13 +590,11 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                                           : 'border-gray-300 dark:border-gray-600 hover:border-cyan-400/50 hover:scale-105'
                                       }`}
                                     >
-                                      <img
+                                      <EnhancedImage
                                         src={image}
                                         alt={`Thumbnail ${index + 1}`}
                                         className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                          e.target.src = "/placeholder.svg"
-                                        }}
+                                        showErrorState={false}
                                       />
                                     </motion.button>
                                   ))}
@@ -616,28 +617,28 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                         <div className={`prose prose-sm sm:prose-base max-w-none ${
                           isDark ? 'prose-invert' : ''
                         }`}>
-                          <div className={`text-sm sm:text-base leading-relaxed space-y-2 sm:space-y-3 ${
-                            isDark ? 'text-gray-300' : 'text-gray-600'
-                          }`}>
-                            {project.longDescription ? (
-                              // Render long description with proper paragraph breaks
-                              project.longDescription.split(/\n\n|\n/).filter(para => para.trim()).map((paragraph, index) => (
-                                <p key={index} className="mb-2 sm:mb-3 text-justify">
-                                  {paragraph.trim()}
-                                </p>
-                              ))
-                            ) : project.description ? (
+                          {project.longDescription ? (
+                            <MarkdownRenderer 
+                              content={project.longDescription}
+                              isDark={isDark}
+                              className="text-sm sm:text-base leading-relaxed"
+                            />
+                          ) : project.description ? (
+                            <div className={`text-sm sm:text-base leading-relaxed space-y-2 sm:space-y-3 ${
+                              isDark ? 'text-gray-300' : 'text-gray-600'
+                            }`}>
                               <p className="mb-2 sm:mb-3 text-justify">
                                 {project.description}
                               </p>
-                            ) : (
-                              <p className={`mb-2 sm:mb-3 text-center italic ${
-                                isDark ? 'text-gray-500' : 'text-gray-400'
-                              }`}>
-                                No description available for this project.
-                              </p>
-                            )}
-                          </div>
+                            </div>
+                          ) : (
+                            <p className={`mb-2 sm:mb-3 text-center italic ${
+                              isDark ? 'text-gray-500' : 'text-gray-400'
+                            }`}>
+                              No description available for this project.
+                            </p>
+                          )}
+                        </div>
                           
                           {/* Project Features */}
                           {project.features && project.features.length > 0 && (

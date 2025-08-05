@@ -6,7 +6,10 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ExternalLink, Github } from "lucide-react"
+import { X, ExternalLink, Github, Calendar, Users } from "lucide-react"
+import { getProjectMainImage } from '../../utils/image-utils'
+import MarkdownRenderer from './MarkdownRenderer'
+import EnhancedImage from './EnhancedImage'
 
 export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
 
@@ -124,12 +127,13 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6">
               {/* Project Image */}
-              {project.image && (
+              {getProjectMainImage(project) !== "/placeholder.svg" && (
                 <div className="mb-6">
-                  <img
-                    src={project.image}
+                  <EnhancedImage
+                    src={getProjectMainImage(project)}
                     alt={project.title}
                     className="w-full h-64 object-cover rounded-xl"
+                    showErrorState={false}
                   />
                 </div>
               )}
@@ -143,11 +147,20 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                   }`}>
                     About This Project
                   </h3>
-                  <p className={`text-sm leading-relaxed ${
-                    isDark ? 'text-gray-300' : 'text-gray-600'
-                  }`}>
-                    {project.longDescription || project.description || 'No detailed description available.'}
-                  </p>
+                  {project.longDescription ? (
+                    <MarkdownRenderer 
+                      content={project.longDescription}
+                      isDark={isDark}
+                      className="text-sm leading-relaxed"
+                      compact={true}
+                    />
+                  ) : (
+                    <p className={`text-sm leading-relaxed ${
+                      isDark ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
+                      {project.description || 'No detailed description available.'}
+                    </p>
+                  )}
                 </div>
 
                 {/* Technologies */}

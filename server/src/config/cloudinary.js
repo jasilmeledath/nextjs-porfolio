@@ -1,170 +1,165 @@
 /**
- * @fileoverview Cloudinary Configuration for Cloud Image Storage
- * @author jasilmeledath@gmail.com
- * @created 2025-08-05
+ * @fileoverview Cloudinary Configuration and Helper Functions
+ * @author jasilmeledath@gmail.com <jasil.portfolio.com>
+ * @created 2025-01-27
+ * @lastModified 2025-01-27
  * @version 1.0.0
  */
 
 const cloudinary = require('cloudinary').v2;
-require('dotenv').config();
+const fs = require('fs');
 
-/**
- * Configure Cloudinary with environment variables
- */
+// Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'demo',
-  api_key: process.env.CLOUDINARY_API_KEY || 'demo',
-  api_secret: process.env.CLOUDINARY_API_SECRET || 'demo',
-  secure: true // Use HTTPS URLs
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 /**
- * Upload image to Cloudinary
- * @param {string} filePath - Local file path or buffer
+ * Upload image to Cloudinary with optimizations
+ * @param {string} filePath - Local file path
  * @param {Object} options - Upload options
  * @returns {Promise<Object>} Upload result
  */
 const uploadImage = async (filePath, options = {}) => {
   try {
     const defaultOptions = {
-      resource_type: 'auto',
+      resource_type: 'image',
       quality: 'auto:good',
       fetch_format: 'auto',
-      crop: 'fill',
-      gravity: 'auto',
-      secure: true,
-      ...options
+      secure: true
     };
 
-    const result = await cloudinary.uploader.upload(filePath, defaultOptions);
+    const uploadOptions = { ...defaultOptions, ...options };
     
+    console.log('📤 Uploading to Cloudinary:', filePath);
+    const result = await cloudinary.uploader.upload(filePath, uploadOptions);
+    
+    console.log('✅ Upload successful:', result.secure_url);
     return {
-      success: true,
-      url: result.secure_url,
       publicId: result.public_id,
+      url: result.secure_url,
       width: result.width,
       height: result.height,
       format: result.format,
+      resourceType: result.resource_type,
       bytes: result.bytes
     };
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    throw new Error(`Failed to upload image: ${error.message}`);
+    console.error('❌ Cloudinary upload failed:', error);
+    throw new Error(`Cloudinary upload failed: ${error.message}`);
   }
 };
 
 /**
  * Delete image from Cloudinary
- * @param {string} publicId - Public ID of the image
+ * @param {string} publicId - Cloudinary public ID
  * @returns {Promise<Object>} Deletion result
  */
 const deleteImage = async (publicId) => {
   try {
+    if (!publicId) {
+      console.warn('⚠️ No public ID provided for deletion');
+      return { result: 'not found' };
+    }
+
+    console.log('🗑️ Deleting from Cloudinary:', publicId);
     const result = await cloudinary.uploader.destroy(publicId);
-    return {
-      success: result.result === 'ok',
-      result: result.result
-    };
+    
+    if (result.result === 'ok') {
+      console.log('✅ Image deleted successfully:', publicId);
+    } else {
+      console.warn('⚠️ Image deletion result:', result.result, 'for', publicId);
+    }
+    
+    return result;
   } catch (error) {
-    console.error('Cloudinary delete error:', error);
-    throw new Error(`Failed to delete image: ${error.message}`);
+    console.error('❌ Cloudinary deletion failed:', error);
+    throw new Error(`Cloudinary deletion failed: ${error.message}`);
   }
 };
 
 /**
- * Generate optimized image URL
- * @param {string} publicId - Public ID of the image
- * @param {Object} transformations - Image transformations
- * @returns {string} Optimized image URL
+ * Get optimized avatar image URL
+ * @param {string} publicId - Cloudinary public ID
+ * @param {Object} options - Transformation options
+ * @returns {string} Optimized URL
  */
-const getOptimizedUrl = (publicId, transformations = {}) => {
-  const defaultTransformations = {
+const getAvatarImageUrl = (publicId, options = {}) => {
+  const defaultOptions = {
+    width: 200,
+    height: 200,
+    crop: 'fill',
+    gravity: 'face',
     quality: 'auto:good',
-    fetch_format: 'auto',
-    ...transformations
+    fetch_format: 'auto'
   };
 
-  return cloudinary.url(publicId, defaultTransformations);
+  const transformOptions = { ...defaultOptions, ...options };
+  
+  return cloudinary.url(publicId, transformOptions);
 };
 
 /**
- * Get avatar optimized URL
- * @param {string} publicId - Public ID of the image
- * @param {number} size - Avatar size (default: 400)
- * @returns {string} Optimized avatar URL
- */
-const getAvatarUrl = (publicId, size = 400) => {
-  return getOptimizedUrl(publicId, {
-    width: size,
-    height: size,
-    crop: 'fill',
-    gravity: 'face:center',
-    radius: 'max',
-    quality: 'auto:good',
-    fetch_format: 'auto'
-  });
-};
-
-/**
- * Get project image optimized URL
- * @param {string} publicId - Public ID of the image
- * @param {Object} options - Size and crop options
- * @returns {string} Optimized project image URL
+ * Get optimized project image URL
+ * @param {string} publicId - Cloudinary public ID
+ * @param {Object} options - Transformation options
+ * @returns {string} Optimized URL
  */
 const getProjectImageUrl = (publicId, options = {}) => {
-  const { width = 800, height = 600, crop = 'fill' } = options;
-  
-  return getOptimizedUrl(publicId, {
-    width,
-    height,
-    crop,
-    gravity: 'auto',
+  const defaultOptions = {
     quality: 'auto:good',
     fetch_format: 'auto'
-  });
+  };
+
+  const transformOptions = { ...defaultOptions, ...options };
+  
+  return cloudinary.url(publicId, transformOptions);
 };
 
 /**
- * Generate responsive image URLs
- * @param {string} publicId - Public ID of the image
- * @param {Array} sizes - Array of sizes
- * @returns {Object} Object with different sized URLs
+ * Get responsive image URLs for different screen sizes
+ * @param {string} publicId - Cloudinary public ID
+ * @returns {Object} Responsive URLs
  */
-const getResponsiveUrls = (publicId, sizes = [400, 800, 1200]) => {
-  const urls = {};
-  
-  sizes.forEach(size => {
-    urls[`w${size}`] = getOptimizedUrl(publicId, {
-      width: size,
-      quality: 'auto:good',
-      fetch_format: 'auto'
-    });
-  });
-  
-  return urls;
+const getResponsiveUrls = (publicId) => {
+  return {
+    small: getProjectImageUrl(publicId, { width: 400, height: 300, crop: 'fill' }),
+    medium: getProjectImageUrl(publicId, { width: 800, height: 600, crop: 'fill' }),
+    large: getProjectImageUrl(publicId, { width: 1200, height: 900, crop: 'fill' }),
+    xlarge: getProjectImageUrl(publicId, { width: 1600, height: 1200, crop: 'fill' })
+  };
 };
 
 /**
- * Upload and process avatar
+ * Upload avatar image with specific optimizations
  * @param {string} filePath - Local file path
  * @param {string} folderName - Cloudinary folder name
  * @returns {Promise<Object>} Upload result with optimized URLs
  */
-const uploadAvatar = async (filePath, folderName = 'avatars') => {
+const uploadAvatarImage = async (filePath, folderName = 'avatars') => {
   try {
-    const result = await uploadImage(filePath, {
+    const uploadOptions = {
       folder: folderName,
       width: 400,
       height: 400,
       crop: 'fill',
-      gravity: 'face:center',
+      gravity: 'face',
       quality: 'auto:good'
-    });
+    };
+
+    const result = await uploadImage(filePath, uploadOptions);
 
     return {
       ...result,
-      avatarUrl: getAvatarUrl(result.publicId),
-      thumbnailUrl: getAvatarUrl(result.publicId, 150)
+      optimizedUrl: getAvatarImageUrl(result.publicId),
+      thumbnailUrl: getAvatarImageUrl(result.publicId, { width: 100, height: 100 }),
+      responsiveUrls: {
+        small: getAvatarImageUrl(result.publicId, { width: 100, height: 100 }),
+        medium: getAvatarImageUrl(result.publicId, { width: 200, height: 200 }),
+        large: getAvatarImageUrl(result.publicId, { width: 400, height: 400 })
+      }
     };
   } catch (error) {
     throw error;
@@ -172,7 +167,7 @@ const uploadAvatar = async (filePath, folderName = 'avatars') => {
 };
 
 /**
- * Upload and process project image
+ * Upload project image with specific optimizations
  * @param {string} filePath - Local file path
  * @param {string} folderName - Cloudinary folder name
  * @param {boolean} isThumbnail - Is this a thumbnail image
@@ -206,20 +201,56 @@ const uploadProjectImage = async (filePath, folderName = 'projects', isThumbnail
 };
 
 /**
+ * Upload company logo with specific optimizations
+ * @param {string} filePath - Local file path
+ * @param {string} folderName - Cloudinary folder name
+ * @returns {Promise<Object>} Upload result with optimized URLs
+ */
+const uploadCompanyLogo = async (filePath, folderName = 'companies') => {
+  try {
+    const uploadOptions = {
+      folder: folderName,
+      width: 200,
+      height: 200,
+      crop: 'fit',
+      background: 'transparent',
+      quality: 'auto:good'
+    };
+
+    const result = await uploadImage(filePath, uploadOptions);
+
+    return {
+      ...result,
+      optimizedUrl: getProjectImageUrl(result.publicId),
+      thumbnailUrl: getProjectImageUrl(result.publicId, { width: 100, height: 100 }),
+      responsiveUrls: {
+        small: getProjectImageUrl(result.publicId, { width: 50, height: 50 }),
+        medium: getProjectImageUrl(result.publicId, { width: 100, height: 100 }),
+        large: getProjectImageUrl(result.publicId, { width: 200, height: 200 })
+      }
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
  * Clean up local uploaded files
  * @param {Array} filePaths - Array of file paths to delete
  */
 const cleanupLocalFiles = (filePaths) => {
-  const fs = require('fs');
-  
+  if (!Array.isArray(filePaths)) {
+    filePaths = [filePaths];
+  }
+
   filePaths.forEach(filePath => {
-    try {
-      if (fs.existsSync(filePath)) {
+    if (filePath && fs.existsSync(filePath)) {
+      try {
         fs.unlinkSync(filePath);
-        console.log(`✅ Cleaned up local file: ${filePath}`);
+        console.log('🧹 Cleaned up local file:', filePath);
+      } catch (error) {
+        console.error('❌ Failed to cleanup local file:', filePath, error.message);
       }
-    } catch (error) {
-      console.error(`❌ Failed to cleanup file ${filePath}:`, error);
     }
   });
 };
@@ -228,11 +259,11 @@ module.exports = {
   cloudinary,
   uploadImage,
   deleteImage,
-  getOptimizedUrl,
-  getAvatarUrl,
+  getAvatarImageUrl,
   getProjectImageUrl,
   getResponsiveUrls,
-  uploadAvatar,
+  uploadAvatarImage,
   uploadProjectImage,
+  uploadCompanyLogo,
   cleanupLocalFiles
 };

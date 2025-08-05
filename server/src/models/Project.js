@@ -78,24 +78,48 @@ const projectSchema = new mongoose.Schema({
   },
   technologies: [projectTechnologySchema],
   images: [{
-    type: String, // URLs to uploaded images
-    required: true
-  }],
-  imagePublicIds: [{
-    type: String // Cloudinary public IDs for image management
-  }],
-  imageResponsive: [{
-    type: mongoose.Schema.Types.Mixed // Responsive image URLs
+    url: {
+      type: String,
+      required: true
+    },
+    publicId: {
+      type: String, // Cloudinary public ID for deletion
+      required: false
+    },
+    thumbnailUrl: {
+      type: String, // Optimized thumbnail URL
+      required: false
+    },
+    responsiveUrls: {
+      type: mongoose.Schema.Types.Mixed, // Object with different sizes
+      required: false
+    },
+    originalName: {
+      type: String,
+      required: false
+    }
   }],
   thumbnailImage: {
-    type: String,
-    required: true
-  },
-  thumbnailPublicId: {
-    type: String // Cloudinary public ID for thumbnail
-  },
-  thumbnailResponsive: {
-    type: mongoose.Schema.Types.Mixed // Responsive thumbnail URLs
+    url: {
+      type: String,
+      required: true
+    },
+    publicId: {
+      type: String, // Cloudinary public ID for deletion
+      required: false
+    },
+    thumbnailUrl: {
+      type: String, // Optimized thumbnail URL
+      required: false
+    },
+    responsiveUrls: {
+      type: mongoose.Schema.Types.Mixed, // Object with different sizes
+      required: false
+    },
+    originalName: {
+      type: String,
+      required: false
+    }
   },
   liveUrl: {
     type: String,

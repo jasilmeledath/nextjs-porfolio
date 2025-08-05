@@ -10,7 +10,7 @@ const express = require('express');
 const router = express.Router();
 const PortfolioManagementController = require('../controllers/portfolio-management-controller');
 const { authenticate } = require('../middleware/auth-middleware');
-const { uploadConfigs, handleUploadError, processUploads } = require('../middleware/upload-enhanced');
+const { uploadConfigs, processUploads, handleUploadError } = require('../middleware/upload-enhanced');
 
 // Apply authentication middleware to all routes
 router.use(authenticate);
@@ -47,8 +47,8 @@ router.get('/personal-info', PortfolioManagementController.getPersonalInfo);
  */
 router.post('/personal-info', 
   uploadConfigs.personalInfo,
-  handleUploadError,
   processUploads,
+  handleUploadError,
   PortfolioManagementController.upsertPersonalInfo
 );
 
@@ -59,6 +59,7 @@ router.post('/personal-info',
  */
 router.put('/personal-info', 
   uploadConfigs.personalInfo,
+  processUploads,
   handleUploadError,
   PortfolioManagementController.upsertPersonalInfo
 );
@@ -146,6 +147,7 @@ router.get('/projects/:id', PortfolioManagementController.getProject);
  */
 router.post('/projects',
   uploadConfigs.project,
+  processUploads,
   handleUploadError,
   PortfolioManagementController.createProject
 );
@@ -157,6 +159,7 @@ router.post('/projects',
  */
 router.put('/projects/:id',
   uploadConfigs.project,
+  processUploads,
   handleUploadError,
   PortfolioManagementController.updateProject
 );
