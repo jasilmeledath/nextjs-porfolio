@@ -12,6 +12,11 @@ export const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     const currentOrigin = window.location.origin;
     
+    // Handle custom production domain
+    if (currentOrigin === 'https://jasilmeledath.dev') {
+      return 'https://jasilmeledathdev-production.up.railway.app/api/v1';
+    }
+    
     // If accessing via Cloudflare tunnel, use relative API calls
     if (currentOrigin.includes('.trycloudflare.com')) {
       // For Cloudflare tunnels, we need to proxy API calls through the same tunnel
@@ -29,8 +34,7 @@ export const getApiBaseUrl = () => {
   }
   
   // Default to environment variable or localhost
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-  return baseUrl.includes('/api/v1') ? baseUrl : `${baseUrl}/api/v1`;
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 };
 
 /**

@@ -8,12 +8,12 @@
   "devCommand": "npm run dev",
   "env": {
     "NODE_ENV": "production",
-    "NEXT_PUBLIC_API_URL": "https://jasilmeledathdev-production.up.railway.app"
+    "NEXT_PUBLIC_API_URL": "https://jasilmeledathdev-production.up.railway.app/api/v1"
   },
   "build": {
     "env": {
       "NODE_ENV": "production",
-      "NEXT_PUBLIC_API_URL": "https://jasilmeledathdev-production.up.railway.app"
+      "NEXT_PUBLIC_API_URL": "https://jasilmeledathdev-production.up.railway.app/api/v1"
     }
   },
   "regions": ["bom1"],
