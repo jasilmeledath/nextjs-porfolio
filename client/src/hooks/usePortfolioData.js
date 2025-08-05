@@ -32,12 +32,20 @@ export const usePortfolioData = () => {
   const [error, setError] = useState(null);
 
   /**
-   * Load complete portfolio data
+   * Load complete portfolio data with retry logic
    */
-  const loadPortfolioData = async () => {
+  const loadPortfolioData = async (retryCount = 0) => {
+    const maxRetries = 3;
+    const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 5000); // Exponential backoff, max 5s
+
     try {
       setLoading(true);
       setError(null);
+
+      // Add a small delay on first load to ensure server is ready
+      if (retryCount === 0) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
 
       // Try to load data from API
       const response = await PortfolioService.getVisitorPortfolio();
@@ -74,22 +82,28 @@ export const usePortfolioData = () => {
         setPortfolioData(finalData);
         
       } else {
-        setError('Failed to load portfolio data');
+        throw new Error('Failed to load portfolio data');
       }
     } catch (err) {
-      setError('Failed to connect to portfolio service');
+      console.error(`[usePortfolioData] Load attempt ${retryCount + 1} failed:`, err);
+      
+      // Retry logic
+      if (retryCount < maxRetries) {
+        console.log(`[usePortfolioData] Retrying in ${retryDelay}ms... (${retryCount + 1}/${maxRetries})`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return loadPortfolioData(retryCount + 1);
+      }
+      
+      // All retries failed
+      setError(`Failed to connect to portfolio service after ${maxRetries + 1} attempts`);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Add a small delay to show the data loads smoothly
-    const timer = setTimeout(() => {
-      loadPortfolioData();
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    // Start loading immediately on mount, no artificial delay
+    loadPortfolioData();
   }, []);
 
   return {
@@ -182,28 +196,24 @@ export const usePortfolioSections = () => {
   };
 
   /**
-   * Load projects with advanced loading
+   * Load projects
    */
   const loadProjects = async () => {
-    return withLoading('projects', async () => {
-      try {
-        const response = await PortfolioService.getAllProjects({ status: 'published' });
-        
-        if (response.success) {
-          const processedData = PortfolioService.processProjectsData(response.data.projects);
-          setSectionsData(prev => ({ ...prev, projects: processedData }));
-          return processedData;
-        } else {
-          throw new Error('Failed to load projects');
-        }
-      } catch (error) {
-        console.error('[usePortfolioSections] Error loading projects:', error);
-        throw error;
+    try {
+      setLoadingStates(prev => ({ ...prev, projects: true }));
+      const response = await PortfolioService.getAllProjects({ status: 'published' });
+      
+      if (response.success) {
+        setSectionsData(prev => ({ 
+          ...prev, 
+          projects: PortfolioService.processProjectsData(response.data.projects) 
+        }));
       }
-    }, {
-      type: LOADING_TYPES.DATA,
-      message: 'Loading projects...'
-    });
+    } catch (error) {
+      console.error('[usePortfolioSections] Error loading projects:', error);
+    } finally {
+      setLoadingStates(prev => ({ ...prev, projects: false }));
+    }
   };
 
   /**

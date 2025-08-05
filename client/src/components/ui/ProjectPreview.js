@@ -639,10 +639,10 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                             </p>
                           )}
                         </div>
-                          
-                          {/* Project Features */}
-                          {project.features && project.features.length > 0 && (
-                            <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border-l-4 border-green-400 bg-green-500/10">
+                        
+                        {/* Project Features */}
+                        {project.features && project.features.length > 0 && (
+                          <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border-l-4 border-green-400 bg-green-500/10">
                               <h4 className={`text-base sm:text-lg font-semibold mb-3 flex items-center ${
                                 isDark ? 'text-white' : 'text-gray-900'
                               }`}>
@@ -664,23 +664,22 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                             </div>
                           )}
                           
-                          {/* My Role Section */}
-                          {project.myRole && (
-                            <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg border-l-4 border-cyan-400 bg-cyan-500/10">
-                              <h4 className={`text-sm sm:text-base font-semibold mb-1.5 sm:mb-2 flex items-center ${
-                                isDark ? 'text-white' : 'text-gray-900'
-                              }`}>
-                                <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-cyan-400" />
-                                My Role
-                              </h4>
-                              <p className={`text-xs sm:text-sm ${
-                                isDark ? 'text-gray-300' : 'text-gray-600'
-                              }`}>
-                                {project.myRole}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                        {/* My Role Section */}
+                        {project.myRole && (
+                          <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg border-l-4 border-cyan-400 bg-cyan-500/10">
+                            <h4 className={`text-sm sm:text-base font-semibold mb-1.5 sm:mb-2 flex items-center ${
+                              isDark ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-cyan-400" />
+                              My Role
+                            </h4>
+                            <p className={`text-xs sm:text-sm ${
+                              isDark ? 'text-gray-300' : 'text-gray-600'
+                            }`}>
+                              {project.myRole}
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       {/* Quick Stats Grid */}

@@ -80,7 +80,7 @@ class PortfolioService {
   }
 
   /**
-   * Make a generic API request
+   * Make a generic API request with timeout and better error handling
    * @param {string} endpoint - API endpoint
    * @param {Object} options - Fetch options
    * @returns {Promise<Object>} API response
@@ -88,17 +88,29 @@ class PortfolioService {
   static async makeRequest(endpoint, options = {}) {
     try {
       const url = `${API_BASE_URL}${endpoint}`;
+      
+      // Add timeout to prevent hanging requests
+      const timeoutMs = options.timeout || 10000; // 10 second default timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
+        signal: controller.signal,
         ...options,
       });
 
+      clearTimeout(timeoutId);
       return await this.handleResponse(response, false);
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error('[PortfolioService] Request timeout:', endpoint);
+        throw new Error('Request timeout - please check your connection');
+      }
       console.error('[PortfolioService] API request error:', error);
       throw error;
     }

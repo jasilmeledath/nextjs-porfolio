@@ -49,7 +49,7 @@ export default function PortfolioPage() {
   const containerRef = useRef(null)
 
   // Load portfolio data from backend
-  const { portfolioData, loading, error } = usePortfolioData()
+  const { portfolioData, loading, error, refetch } = usePortfolioData()
   const { personalInfo, socialLinks, skills, projects, experience } = portfolioData
 
   // Debug log for avatar
@@ -403,12 +403,17 @@ export default function PortfolioPage() {
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h2 className="text-white text-2xl mb-2">Unable to load portfolio</h2>
           <p className="text-white/70 mb-4">{error}</p>
-          <p className="text-white/50 text-sm mb-4">Showing default content instead</p>
+          <p className="text-white/50 text-sm mb-4">Please try again to reload the content</p>
           <button 
-            onClick={() => window.location.reload()} 
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            onClick={() => refetch()} 
+            disabled={loading}
+            className={`px-6 py-2 bg-purple-600 text-white rounded-lg transition-colors ${
+              loading 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:bg-purple-700'
+            }`}
           >
-            Retry
+            {loading ? 'Retrying...' : 'Retry'}
           </button>
         </div>
       </div>
