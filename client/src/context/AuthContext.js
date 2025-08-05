@@ -33,6 +33,7 @@ export function AuthProvider({ children }) {
    * API base URL
    */
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_V1_URL = API_BASE_URL.includes('/api/v1') ? API_BASE_URL : `${API_BASE_URL}/api/v1`;
 
   /**
    * Checks if user is authenticated on app initialization
@@ -64,7 +65,7 @@ export function AuthProvider({ children }) {
       }
 
       // Verify token with backend
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/verify`, {
+      const response = await fetch(`${API_V1_URL}/auth/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -130,7 +131,7 @@ export function AuthProvider({ children }) {
         return { success: true, user: mockUser };
       }
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_V1_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -178,7 +179,7 @@ export function AuthProvider({ children }) {
       
       if (token && process.env.NODE_ENV !== 'development') {
         // Call logout endpoint to invalidate server-side session
-        await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
+        await fetch(`${API_V1_URL}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -207,7 +208,7 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const token = Cookies.get('auth_token');
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/profile`, {
+      const response = await fetch(`${API_V1_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -248,7 +249,7 @@ export function AuthProvider({ children }) {
       setLoading(true);
       const token = Cookies.get('auth_token');
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/change-password`, {
+      const response = await fetch(`${API_V1_URL}/auth/change-password`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
