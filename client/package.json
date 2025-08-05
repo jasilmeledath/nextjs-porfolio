@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.83.0",
+    "autoprefixer": "^10.4.16",
     "axios": "^1.5.0",
     "clsx": "^2.0.0",
     "critters": "^0.0.23",
@@ -24,6 +25,7 @@
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.292.0",
     "next": "^14.2.30",
+    "postcss": "^8.4.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
@@ -38,11 +40,11 @@
     "react-share": "^4.4.1",
     "react-syntax-highlighter": "^15.5.0",
     "rehype-highlight": "^7.0.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.0",
-    "three": "^0.179.1",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.5"
+    "tailwindcss": "^3.3.5",
+    "three": "^0.179.1"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
