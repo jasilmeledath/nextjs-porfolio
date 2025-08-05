@@ -53,30 +53,30 @@ const Loader = memo(({
     if (isDark) {
       return {
         // Dark mode - Clean green palette matching portfolio
-        primary: '#4ade80',      // Green-400
-        secondary: '#22c55e',    // Green-500  
-        tertiary: '#16a34a',     // Green-600
-        text: '#e5e7eb',         // Gray-200 (better contrast)
-        textSecondary: '#9ca3af', // Gray-400
-        background: '#000000',    // Pure black
-        surface: '#111827',       // Gray-900
+        primary: '#4ade80',         // Green-400
+        secondary: '#22c55e',       // Green-500  
+        tertiary: '#16a34a',        // Green-600
+        text: '#f3f4f6',           // Gray-100 (better contrast)
+        textSecondary: '#9ca3af',   // Gray-400
+        background: '#000000',      // Pure black
+        surface: '#111827',         // Gray-900
         border: 'rgba(74, 222, 128, 0.15)', // Green with opacity
-        track: '#1f2937',        // Gray-800
-        accent: '#10b981'        // Emerald-500
+        track: 'transparent',       // Clean transparent track
+        accent: '#10b981'          // Emerald-500
       };
     }
     return {
       // Light mode - Clean, professional palette  
-      primary: '#1f2937',        // Gray-800
-      secondary: '#374151',      // Gray-700
-      tertiary: '#4b5563',       // Gray-600
-      text: '#1f2937',           // Gray-800 (strong contrast)
-      textSecondary: '#6b7280',  // Gray-500
-      background: '#ffffff',     // Pure white
-      surface: '#f9fafb',        // Gray-50
+      primary: '#1f2937',          // Gray-800
+      secondary: '#374151',        // Gray-700
+      tertiary: '#4b5563',         // Gray-600
+      text: '#1f2937',            // Gray-800 (strong contrast)
+      textSecondary: '#6b7280',    // Gray-500
+      background: '#ffffff',       // Pure white
+      surface: '#f9fafb',         // Gray-50
       border: 'rgba(31, 41, 55, 0.08)', // Gray with opacity
-      track: '#e5e7eb',          // Gray-200
-      accent: '#059669'          // Emerald-600
+      track: 'transparent',        // Clean transparent track
+      accent: '#059669'           // Emerald-600
     };
   }, [isDark]);
 
@@ -114,7 +114,7 @@ const Loader = memo(({
   const colors = theme();
   const config = sizeConfig();
 
-  // Enhanced Spinner with clean design
+  // Enhanced Spinner with clean, professional design
   const SpinnerLoader = memo(() => (
     <div
       className="relative inline-block"
@@ -126,12 +126,9 @@ const Loader = memo(({
       <div
         className="absolute inset-0 rounded-full animate-spin"
         style={{
-          border: `${config.spinner.borderWidth}px solid ${colors.track}`,
+          border: `${config.spinner.borderWidth}px solid transparent`,
           borderTopColor: colors.primary,
-          borderRightColor: colors.primary,
-          borderBottomColor: colors.primary,
-          borderLeftColor: 'transparent',
-          animationDuration: '0.75s',
+          animationDuration: '1s',
           animationTimingFunction: 'linear'
         }}
       />

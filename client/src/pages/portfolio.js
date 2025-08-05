@@ -33,20 +33,16 @@ import {
   FileText,
 } from "lucide-react"
 import { usePortfolioData } from "../hooks/usePortfolioData"
-import { useTheme } from "../context/ThemeContext"
 import Avatar3D from "../components/ui/Avatar3D"
 import ProjectPreview from "../components/ui/ProjectPreview"
-import MarkdownRenderer from "../components/ui/MarkdownRenderer"
 import SkillsMarquee from "../components/ui/SkillsMarquee"
-import ThemeToggle from "../components/ui/ThemeToggle"
-import Loader, { LOADER_VARIANTS, LOADER_SIZES } from "../components/ui/Loader"
 import PortfolioManagementService from "../services/portfolio-management-service"
 
 export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("hero")
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const { isDark, mounted } = useTheme()
-  const isClient = mounted
+  const [isDark, setIsDark] = useState(true)
+  const [isClient, setIsClient] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
   const [isProjectPreviewOpen, setIsProjectPreviewOpen] = useState(false)
   const [isDownloadingResume, setIsDownloadingResume] = useState(false)
@@ -108,7 +104,36 @@ export default function PortfolioPage() {
     return () => document.removeEventListener("mousemove", handleMouseMove)
   }, [handleMouseMove])
 
+  // Enhanced dark mode toggle functionality
+  const toggleDarkMode = useCallback(() => {
+    const newMode = !isDark
+    setIsDark(newMode)
+    
+    // Apply to document class for global theme
+    if (newMode) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDark])
 
+  // Initialize theme from localStorage - only on client
+  useEffect(() => {
+    if (!isClient) return
+    
+    const savedTheme = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDark(true)
+      document.documentElement.classList.add('dark')
+    } else {
+      setIsDark(false)
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isClient])
 
   // Optimized animation variants for maximum FPS and performance
   const fadeInUp = useMemo(() => ({
@@ -247,7 +272,7 @@ export default function PortfolioPage() {
     </svg>
   ], [])
 
-  // Memoized loading state check with advanced loader
+  // Memoized loading state check
   const shouldShowLoading = useMemo(() => 
     loading && (!personalInfo.name || personalInfo.name === ''), 
     [loading, personalInfo.name]
@@ -255,8 +280,8 @@ export default function PortfolioPage() {
 
   // Memoized error state check  
   const shouldShowError = useMemo(() => 
-    error && (!personalInfo.name || personalInfo.name === '') && !loading, 
-    [error, personalInfo.name, loading]
+    error && (!personalInfo.name || personalInfo.name === ''), 
+    [error, personalInfo.name]
   )
 
   // Project preview handlers
@@ -334,64 +359,37 @@ export default function PortfolioPage() {
 
   // Client-side hydration fix
   useEffect(() => {
+    setIsClient(true)
+    
     // Cleanup function to reset body overflow when component unmounts
     return () => {
       document.body.style.overflow = 'unset'
     }
   }, [])
 
-  // Loading state - professional loader with branding
+  // Loading state - clean, minimalistic professional loader
   if (shouldShowLoading) {
     return (
-      <div className={`min-h-screen flex flex-col items-center justify-center ${
-        isDark ? 'bg-black text-white' : 'bg-white text-black'
+      <div className={`min-h-screen flex items-center justify-center transition-colors duration-300 ${
+        isDark ? 'bg-black' : 'bg-white'
       }`}>
-        <div className="text-center space-y-8 max-w-md mx-auto px-6">
-          {/* Brand logo area */}
-          <div className={`relative p-6 rounded-2xl ${
+        <div className="text-center">
+          {/* Single, clean spinner */}
+          <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4 ${
             isDark 
-              ? 'bg-gradient-to-br from-green-500/10 to-cyan-500/10 border border-green-500/20' 
-              : 'bg-gradient-to-br from-green-50 to-cyan-50 border border-green-200'
+              ? 'border-green-400' 
+              : 'border-gray-800'
+          }`} style={{
+            animationDuration: '1s',
+            animationTimingFunction: 'linear'
+          }}></div>
+          
+          {/* Simple, professional message */}
+          <p className={`text-sm font-medium ${
+            isDark ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center font-bold text-xl mx-auto ${
-              isDark
-                ? 'border-green-400 text-green-400 bg-green-400/10'
-                : 'border-green-600 text-green-600 bg-green-600/10'
-            }`}>
-              <span>JP</span>
-            </div>
-          </div>
-
-          {/* Advanced loader */}
-          <Loader
-            show={true}
-            variant={LOADER_VARIANTS.SPINNER}
-            size={LOADER_SIZES.LG}
-            message="Loading Portfolio..."
-          />
-
-          {/* Additional context */}
-          <div className="space-y-3">
-            <p className={`text-base font-medium ${
-              isDark ? 'text-gray-200' : 'text-gray-700'
-            }`}>
-              Preparing your portfolio experience
-            </p>
-            <p className={`text-sm ${
-              isDark ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              Fetching projects, skills, and experience data...
-            </p>
-          </div>
-
-          {/* Progress indicator */}
-          <div className="w-full max-w-xs mx-auto">
-            <Loader
-              show={true}
-              variant={LOADER_VARIANTS.PROGRESS}
-              size={LOADER_SIZES.MD}
-            />
-          </div>
+            Loading...
+          </p>
         </div>
       </div>
     )
@@ -643,7 +641,18 @@ export default function PortfolioPage() {
               </div>
 
               <div className="flex items-center space-x-4">
-                <ThemeToggle />
+                <motion.button
+                  onClick={toggleDarkMode}
+                  whileHover={{ scale: 1.1, rotate: 180 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`p-3 rounded-xl backdrop-blur-sm border transition-all duration-300 ${
+                    isClient && isDark 
+                      ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' 
+                      : 'bg-black/10 border-black/20 text-black hover:bg-black/20'
+                  }`}
+                >
+                  <div className="text-xl">{isClient && isDark ? "☀️" : "🌙"}</div>
+                </motion.button>
               </div>
             </div>
           </div>
@@ -955,18 +964,13 @@ export default function PortfolioPage() {
                       }`}>
                         {project.title}
                       </h3>
-                      <div className={`mb-3 md:mb-4 text-xs md:text-sm leading-relaxed overflow-hidden ${
+                      <p className={`mb-3 md:mb-4 text-xs md:text-sm leading-relaxed ${
                         isDark ? 'text-gray-300' : 'text-gray-600'
-                      }`} style={{ maxHeight: '4rem' }}>
-                        <MarkdownRenderer 
-                          content={project.description?.length > 120 
-                            ? `${project.description.slice(0, 120)}...` 
-                            : project.description || ''}
-                          isDark={isDark}
-                          compact={true}
-                          className="line-clamp-3"
-                        />
-                      </div>
+                      }`}>
+                        {project.description?.length > 120 
+                          ? `${project.description.slice(0, 120)}...` 
+                          : project.description}
+                      </p>
 
                       {/* Stats */}
                       <div className={`flex justify-between text-xs mb-3 md:mb-4 ${
@@ -1123,7 +1127,7 @@ export default function PortfolioPage() {
                   </div>
 
                   <motion.a
-                    href={`mailto:contact@jasilmeledath.dev`}
+                    href={`mailto:${personalInfo.email}`}
                     whileHover={{ scale: 1.02 }} // Reduced from 1.05
                     whileTap={{ scale: 0.98 }} // Reduced from 0.95
                     transition={{ duration: 0.15, ease: "easeOut" }} // Faster transition
@@ -1329,7 +1333,7 @@ export default function PortfolioPage() {
                 </p>
                 <div className="flex items-center space-x-4 sm:space-x-6">
                   <a 
-                    href="mailto:contact@jasilmeledath.dev" 
+                    href="mailto:jasilmeledath@gmail.com" 
                     className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-xs sm:text-sm transition-colors"
                   >
                     Contact

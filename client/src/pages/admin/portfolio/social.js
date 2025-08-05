@@ -347,8 +347,11 @@ export default function SocialLinksPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-yellow-500/30 border-t-yellow-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-yellow-400 font-mono">Loading social links management...</p>
+          <div className="w-8 h-8 border-2 border-t-transparent border-yellow-400 rounded-full animate-spin mx-auto mb-4" style={{
+            animationDuration: '1s',
+            animationTimingFunction: 'linear'
+          }}></div>
+          <p className="text-yellow-300 text-sm font-medium">Loading...</p>
         </div>
       </div>
     );

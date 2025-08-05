@@ -10,12 +10,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import {
   X,
   ExternalLink,
@@ -480,7 +474,10 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                           
                           {isImageLoading && (
                             <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-                              <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"></div>
+                              <div className="w-6 h-6 border-2 border-t-transparent border-cyan-400 rounded-full animate-spin" style={{
+                                animationDuration: '1s',
+                                animationTimingFunction: 'linear'
+                              }}></div>
                             </div>
                           )}
 
@@ -615,170 +612,74 @@ export default function ProjectPreview({ project, isOpen, onClose, isDark }) {
                           About This Project
                         </h3>
                         
-                        {/* Enhanced Markdown Description */}
-                        <div className="prose prose-sm sm:prose-base max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                            components={{
-                              // Code syntax highlighting
-                              code({ node, inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(className || '');
-                                return !inline && match ? (
-                                  <SyntaxHighlighter
-                                    style={vscDarkPlus}
-                                    language={match[1]}
-                                    PreTag="div"
-                                    className="rounded-lg !bg-black/60 !text-sm my-4"
-                                    {...props}
-                                  >
-                                    {String(children).replace(/\n$/, '')}
-                                  </SyntaxHighlighter>
-                                ) : (
-                                  <code className={`px-1.5 py-0.5 rounded text-sm font-mono ${
-                                    isDark 
-                                      ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20' 
-                                      : 'bg-blue-50 text-blue-700 border border-blue-200'
-                                  }`} {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              },
-                              // Enhanced headings
-                              h1: ({ children }) => (
-                                <h1 className={`text-xl md:text-2xl font-bold mb-4 pb-2 border-b ${
-                                  isDark ? 'text-white border-gray-700' : 'text-gray-900 border-gray-200'
-                                }`}>
-                                  {children}
-                                </h1>
-                              ),
-                              h2: ({ children }) => (
-                                <h2 className={`text-lg md:text-xl font-semibold mb-3 mt-6 ${
-                                  isDark ? 'text-white' : 'text-gray-900'
-                                }`}>
-                                  {children}
-                                </h2>
-                              ),
-                              h3: ({ children }) => (
-                                <h3 className={`text-base md:text-lg font-medium mb-2 mt-4 ${
-                                  isDark ? 'text-gray-100' : 'text-gray-800'
-                                }`}>
-                                  {children}
-                                </h3>
-                              ),
-                              // Enhanced paragraphs
-                              p: ({ children }) => (
-                                <p className={`mb-4 leading-relaxed text-sm md:text-base ${
-                                  isDark ? 'text-gray-300' : 'text-gray-600'
-                                }`}>
-                                  {children}
+                        {/* Main Description */}
+                        <div className={`prose prose-sm sm:prose-base max-w-none ${
+                          isDark ? 'prose-invert' : ''
+                        }`}>
+                          <div className={`text-sm sm:text-base leading-relaxed space-y-2 sm:space-y-3 ${
+                            isDark ? 'text-gray-300' : 'text-gray-600'
+                          }`}>
+                            {project.longDescription ? (
+                              // Render long description with proper paragraph breaks
+                              project.longDescription.split(/\n\n|\n/).filter(para => para.trim()).map((paragraph, index) => (
+                                <p key={index} className="mb-2 sm:mb-3 text-justify">
+                                  {paragraph.trim()}
                                 </p>
-                              ),
-                              // Enhanced lists
-                              ul: ({ children }) => (
-                                <ul className={`mb-4 space-y-2 pl-6 ${
-                                  isDark ? 'text-gray-300' : 'text-gray-600'
-                                }`}>
-                                  {children}
-                                </ul>
-                              ),
-                              li: ({ children }) => (
-                                <li className="relative text-sm md:text-base">
-                                  {children}
-                                </li>
-                              ),
-                              // Enhanced links
-                              a: ({ children, href }) => (
-                                <a
-                                  href={href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={`inline-flex items-center gap-1 font-medium underline transition-colors duration-200 ${
-                                    isDark 
-                                      ? 'text-blue-400 hover:text-blue-300 decoration-blue-500/50' 
-                                      : 'text-blue-600 hover:text-blue-500 decoration-blue-600/50'
-                                  }`}
-                                >
-                                  {children}
-                                  <ExternalLink className="w-3 h-3 opacity-70" />
-                                </a>
-                              ),
-                              // Enhanced blockquotes
-                              blockquote: ({ children }) => (
-                                <blockquote className={`border-l-4 pl-4 py-2 my-4 italic ${
-                                  isDark 
-                                    ? 'border-blue-500 bg-blue-500/5 text-blue-200' 
-                                    : 'border-blue-500 bg-blue-50 text-blue-700'
-                                }`}>
-                                  {children}
-                                </blockquote>
-                              ),
-                              // Enhanced images
-                              img: ({ src, alt }) => (
-                                <div className="my-6">
-                                  <img
-                                    src={src}
-                                    alt={alt}
-                                    className={`rounded-lg max-w-full h-auto mx-auto border shadow-lg ${
-                                      isDark ? 'border-gray-700' : 'border-gray-200'
-                                    }`}
-                                  />
-                                  {alt && (
-                                    <p className={`text-center mt-2 italic text-sm ${
-                                      isDark ? 'text-gray-400' : 'text-gray-500'
+                              ))
+                            ) : project.description ? (
+                              <p className="mb-2 sm:mb-3 text-justify">
+                                {project.description}
+                              </p>
+                            ) : (
+                              <p className={`mb-2 sm:mb-3 text-center italic ${
+                                isDark ? 'text-gray-500' : 'text-gray-400'
+                              }`}>
+                                No description available for this project.
+                              </p>
+                            )}
+                          </div>
+                          
+                          {/* Project Features */}
+                          {project.features && project.features.length > 0 && (
+                            <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border-l-4 border-green-400 bg-green-500/10">
+                              <h4 className={`text-base sm:text-lg font-semibold mb-3 flex items-center ${
+                                isDark ? 'text-white' : 'text-gray-900'
+                              }`}>
+                                <Layers className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-400" />
+                                Key Features
+                              </h4>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {project.features.map((feature, index) => (
+                                  <div key={index} className="flex items-start space-x-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></div>
+                                    <span className={`text-sm ${
+                                      isDark ? 'text-gray-300' : 'text-gray-600'
                                     }`}>
-                                      {alt}
-                                    </p>
-                                  )}
-                                </div>
-                              ),
-                            }}
-                            className="text-justify"
-                          >
-                            {project.longDescription || project.description || 'No description available for this project.'}
-                          </ReactMarkdown>
-                        </div>
-                        
-                        {/* Project Features */}
-                        {project.features && project.features.length > 0 && (
-                          <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-xl border-l-4 border-green-400 bg-green-500/10">
-                            <h4 className={`text-base sm:text-lg font-semibold mb-3 flex items-center ${
-                              isDark ? 'text-white' : 'text-gray-900'
-                            }`}>
-                              <Layers className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-400" />
-                              Key Features
-                            </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {project.features.map((feature, index) => (
-                                <div key={index} className="flex items-start space-x-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></div>
-                                  <span className={`text-sm ${
-                                    isDark ? 'text-gray-300' : 'text-gray-600'
-                                  }`}>
-                                    {feature}
-                                  </span>
-                                </div>
-                              ))}
+                                      {feature}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                        
-                        {/* My Role Section */}
-                        {project.myRole && (
-                          <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg border-l-4 border-cyan-400 bg-cyan-500/10">
-                            <h4 className={`text-sm sm:text-base font-semibold mb-1.5 sm:mb-2 flex items-center ${
-                              isDark ? 'text-white' : 'text-gray-900'
-                            }`}>
-                              <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-cyan-400" />
-                              My Role
-                            </h4>
-                            <p className={`text-xs sm:text-sm ${
-                              isDark ? 'text-gray-300' : 'text-gray-600'
-                            }`}>
-                              {project.myRole}
-                            </p>
-                          </div>
-                        )}
+                          )}
+                          
+                          {/* My Role Section */}
+                          {project.myRole && (
+                            <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg border-l-4 border-cyan-400 bg-cyan-500/10">
+                              <h4 className={`text-sm sm:text-base font-semibold mb-1.5 sm:mb-2 flex items-center ${
+                                isDark ? 'text-white' : 'text-gray-900'
+                              }`}>
+                                <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-cyan-400" />
+                                My Role
+                              </h4>
+                              <p className={`text-xs sm:text-sm ${
+                                isDark ? 'text-gray-300' : 'text-gray-600'
+                              }`}>
+                                {project.myRole}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Quick Stats Grid */}

@@ -174,8 +174,13 @@ const SubscriptionManagement = () => {
         return (
             <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className={`${isDark ? 'text-white' : 'text-gray-900'}`}>Loading subscription data...</p>
+                    <div className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4 ${
+                        isDark ? 'border-blue-400' : 'border-blue-600'
+                    }`} style={{
+                        animationDuration: '1s',
+                        animationTimingFunction: 'linear'
+                    }}></div>
+                    <p className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Loading...</p>
                 </div>
             </div>
         );

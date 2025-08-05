@@ -36,20 +36,36 @@ export default function PageLoader({ show = false, message = 'Loading...' }) {
         }`}
         style={{ backdropFilter: 'blur(10px)' }}
       >
-        <div className="text-center space-y-6 max-w-sm mx-auto px-6">
-          {/* Clean loader */}
+        <div className="text-center">
+          {/* Single clean spinner */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.3 }}
-          >
-            <Loader
-              show={true}
-              variant={LOADER_VARIANTS.DOTS}
-              size={LOADER_SIZES.MD}
-              message={message}
-            />
-          </motion.div>
+            className={`w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-4 ${
+              isDark 
+                ? 'border-green-400' 
+                : 'border-gray-800'
+            }`}
+            style={{
+              animationDuration: '1s',
+              animationTimingFunction: 'linear'
+            }}
+          />
+          
+          {/* Simple message */}
+          {message && (
+            <motion.p
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              className={`text-sm font-medium ${
+                isDark ? 'text-gray-300' : 'text-gray-600'
+              }`}
+            >
+              {message}
+            </motion.p>
+          )}
         </div>
       </motion.div>
     </AnimatePresence>

@@ -38,8 +38,11 @@ export default function ProjectsPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-500/30 border-t-green-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-green-400 font-mono">Loading projects management...</p>
+          <div className="w-8 h-8 border-2 border-t-transparent border-green-400 rounded-full animate-spin mx-auto mb-4" style={{
+            animationDuration: '1s',
+            animationTimingFunction: 'linear'
+          }}></div>
+          <p className="text-green-300 text-sm font-medium">Loading...</p>
         </div>
       </div>
     );
