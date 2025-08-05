@@ -17,7 +17,8 @@ const Portfolio = require('../models/Portfolio');
 const ApiResponse = require('../utils/ApiResponse');
 const { HTTP_STATUS } = require('../constants/http-status');
 const { CustomError } = require('../errors/custom-errors');
-const { getFileUrl, deleteOldFiles } = require('../middleware/upload');
+const { getFileUrl, deleteOldFiles } = require('../middleware/upload-enhanced');
+const { deleteImage } = require('../config/cloudinary');
 
 /**
  * Portfolio Management Controller Class
@@ -182,17 +183,20 @@ class PortfolioManagementController {
       // Extract form data
       const { name, title, location, email, phone, description } = req.body;
       
-      // Handle file uploads
+      // Handle file uploads from Cloudinary processing
       let avatar = null;
+      let avatarPublicId = null;
+      let avatarThumbnail = null;
       let resumeUrl = null;
       
-      
-      if (req.files) {
-        if (req.files.avatar && req.files.avatar[0]) {
-          avatar = getFileUrl(req, req.files.avatar[0].filename, 'avatars');
+      if (req.uploadResults) {
+        if (req.uploadResults.avatar) {
+          avatar = req.uploadResults.avatar.url;
+          avatarPublicId = req.uploadResults.avatar.publicId;
+          avatarThumbnail = req.uploadResults.avatar.thumbnailUrl;
         }
-        if (req.files.resume && req.files.resume[0]) {
-          resumeUrl = getFileUrl(req, req.files.resume[0].filename, 'resumes');
+        if (req.uploadResults.resume) {
+          resumeUrl = req.uploadResults.resume.url;
         }
       }
       
@@ -207,12 +211,13 @@ class PortfolioManagementController {
         description
       };
       
-      if (avatar) updateData.avatar = avatar;
+      if (avatar) {
+        updateData.avatar = avatar;
+        updateData.avatarPublicId = avatarPublicId;
+        updateData.avatarThumbnail = avatarThumbnail;
+      }
       if (resumeUrl) updateData.resumeUrl = resumeUrl;
       
-      
-      // Check if MongoDB is connected
-      const mongoose = require('mongoose');
       
       // Find existing personal info
       const existingPersonalInfo = await PersonalInfo.findOne({ userId });
@@ -221,10 +226,17 @@ class PortfolioManagementController {
       
       if (existingPersonalInfo) {
         
-        // Delete old files if new ones are uploaded
-        if (avatar && existingPersonalInfo.avatar) {
-          deleteOldFiles([existingPersonalInfo.avatar], 'avatars');
+        // Delete old Cloudinary image if new one is uploaded
+        if (avatar && existingPersonalInfo.avatarPublicId) {
+          try {
+            await deleteImage(existingPersonalInfo.avatarPublicId);
+            console.log('✅ Deleted old avatar from Cloudinary');
+          } catch (error) {
+            console.error('⚠️ Failed to delete old avatar:', error.message);
+          }
         }
+        
+        // Delete old resume file if new one is uploaded
         if (resumeUrl && existingPersonalInfo.resumeUrl) {
           deleteOldFiles([existingPersonalInfo.resumeUrl], 'resumes');
         }

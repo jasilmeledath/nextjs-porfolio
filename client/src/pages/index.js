@@ -143,7 +143,7 @@ export default function LandingPage() {
                 className="font-medium text-lg tracking-tight"
               >
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  jasilmeledath.me
+                  jasilmeledath.dev
                 </span>
               </motion.div>
 

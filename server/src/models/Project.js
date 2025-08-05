@@ -81,9 +81,21 @@ const projectSchema = new mongoose.Schema({
     type: String, // URLs to uploaded images
     required: true
   }],
+  imagePublicIds: [{
+    type: String // Cloudinary public IDs for image management
+  }],
+  imageResponsive: [{
+    type: mongoose.Schema.Types.Mixed // Responsive image URLs
+  }],
   thumbnailImage: {
     type: String,
     required: true
+  },
+  thumbnailPublicId: {
+    type: String // Cloudinary public ID for thumbnail
+  },
+  thumbnailResponsive: {
+    type: mongoose.Schema.Types.Mixed // Responsive thumbnail URLs
   },
   liveUrl: {
     type: String,

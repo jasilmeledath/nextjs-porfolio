@@ -55,6 +55,14 @@ const personalInfoSchema = new mongoose.Schema({
     type: String,
     default: null // URL to uploaded image
   },
+  avatarPublicId: {
+    type: String,
+    default: null // Cloudinary public ID for image management
+  },
+  avatarThumbnail: {
+    type: String,
+    default: null // Thumbnail URL for optimized loading
+  },
   resumeUrl: {
     type: String,
     default: null // URL to uploaded resume PDF

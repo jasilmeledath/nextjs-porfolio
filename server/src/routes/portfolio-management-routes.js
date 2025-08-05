@@ -10,7 +10,7 @@ const express = require('express');
 const router = express.Router();
 const PortfolioManagementController = require('../controllers/portfolio-management-controller');
 const { authenticate } = require('../middleware/auth-middleware');
-const { uploadConfigs, handleUploadError } = require('../middleware/upload');
+const { uploadConfigs, handleUploadError, processUploads } = require('../middleware/upload-enhanced');
 
 // Apply authentication middleware to all routes
 router.use(authenticate);
@@ -48,6 +48,7 @@ router.get('/personal-info', PortfolioManagementController.getPersonalInfo);
 router.post('/personal-info', 
   uploadConfigs.personalInfo,
   handleUploadError,
+  processUploads,
   PortfolioManagementController.upsertPersonalInfo
 );
 

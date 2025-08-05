@@ -1025,7 +1025,7 @@ export default function BlogPage() {
             <div className="border-t border-slate-200 dark:border-slate-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
                 <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm text-center sm:text-left">
-                  © 2025 jasilmeledath.me • Crafted with NextJS & Passion ❤
+                  © 2025 jasilmeledath.dev • Crafted with NextJS & Passion ❤
                 </p>
                 <div className="flex items-center space-x-4 sm:space-x-6">
                   <a 
