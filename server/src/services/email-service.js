@@ -77,7 +77,7 @@ class EmailService {
    * @returns {Promise<Object>} Email result
    */
   async sendSubscriptionConfirmation(subscriber, confirmationToken) {
-    const confirmationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscription/confirm/${confirmationToken}`;
+    const confirmationUrl = `${process.env.FRONTEND_URL || 'https://jasilmeledath.dev'}/subscription/confirm/${confirmationToken}`;
     
     const html = this.generateConfirmationEmailTemplate(subscriber, confirmationUrl);
     const text = this.generateConfirmationEmailText(subscriber, confirmationUrl);
@@ -135,8 +135,8 @@ class EmailService {
       throw new Error('Blog title and slug are required');
     }
     
-    const blogUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/blog/${blog.slug}`;
-    const unsubscribeUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscription/unsubscribe/${subscriber.unsubscribeToken}`;
+    const blogUrl = `${process.env.FRONTEND_URL || 'https://jasilmeledath.dev'}/blog/${blog.slug}`;
+    const unsubscribeUrl = `${process.env.FRONTEND_URL || 'https://jasilmeledath.dev'}/subscription/unsubscribe/${subscriber.unsubscribeToken}`;
     
     console.log('[EmailService] URLs:', {
       blogUrl,
@@ -429,7 +429,7 @@ This email was sent to ${subscriber.email}
             </div>
             <div class="footer">
                 <p>This email was sent to ${subscriber.email}</p>
-                <p><a href="${unsubscribeUrl}" class="unsubscribe">Unsubscribe</a> | <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}" class="unsubscribe">Visit Website</a></p>
+                <p><a href="${unsubscribeUrl}" class="unsubscribe">Unsubscribe</a> | <a href="${process.env.FRONTEND_URL || 'https://jasilmeledath.dev'}" class="unsubscribe">Visit Website</a></p>
                 <p>© 2025 Jasil M. All rights reserved.</p>
             </div>
         </div>
