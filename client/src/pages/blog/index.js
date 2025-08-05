@@ -33,6 +33,7 @@ import {
   FiCode
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
+import ThemeToggle from '../../components/ui/ThemeToggle';
 import BlogService from '../../services/blog-service';
 import SubscriptionForm from '../../components/SubscriptionForm';
 
@@ -465,19 +466,7 @@ export default function BlogPage() {
                 >
                   Portfolio
                 </Link>
-                <motion.button
-                  onClick={toggleTheme}
-                  whileHover={{ scale: 1.1, rotate: 180 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`p-2 sm:p-3 rounded-xl backdrop-blur-sm border transition-all duration-300 ${
-                    isDark 
-                      ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' 
-                      : 'bg-black/10 border-black/20 text-black hover:bg-black/20'
-                  }`}
-                  aria-label="Toggle theme"
-                >
-                  <div className="text-sm sm:text-xl">{isDark ? '☀️' : '🌙'}</div>
-                </motion.button>
+                <ThemeToggle size="sm" />
               </div>
             </div>
           </div>
@@ -1029,7 +1018,7 @@ export default function BlogPage() {
                 </p>
                 <div className="flex items-center space-x-4 sm:space-x-6">
                   <a 
-                    href="mailto:jasilmeledath@gmail.com" 
+                    href="mailto:contact@jasilmeledath.dev" 
                     className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-xs sm:text-sm transition-colors"
                   >
                     Contact

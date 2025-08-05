@@ -6,41 +6,16 @@ import Head from "next/head"
 import { motion } from "framer-motion"
 import { FiGrid, FiBookOpen, FiGithub, FiLinkedin, FiTwitter, FiMail } from "react-icons/fi"
 import { MdTerminal } from "react-icons/md"
+import { useTheme } from "../context/ThemeContext"
+import ThemeToggle from "../components/ui/ThemeToggle"
 
 export default function LandingPage() {
   const router = useRouter()
-  const [isDark, setIsDark] = useState(false)
-  const [isClient, setIsClient] = useState(false)
+  const { isDark, mounted } = useTheme()
   const [activeCard, setActiveCard] = useState(null)
 
-  // Client-side hydration fix
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  // Theme management
-  const toggleTheme = useCallback(() => {
-    const newMode = !isDark
-    setIsDark(newMode)
-    if (newMode) {
-      document.documentElement.classList.add("dark")
-      localStorage.setItem("theme", "dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-      localStorage.setItem("theme", "light")
-    }
-  }, [isDark])
-
-  // Initialize theme
-  useEffect(() => {
-    if (!isClient) return
-    const savedTheme = localStorage.getItem("theme")
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-      setIsDark(true)
-      document.documentElement.classList.add("dark")
-    }
-  }, [isClient])
+  // Use mounted from ThemeContext instead of isClient
+  const isClient = mounted
 
   // Navigation handler
   const navigate = useCallback(
@@ -148,24 +123,13 @@ export default function LandingPage() {
               </motion.div>
 
               {/* Theme Toggle */}
-              <motion.button
+              <motion.div
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                onClick={toggleTheme}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`p-3 rounded-2xl backdrop-blur-sm border transition-all duration-300 ${
-                  isClient && isDark
-                    ? "bg-slate-800/50 border-slate-700/50 text-slate-300 hover:bg-slate-700/50 hover:border-slate-600/50"
-                    : "bg-white/50 border-slate-200/50 text-slate-600 hover:bg-white/80 hover:border-slate-300/50 shadow-sm"
-                }`}
-                aria-label="Toggle theme"
               >
-                <motion.div animate={{ rotate: isDark ? 180 : 0 }} transition={{ duration: 0.5 }} className="text-lg">
-                  {isClient && isDark ? "☀️" : "🌙"}
-                </motion.div>
-              </motion.button>
+                <ThemeToggle />
+              </motion.div>
             </div>
           </div>
         </motion.header>
@@ -333,7 +297,7 @@ export default function LandingPage() {
                     { icon: FiGithub, href: "https://github.com/jasilmeledath", label: "GitHub" },
                     { icon: FiLinkedin, href: "https://linkedin.com/in/jasilmeledath", label: "LinkedIn" },
                     { icon: FiTwitter, href: "https://twitter.com/jasilmeledath", label: "Twitter" },
-                    { icon: FiMail, href: "mailto:jasilmeledath@gmail.com", label: "Email" },
+                    { icon: FiMail, href: "mailto:contact@jasilmeledath.dev", label: "Email" },
                   ].map(({ icon: Icon, href, label }) => (
                     <motion.a
                       key={label}

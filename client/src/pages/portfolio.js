@@ -33,16 +33,18 @@ import {
   FileText,
 } from "lucide-react"
 import { usePortfolioData } from "../hooks/usePortfolioData"
+import { useTheme } from "../context/ThemeContext"
 import Avatar3D from "../components/ui/Avatar3D"
 import ProjectPreview from "../components/ui/ProjectPreview"
 import SkillsMarquee from "../components/ui/SkillsMarquee"
+import ThemeToggle from "../components/ui/ThemeToggle"
 import PortfolioManagementService from "../services/portfolio-management-service"
 
 export default function PortfolioPage() {
   const [activeSection, setActiveSection] = useState("hero")
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isDark, setIsDark] = useState(true)
-  const [isClient, setIsClient] = useState(false)
+  const { isDark, mounted } = useTheme()
+  const isClient = mounted
   const [selectedProject, setSelectedProject] = useState(null)
   const [isProjectPreviewOpen, setIsProjectPreviewOpen] = useState(false)
   const [isDownloadingResume, setIsDownloadingResume] = useState(false)
@@ -104,36 +106,7 @@ export default function PortfolioPage() {
     return () => document.removeEventListener("mousemove", handleMouseMove)
   }, [handleMouseMove])
 
-  // Enhanced dark mode toggle functionality
-  const toggleDarkMode = useCallback(() => {
-    const newMode = !isDark
-    setIsDark(newMode)
-    
-    // Apply to document class for global theme
-    if (newMode) {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-  }, [isDark])
 
-  // Initialize theme from localStorage - only on client
-  useEffect(() => {
-    if (!isClient) return
-    
-    const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDark(true)
-      document.documentElement.classList.add('dark')
-    } else {
-      setIsDark(false)
-      document.documentElement.classList.remove('dark')
-    }
-  }, [isClient])
 
   // Optimized animation variants for maximum FPS and performance
   const fadeInUp = useMemo(() => ({
@@ -626,18 +599,7 @@ export default function PortfolioPage() {
               </div>
 
               <div className="flex items-center space-x-4">
-                <motion.button
-                  onClick={toggleDarkMode}
-                  whileHover={{ scale: 1.1, rotate: 180 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`p-3 rounded-xl backdrop-blur-sm border transition-all duration-300 ${
-                    isClient && isDark 
-                      ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' 
-                      : 'bg-black/10 border-black/20 text-black hover:bg-black/20'
-                  }`}
-                >
-                  <div className="text-xl">{isClient && isDark ? "☀️" : "🌙"}</div>
-                </motion.button>
+                <ThemeToggle />
               </div>
             </div>
           </div>
@@ -1112,7 +1074,7 @@ export default function PortfolioPage() {
                   </div>
 
                   <motion.a
-                    href={`mailto:${personalInfo.email}`}
+                    href={`mailto:contact@jasilmeledath.dev`}
                     whileHover={{ scale: 1.02 }} // Reduced from 1.05
                     whileTap={{ scale: 0.98 }} // Reduced from 0.95
                     transition={{ duration: 0.15, ease: "easeOut" }} // Faster transition
@@ -1318,7 +1280,7 @@ export default function PortfolioPage() {
                 </p>
                 <div className="flex items-center space-x-4 sm:space-x-6">
                   <a 
-                    href="mailto:jasilmeledath@gmail.com" 
+                    href="mailto:contact@jasilmeledath.dev" 
                     className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 text-xs sm:text-sm transition-colors"
                   >
                     Contact

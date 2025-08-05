@@ -22,28 +22,38 @@ export default function MyApp({ Component, pageProps }) {
             <Component {...pageProps} />
           )}
           
-          {/* Global toast notifications with theme support */}
+          {/* Professional theme-aware toast notifications */}
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
+              className: 'toast-custom',
               style: {
-                background: 'var(--toast-bg, #1a1a1a)',
-                color: 'var(--toast-text, #00ff41)',
-                border: '1px solid var(--toast-border, #00ff41)',
-                fontFamily: 'monospace',
-                fontSize: '14px'
+                background: 'transparent',
+                color: 'inherit',
+                border: 'none',
+                boxShadow: 'none',
+                padding: '0'
               },
               success: {
+                className: 'toast-success',
                 iconTheme: {
-                  primary: '#00ff41',
-                  secondary: '#000000'
+                  primary: '#10b981',
+                  secondary: '#ffffff'
                 }
               },
               error: {
+                className: 'toast-error',
                 iconTheme: {
-                  primary: '#ff4444',
-                  secondary: '#000000'
+                  primary: '#ef4444',
+                  secondary: '#ffffff'
+                }
+              },
+              loading: {
+                className: 'toast-loading',
+                iconTheme: {
+                  primary: '#3b82f6',
+                  secondary: '#ffffff'
                 }
               }
             }}
