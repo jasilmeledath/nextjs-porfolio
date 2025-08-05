@@ -332,8 +332,6 @@ export default function PortfolioPage() {
 
   // Client-side hydration fix
   useEffect(() => {
-    setIsClient(true)
-    
     // Cleanup function to reset body overflow when component unmounts
     return () => {
       document.body.style.overflow = 'unset'
