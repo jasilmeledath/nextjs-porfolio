@@ -36,6 +36,7 @@ import { usePortfolioData } from "../hooks/usePortfolioData"
 import { useTheme } from "../context/ThemeContext"
 import Avatar3D from "../components/ui/Avatar3D"
 import ProjectPreview from "../components/ui/ProjectPreview"
+import MarkdownRenderer from "../components/ui/MarkdownRenderer"
 import SkillsMarquee from "../components/ui/SkillsMarquee"
 import ThemeToggle from "../components/ui/ThemeToggle"
 import PortfolioManagementService from "../services/portfolio-management-service"
@@ -909,13 +910,18 @@ export default function PortfolioPage() {
                       }`}>
                         {project.title}
                       </h3>
-                      <p className={`mb-3 md:mb-4 text-xs md:text-sm leading-relaxed ${
+                      <div className={`mb-3 md:mb-4 text-xs md:text-sm leading-relaxed overflow-hidden ${
                         isDark ? 'text-gray-300' : 'text-gray-600'
-                      }`}>
-                        {project.description?.length > 120 
-                          ? `${project.description.slice(0, 120)}...` 
-                          : project.description}
-                      </p>
+                      }`} style={{ maxHeight: '4rem' }}>
+                        <MarkdownRenderer 
+                          content={project.description?.length > 120 
+                            ? `${project.description.slice(0, 120)}...` 
+                            : project.description || ''}
+                          isDark={isDark}
+                          compact={true}
+                          className="line-clamp-3"
+                        />
+                      </div>
 
                       {/* Stats */}
                       <div className={`flex justify-between text-xs mb-3 md:mb-4 ${
