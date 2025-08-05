@@ -23,9 +23,16 @@ class PortfolioService {
    * @returns {string} Processed URL
    */
   static processImageUrl(url) {
-    if (!url || url === "/placeholder.svg" || !url.startsWith('http://localhost')) {
+    // Ensure url is a string and handle null/undefined/non-string values
+    if (!url || typeof url !== 'string' || url === "/placeholder.svg") {
+      return url || "/placeholder.svg";
+    }
+    
+    // Check if it's a localhost URL that needs processing
+    if (!url.startsWith('http://localhost')) {
       return url;
     }
+    
     // Convert localhost URLs to proxy routes for tunnel environments
     if (typeof window !== 'undefined' && 
         (window.location.origin.includes('.trycloudflare.com') ||
