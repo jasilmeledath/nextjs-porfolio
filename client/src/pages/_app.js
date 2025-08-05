@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { ThemeProvider } from '../context/ThemeContext';
 import { AuthProvider } from '../context/AuthContext';
 import AdminProtectedRoute from '../components/admin/AdminProtectedRoute';
+import { RouterPageLoader } from '../components/ui/PageLoader';
 import { Toaster } from 'react-hot-toast';
 
 export default function MyApp({ Component, pageProps }) {
@@ -11,9 +12,13 @@ export default function MyApp({ Component, pageProps }) {
     <>
       <Head>
         <link rel="stylesheet" href="/emergency-styles.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <ThemeProvider>
         <AuthProvider>
+          {/* Global Page Loader for Route Transitions */}
+          <RouterPageLoader />
+          
           {Component.requireAuth ? (
             <AdminProtectedRoute>
               <Component {...pageProps} />

@@ -39,6 +39,7 @@ import ProjectPreview from "../components/ui/ProjectPreview"
 import MarkdownRenderer from "../components/ui/MarkdownRenderer"
 import SkillsMarquee from "../components/ui/SkillsMarquee"
 import ThemeToggle from "../components/ui/ThemeToggle"
+import Loader, { LOADER_VARIANTS, LOADER_SIZES } from "../components/ui/Loader"
 import PortfolioManagementService from "../services/portfolio-management-service"
 
 export default function PortfolioPage() {
@@ -246,7 +247,7 @@ export default function PortfolioPage() {
     </svg>
   ], [])
 
-  // Memoized loading state check
+  // Memoized loading state check with advanced loader
   const shouldShowLoading = useMemo(() => 
     loading && (!personalInfo.name || personalInfo.name === ''), 
     [loading, personalInfo.name]
@@ -254,8 +255,8 @@ export default function PortfolioPage() {
 
   // Memoized error state check  
   const shouldShowError = useMemo(() => 
-    error && (!personalInfo.name || personalInfo.name === ''), 
-    [error, personalInfo.name]
+    error && (!personalInfo.name || personalInfo.name === '') && !loading, 
+    [error, personalInfo.name, loading]
   )
 
   // Project preview handlers
@@ -339,14 +340,58 @@ export default function PortfolioPage() {
     }
   }, [])
 
-  // Loading state - only show if we're still loading and don't have data
+  // Loading state - professional loader with branding
   if (shouldShowLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/70 text-lg font-mono">Loading portfolio...</p>
-          <p className="text-white/50 text-sm mt-2">If this takes too long, we'll show default content</p>
+      <div className={`min-h-screen flex flex-col items-center justify-center ${
+        isDark ? 'bg-black text-white' : 'bg-white text-black'
+      }`}>
+        <div className="text-center space-y-8 max-w-md mx-auto px-6">
+          {/* Brand logo area */}
+          <div className={`relative p-6 rounded-2xl ${
+            isDark 
+              ? 'bg-gradient-to-br from-green-500/10 to-cyan-500/10 border border-green-500/20' 
+              : 'bg-gradient-to-br from-green-50 to-cyan-50 border border-green-200'
+          }`}>
+            <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center font-bold text-xl mx-auto ${
+              isDark
+                ? 'border-green-400 text-green-400 bg-green-400/10'
+                : 'border-green-600 text-green-600 bg-green-600/10'
+            }`}>
+              <span>JP</span>
+            </div>
+          </div>
+
+          {/* Advanced loader */}
+          <Loader
+            show={true}
+            variant={LOADER_VARIANTS.SPINNER}
+            size={LOADER_SIZES.LG}
+            message="Loading Portfolio..."
+          />
+
+          {/* Additional context */}
+          <div className="space-y-3">
+            <p className={`text-base font-medium ${
+              isDark ? 'text-gray-200' : 'text-gray-700'
+            }`}>
+              Preparing your portfolio experience
+            </p>
+            <p className={`text-sm ${
+              isDark ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              Fetching projects, skills, and experience data...
+            </p>
+          </div>
+
+          {/* Progress indicator */}
+          <div className="w-full max-w-xs mx-auto">
+            <Loader
+              show={true}
+              variant={LOADER_VARIANTS.PROGRESS}
+              size={LOADER_SIZES.MD}
+            />
+          </div>
         </div>
       </div>
     )

@@ -34,6 +34,7 @@ import {
 } from 'react-icons/fi';
 import { useTheme } from '../../context/ThemeContext';
 import ThemeToggle from '../../components/ui/ThemeToggle';
+import Loader, { LOADER_VARIANTS, LOADER_SIZES } from '../../components/ui/Loader';
 import BlogService from '../../services/blog-service';
 import SubscriptionForm from '../../components/SubscriptionForm';
 
@@ -672,18 +673,53 @@ export default function BlogPage() {
         <section className="px-3 sm:px-6 py-8 sm:py-12">
           <div className="max-w-6xl mx-auto">
             {loading ? (
-              /* Loading Skeleton */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white dark:bg-slate-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700">
-                    <div className="h-40 sm:h-48 bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
-                    <div className="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
-                      <div className="h-3 sm:h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                      <div className="h-5 sm:h-6 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                      <div className="h-3 sm:h-4 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
-                    </div>
+              /* Professional Loading State */
+              <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
+                {/* Brand logo area for blogs */}
+                <div className={`relative p-6 rounded-2xl ${
+                  isDark 
+                    ? 'bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20' 
+                    : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'
+                }`}>
+                  <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center font-bold text-xl mx-auto ${
+                    isDark
+                      ? 'border-blue-400 text-blue-400 bg-blue-400/10'
+                      : 'border-blue-600 text-blue-600 bg-blue-600/10'
+                  }`}>
+                    <span>📝</span>
                   </div>
-                ))}
+                </div>
+
+                {/* Advanced loader */}
+                <Loader
+                  show={true}
+                  variant={LOADER_VARIANTS.DOTS}
+                  size={LOADER_SIZES.LG}
+                  message="Loading Blog Posts..."
+                />
+
+                {/* Additional context */}
+                <div className="text-center space-y-3 max-w-md">
+                  <p className={`text-base font-medium ${
+                    isDark ? 'text-gray-200' : 'text-gray-700'
+                  }`}>
+                    Fetching latest articles
+                  </p>
+                  <p className={`text-sm ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
+                    Discovering insights and stories...
+                  </p>
+                </div>
+
+                {/* Progress indicator */}
+                <div className="w-full max-w-xs mx-auto">
+                  <Loader
+                    show={true}
+                    variant={LOADER_VARIANTS.PULSE}
+                    size={LOADER_SIZES.SM}
+                  />
+                </div>
               </div>
             ) : filteredBlogs.length > 0 ? (
               <>
@@ -824,7 +860,13 @@ export default function BlogPage() {
                     >
                       {loadingMore ? (
                         <>
-                          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+                          <Loader
+                            show={true}
+                            variant={LOADER_VARIANTS.SPINNER}
+                            size={LOADER_SIZES.SM}
+                            inline={true}
+                            className="mr-2"
+                          />
                           <span className="hidden sm:inline">Loading...</span>
                           <span className="sm:hidden">...</span>
                         </>

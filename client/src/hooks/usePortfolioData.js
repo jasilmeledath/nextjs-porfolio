@@ -39,51 +39,48 @@ export const usePortfolioData = () => {
       setLoading(true);
       setError(null);
 
-        // Try to load data from API
-        const response = await PortfolioService.getVisitorPortfolio();
+      // Try to load data from API
+      const response = await PortfolioService.getVisitorPortfolio();
+      
+      if (response.success && response.data) {
+        const data = response.data;
         
+        // Process the data
+        const processedSkills = data.skills && Array.isArray(data.skills) && data.skills.length > 0
+          ? PortfolioService.processSkillsData(data.skills) 
+          : null;
         
-        if (response.success && response.data) {
-          const data = response.data;
+        const processedProjects = data.projects && data.projects.length > 0
+          ? PortfolioService.processProjectsData(data.projects)
+          : null;
           
+        const processedSocialLinks = data.socialLinks && data.socialLinks.length > 0
+          ? PortfolioService.processSocialLinksData(data.socialLinks)
+          : null;
+          
+        const processedExperience = data.experience && data.experience.length > 0
+          ? PortfolioService.processExperienceData(data.experience)
+          : null;
         
-          // Process the data
-          const processedSkills = data.skills && Array.isArray(data.skills) && data.skills.length > 0
-            ? PortfolioService.processSkillsData(data.skills) 
-            : null;
-          
-          const processedProjects = data.projects && data.projects.length > 0
-            ? PortfolioService.processProjectsData(data.projects)
-            : null;
-            
-          const processedSocialLinks = data.socialLinks && data.socialLinks.length > 0
-            ? PortfolioService.processSocialLinksData(data.socialLinks)
-            : null;
-            
-          const processedExperience = data.experience && data.experience.length > 0
-            ? PortfolioService.processExperienceData(data.experience)
-            : null;
-          
-          // Use only API data - no fallback to defaults
-          const finalData = {
-            personalInfo: data.personalInfo || {},
-            socialLinks: processedSocialLinks || [],
-            skills: processedSkills || { frontend: [], backend: [], tools: [] },
-            projects: processedProjects || [],
-            experience: processedExperience || []
-          };
-          
-          
-          setPortfolioData(finalData);
-          
-        } else {
-          setError('Failed to load portfolio data');
-        }
-      } catch (err) {
-        setError('Failed to connect to portfolio service');
-      } finally {
-        setLoading(false);
+        // Use only API data - no fallback to defaults
+        const finalData = {
+          personalInfo: data.personalInfo || {},
+          socialLinks: processedSocialLinks || [],
+          skills: processedSkills || { frontend: [], backend: [], tools: [] },
+          projects: processedProjects || [],
+          experience: processedExperience || []
+        };
+        
+        setPortfolioData(finalData);
+        
+      } else {
+        setError('Failed to load portfolio data');
       }
+    } catch (err) {
+      setError('Failed to connect to portfolio service');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -185,24 +182,28 @@ export const usePortfolioSections = () => {
   };
 
   /**
-   * Load projects
+   * Load projects with advanced loading
    */
   const loadProjects = async () => {
-    try {
-      setLoadingStates(prev => ({ ...prev, projects: true }));
-      const response = await PortfolioService.getAllProjects({ status: 'published' });
-      
-      if (response.success) {
-        setSectionsData(prev => ({ 
-          ...prev, 
-          projects: PortfolioService.processProjectsData(response.data.projects) 
-        }));
+    return withLoading('projects', async () => {
+      try {
+        const response = await PortfolioService.getAllProjects({ status: 'published' });
+        
+        if (response.success) {
+          const processedData = PortfolioService.processProjectsData(response.data.projects);
+          setSectionsData(prev => ({ ...prev, projects: processedData }));
+          return processedData;
+        } else {
+          throw new Error('Failed to load projects');
+        }
+      } catch (error) {
+        console.error('[usePortfolioSections] Error loading projects:', error);
+        throw error;
       }
-    } catch (error) {
-      console.error('[usePortfolioSections] Error loading projects:', error);
-    } finally {
-      setLoadingStates(prev => ({ ...prev, projects: false }));
-    }
+    }, {
+      type: LOADING_TYPES.DATA,
+      message: 'Loading projects...'
+    });
   };
 
   /**
